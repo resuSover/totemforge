@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Totem Forge: The Interactive Miniature, Explained</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&amp;family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;1,400&amp;display=swap" rel="stylesheet">
+<style>
+  :root {
+    --night: #120a05;
+    --night-2: #1b0f08;
+    --panel: #1e1107;
+    --panel-2: #25160a;
+    --ember: #ff9d3d;
+    --gold: #f0c046;
+    --cream: #f3e7c9;
+    --cream-dim: #b9a482;
+    --cream-dimmer: #8a7659;
+    --red: #a32b14;
+    --red-hot: #c84a1d;
+    --red-deep: #6e1a0a;
+    --line: #3d2814;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--night);
+    color: var(--cream);
+    font-family: "Alegreya Sans", sans-serif;
+    font-size: 17px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  img { display: block; max-width: 100%; }
+  h1, h2, h3 { font-family: "Cinzel", serif; line-height: 1.12; text-wrap: balance; }
+  p { text-wrap: pretty; }
+  .wrap { max-width: 660px; margin: 0 auto; padding: 0 22px; }
+  .narrow { max-width: 560px; }
+
+  .btn-forge {
+    display: inline-block;
+    font-family: "Cinzel", serif;
+    font-size: 19px;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-decoration: none;
+    text-align: center;
+    color: var(--gold);
+    text-shadow: 0 2px 2px rgba(0,0,0,0.5);
+    background: linear-gradient(180deg, var(--red-hot) 0%, var(--red) 48%, var(--red-deep) 100%);
+    border: 2px solid #d8a437;
+    border-radius: 8px;
+    padding: 14px 36px;
+    box-shadow: 0 5px 0 #471107, 0 10px 24px rgba(0,0,0,0.6);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+  }
+  .btn-forge:hover { transform: translateY(-2px); }
+  .btn-forge:active { transform: translateY(3px); box-shadow: 0 2px 0 #471107, 0 6px 12px rgba(0,0,0,0.5); }
+
+  .kicker {
+    display: block;
+    font-family: "Cinzel", serif;
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--ember);
+  }
+  .section-num {
+    font-family: "Cinzel", serif;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 0.3em;
+    color: var(--cream-dimmer);
+  }
+
+  /* ============ Hero ============ */
+  .hero {
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-bg {
+    position: relative;
+    height: 54svh;
+    background: url("assets/hero-animated.webp") center 52% / cover no-repeat, var(--night);
+  }
+  .hero-bg::after {
+    content: "";
+    position: absolute; inset: 0;
+    z-index: 1;
+    background: linear-gradient(180deg, rgba(18,10,5,0.5) 0%, rgba(18,10,5,0) 30%, rgba(18,10,5,0.15) 58%, rgba(18,10,5,0.92) 88%, var(--night) 100%);
+  }
+  .hero-top { position: absolute; top: 0; left: 0; right: 0; z-index: 2; display: flex; justify-content: center; padding-top: 22px; }
+  .hero-top img { height: 34px; width: auto; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.8)); }
+  .hero-pitch { position: relative; text-align: center; padding: 6px 0 30px; }
+  .hero-pitch h1 {
+    font-size: clamp(34px, 9.4vw, 56px);
+    font-weight: 900;
+    text-transform: uppercase;
+    color: #ffffff;
+    text-shadow: 0 3px 12px rgba(0,0,0,0.7);
+  }
+  .hero-pitch h1 em { font-style: normal; color: var(--gold); }
+  .hero-pitch .what {
+    margin: 14px auto 0;
+    max-width: 24em;
+    font-size: clamp(17px, 4.6vw, 21px);
+    color: var(--cream);
+    text-shadow: 0 1px 6px rgba(0,0,0,0.85);
+  }
+  .hero-pitch .btn-forge { margin-top: 22px; }
+  .hero-pitch .scroll-hint {
+    display: block;
+    margin-top: 18px;
+    font-size: 13px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--cream-dim);
+    text-decoration: none;
+  }
+  .hero-pitch .scroll-hint::after {
+    content: "▾";
+    display: block;
+    color: var(--ember);
+    font-size: 16px;
+    animation: bob 1.6s ease-in-out infinite;
+  }
+  @media (prefers-reduced-motion: reduce) { .hero-pitch .scroll-hint::after { animation: none; } }
+  @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(5px); } }
+
+  /* ============ Spec strip ============ */
+  .specstrip {
+    position: relative;
+    z-index: 2;
+    background: var(--night);
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+  .specstrip ul {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px 0;
+    padding: 16px 18px;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .specstrip li {
+    font-family: "Cinzel", serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--cream-dim);
+    padding: 0 14px;
+    position: relative;
+  }
+  .specstrip li + li::before {
+    content: "";
+    position: absolute; left: 0; top: 50%;
+    width: 1px; height: 13px;
+    transform: translateY(-50%);
+    background: #5a3a18;
+  }
+  .specstrip b { color: var(--ember); font-weight: 700; }
+
+  /* ============ Problem / lead-in ============ */
+  .lead { padding: 64px 0 8px; text-align: center; }
+  .lead .section-num { display: block; margin-bottom: 14px; }
+  .lead h2 {
+    font-size: clamp(27px, 7vw, 40px);
+    font-weight: 900;
+    text-transform: uppercase;
+  }
+  .lead h2 .gold { color: var(--gold); }
+  .lead p {
+    margin: 20px auto 0;
+    max-width: 30em;
+    font-size: clamp(17px, 4.4vw, 19px);
+    color: var(--cream-dim);
+  }
+  .lead p + p { margin-top: 16px; }
+  .lead p b { color: var(--cream); font-weight: 700; }
+
+  /* ============ Feature deep-dives ============ */
+  .features { padding: 40px 0 10px; }
+  .feature { padding: 30px 0; }
+  .feature + .feature { border-top: 1px solid #251608; }
+  .feature .media {
+    margin-top: 16px;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1.5px solid #4d3014;
+    background: var(--night-2);
+    box-shadow: 0 14px 34px rgba(0,0,0,0.5);
+  }
+  .feature .media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .feature .media img[src*="app-phone"] { object-position: top; }
+  .feature .media.tall img { aspect-ratio: 4 / 3.4; }
+  .feature .media.wide img { aspect-ratio: 4 / 3; }
+  .feature .copy { padding-top: 22px; }
+  .feature .copy .kicker { margin-bottom: 10px; }
+  .feature h3 {
+    font-size: clamp(23px, 6vw, 30px);
+    font-weight: 900;
+    text-transform: uppercase;
+    color: var(--cream);
+  }
+  .feature h3 em { font-style: normal; color: var(--gold); }
+  .feature .copy p {
+    margin-top: 14px;
+    font-size: 17px;
+    color: var(--cream-dim);
+  }
+  .feature .copy p b { color: var(--cream); font-weight: 700; }
+  .micro {
+    list-style: none;
+    margin-top: 16px;
+    display: grid;
+    gap: 9px;
+  }
+  .micro li {
+    position: relative;
+    padding-left: 24px;
+    font-size: 15.5px;
+    color: var(--cream-dim);
+  }
+  .micro li::before {
+    content: "";
+    position: absolute; left: 2px; top: 9px;
+    width: 9px; height: 9px;
+    transform: rotate(45deg);
+    background: var(--ember);
+    border-radius: 1px;
+  }
+
+  /* ============ How it works ============ */
+  .how { padding: 54px 0 12px; text-align: center; }
+  .how .section-num { display: block; margin-bottom: 14px; }
+  .how h2 { font-size: clamp(25px, 6.6vw, 36px); font-weight: 900; text-transform: uppercase; }
+  .steps { margin-top: 8px; }
+  .steps img { display: block; width: 100%; height: auto; }
+  .how .under { margin: 22px auto 0; max-width: 26em; font-size: 15.5px; color: var(--cream-dimmer); }
+
+  /* ============ Comparison ============ */
+  .compare { padding: 56px 0 12px; }
+  .compare .head { text-align: center; }
+  .compare .section-num { display: block; margin-bottom: 14px; }
+  .compare h2 { font-size: clamp(25px, 6.6vw, 36px); font-weight: 900; text-transform: uppercase; }
+  .ctable {
+    margin-top: 26px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .crow { display: grid; grid-template-columns: 1.25fr 1fr 1fr; }
+  .crow > div { padding: 13px 12px; border-bottom: 1px solid #2a1909; }
+  .crow:last-child > div { border-bottom: none; }
+  .crow .rowlabel { font-size: 14.5px; color: var(--cream); font-weight: 500; }
+  .crow .cell { text-align: center; font-size: 14px; color: var(--cream-dim); display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .crow.head-row > div {
+    font-family: "Cinzel", serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    background: var(--panel-2);
+    color: var(--cream);
+    text-align: center;
+  }
+  .crow.head-row .rowlabel { text-align: left; color: var(--cream-dimmer); }
+  .crow .tf { background: rgba(255, 157, 61, 0.06); }
+  .crow.head-row .tf { color: var(--gold); }
+  .yes { color: var(--ember); font-weight: 700; }
+  .no { color: #7c5a3a; }
+
+  /* ============ Tech specs ============ */
+  .specs { padding: 56px 0 12px; }
+  .specs .head { text-align: center; }
+  .specs .section-num { display: block; margin-bottom: 14px; }
+  .specs h2 { font-size: clamp(25px, 6.6vw, 36px); font-weight: 900; text-transform: uppercase; }
+  .specgrid {
+    margin-top: 26px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    overflow: hidden;
+    background: linear-gradient(180deg, var(--panel), var(--night-2));
+  }
+  .specgrid dl { display: grid; grid-template-columns: 1fr 1.3fr; }
+  .specgrid dt, .specgrid dd { padding: 13px 16px; border-bottom: 1px solid #2a1909; }
+  .specgrid dt {
+    font-family: "Cinzel", serif;
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--cream-dimmer);
+  }
+  .specgrid dd { color: var(--cream); font-size: 15.5px; }
+  .specgrid dl > :nth-last-child(1), .specgrid dl > :nth-last-child(2) { border-bottom: none; }
+
+  /* ============ Story ============ */
+  .story { padding: 58px 0 12px; }
+  .story .head { text-align: center; }
+  .story .section-num { display: block; margin-bottom: 14px; }
+  .story-card {
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    overflow: hidden;
+    background: linear-gradient(180deg, #221306, #170d06);
+  }
+  .story-card img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
+  .story-card .txt { padding: 26px 24px 28px; text-align: center; }
+  .story-card .kicker { margin-bottom: 8px; }
+  .story-card h2 { font-size: clamp(22px, 5.8vw, 30px); font-weight: 900; text-transform: uppercase; }
+  .story-card p { margin-top: 14px; color: var(--cream-dim); font-size: 16.5px; }
+  .story-card p b { color: var(--cream); font-weight: 700; }
+  .story-facts {
+    list-style: none;
+    margin-top: 22px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border-top: 1px solid #2a1909;
+  }
+  .story-facts li { padding: 18px 8px 4px; }
+  .story-facts b { display: block; font-family: "Cinzel", serif; font-size: clamp(20px, 6vw, 26px); font-weight: 900; color: var(--gold); }
+  .story-facts span { font-size: 12.5px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--cream-dimmer); }
+
+  /* ============ FAQ ============ */
+  .faq-sec { padding: 58px 0 12px; }
+  .faq-sec .head { text-align: center; }
+  .faq-sec .section-num { display: block; margin-bottom: 14px; }
+  .faq-sec h2 { font-size: clamp(25px, 6.6vw, 36px); font-weight: 900; text-transform: uppercase; }
+  .faq { margin-top: 24px; }
+  .faq details { border-bottom: 1px solid var(--line); }
+  .faq details:first-of-type { border-top: 1px solid var(--line); }
+  .faq summary {
+    cursor: pointer;
+    list-style: none;
+    padding: 16px 4px;
+    font-family: "Cinzel", serif;
+    font-size: 15.5px;
+    font-weight: 700;
+    color: var(--cream);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+    min-height: 44px;
+  }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary::after { content: "+"; font-size: 22px; color: var(--ember); flex-shrink: 0; line-height: 1; }
+  .faq details[open] summary::after { content: "–"; }
+  .faq .a { padding: 0 4px 18px; color: var(--cream-dim); font-size: 16px; }
+
+  /* ============ Final CTA ============ */
+  .final {
+    margin-top: 58px;
+    padding: 60px 0 64px;
+    text-align: center;
+    background:
+      radial-gradient(120% 90% at 50% 110%, rgba(200, 74, 29, 0.22), transparent 60%),
+      var(--night-2);
+    border-top: 1px solid var(--line);
+  }
+  .final h2 { font-size: clamp(27px, 7.2vw, 40px); font-weight: 900; text-transform: uppercase; }
+  .final p { margin: 14px auto 0; max-width: 24em; color: var(--cream-dim); }
+  .final .btn-forge { margin-top: 24px; }
+  .final .feedback-line { margin-top: 28px; font-size: 15px; }
+  .final .feedback-line a { color: var(--ember); text-decoration: underline; text-underline-offset: 3px; }
+
+  footer { padding: 28px 0 96px; text-align: center; background: var(--night); }
+  footer img { height: 36px; width: auto; margin: 0 auto 10px; }
+  footer p { font-size: 13.5px; color: #7a6448; }
+
+  /* ============ Sticky buy bar ============ */
+  .buybar {
+    position: fixed; inset: auto 0 0 0; z-index: 50;
+    display: flex; align-items: center; justify-content: space-between; gap: 14px;
+    padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+    background: rgba(18, 10, 5, 0.92);
+    backdrop-filter: blur(8px);
+    border-top: 1px solid #5a3a18;
+    transform: translateY(110%);
+    transition: transform 0.3s ease;
+  }
+  .buybar.show { transform: translateY(0); }
+  .buybar .label {
+    font-family: "Cinzel", serif; font-size: 14px; font-weight: 700;
+    letter-spacing: 0.04em; text-transform: uppercase; color: var(--cream); line-height: 1.3;
+  }
+  .buybar .label small {
+    display: block; font-family: "Alegreya Sans", sans-serif; font-size: 12.5px;
+    font-weight: 400; letter-spacing: 0; text-transform: none; color: var(--cream-dim);
+  }
+  .buybar .btn-forge { font-size: 15px; padding: 11px 22px; flex-shrink: 0; }
+
+  /* ============ Larger screens: alternate feature layout ============ */
+  @media (min-width: 760px) {
+    .hero-bg { height: 66svh; }
+    .feature .copy { max-width: 560px; margin: 0 auto; }
+    .feature .media { margin: 6px 0 4px; }
+  }
+</style>
+</head>
+<body>
+
+<main>
+  <!-- ============ Hero ============ -->
+  <section class="hero" data-screen-label="Hero">
+    <div class="hero-bg"></div>
+    <div class="hero-top">
+      <img src="assets/logo-horizontal.png" alt="Totem Forge">
+    </div>
+    <div class="wrap hero-pitch">
+      <h1 style="font-size: 46px">ONE MINI.<br><em>EVERY CHARACTER.</em></h1>
+      <p class="what">An interactive token with an always-on screen. Fill your entire tabletop session and keep your painted miniatures for special moments. </p>
+      <!-- TODO(owner): replace # with the Etsy listing URL -->
+      <a class="btn-forge" href="#" title="Placeholder — add your Etsy listing link">ORDER NOW</a>
+    </div>
+  </section>
+
+  <!-- ============ How it works ============ -->
+  <section class="how" id="how" data-screen-label="How it works">
+    <div class="wrap">
+      <span class="section-num">01 · HOW IT WORKS</span>
+      <div class="steps">
+        <img src="assets/how-it-works.webp" alt="Three steps: 1. Choose a portrait in the app, 2. Summon it onto a totem in the base, 3. Play with it on the battle map">
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Spec strip ============ -->
+  <div class="specstrip" data-screen-label="Spec strip">
+    <ul>
+      <li><b>Always-on</b> e-ink screen</li>
+      <li style="color: rgb(255, 157, 61)">NO CHARGING</li>
+      <li>SWAP ART <span style="color: rgb(255, 157, 61)">IN SECONDS</span></li>
+      <li><b>1-inch</b> grid base</li>
+      <li>LED <span style="color: rgb(255, 157, 61)">LIGHT &amp; STATUS FX </span></li>
+      <li><b>ANDROID</b> app</li>
+    </ul>
+  </div>
+
+  <!-- ============ The gap (problem → solution) ============ -->
+  <section class="lead" data-screen-label="The idea">
+    <div class="wrap narrow">
+      <span class="section-num">02 · THE IDEA</span>
+      <p style="font-size: 21px">Every campaign is the same: one painted figure for your character, and a pile of dice, coins and crumpled paper standing in for the goblins, the bandits, the boss. The table never quite <b>sees</b> what you're fighting.</p>
+      <p style="font-size: 21px">Totem Forge is one small device that becomes any of them. Choose a picture in the app, transfer it through the base, and the character appears on totem screen that stays on for the whole game, then becomes someone else next session.</p>
+    </div>
+  </section>
+
+  <!-- ============ Feature deep-dives ============ -->
+  <section class="features" data-screen-label="Features">
+    <div class="wrap">
+
+      <article class="feature">
+        <div class="inner">          <div class="copy">
+            <span class="kicker">THE MAGIC</span>
+            <h3>SCREEN THAT <em>NEVER SLEEPS</em></h3>
+            <div class="media tall">
+              <img src="assets/photo-totems-closeup.jpg" alt="Three Totem Forge minis with crisp character portraits on their screens" loading="lazy">
+            </div>
+            <p style="font-size: 19px">Totems use color e-ink, the same technology as a modern e-reader. The image is held physically by the display, so it stays sharp and visible with zero power, no backlight glow, no sleep timeout.</p>
+            <ul class="micro">
+              <li>Paper-crisp detail, readable across the table</li>
+              <li>No battery is needed to keep a character on screen</li>
+              <li>Digital flexibility combined with physical presence</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="feature flip">
+        <div class="inner">          <div class="copy">
+            <span class="kicker">At the table</span>
+            <h3>FILL THE <em>ENTIRE ENCOUNTER</em></h3>
+            <div class="media wide">
+              <img src="assets/use-minion-army.webp" alt="A full case of loaded totems beside the phone gallery" loading="lazy">
+            </div>
+            <p style="font-size: 19px">Because one totem becomes anyone, a handful covers a session. Now every minion gets a beautiful totem, while hand-painted minis are reserved for important bosses. </p>
+            <ul class="micro">
+              <li>A small set covers an entire night of play</li>
+              <li>Mixes naturally with painted miniatures</li>
+              <li>Fits D&amp;D &amp; Pathfinder 1-inch squares</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="feature">
+        <div class="inner">          <div class="copy">
+            <span class="kicker">LIGHT &amp; STATUS TRACKING</span>
+            <h3>Make the moment <em>glow</em></h3>
+            <div class="media tall">
+              <img src="assets/use-lighting.webp" alt="A cursed skull totem shown with its LED glow off, then on" loading="lazy">
+            </div>
+            <p style="font-size: 19px">A built-in LED lights the totem from within. Mark a curse, a buff, a burning aura or a downed enemy with colour. The table tracks the state of a fight at a glance.</p>
+            <ul class="micro">
+              <li>Press down on the colored inserts to turn ON</li>
+              <li>Signal status: poisoned, blessed, or any text</li>
+              <li>Small battery provides 6 months of average use</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="feature flip">
+        <div class="inner">          <div class="copy">
+            <span class="kicker">Storage</span>
+            <h3>Travels in <em>its own vault</em></h3>
+            <div class="media wide">
+              <img src="assets/use-storage.webp" alt="The round Totem Forge case tucked into a backpack pocket" loading="lazy">
+            </div>
+            <p style="font-size: 19px">The collection lives in a padded, compartmented case that doubles as a summoning circle. Throw it in a bag, arrive at game night, and your whole cast is protected, organized and ready.</p>
+            <ul class="micro">
+              <li>Padded slots keep screens scratch-free</li>
+              <li>Compact enough for any game bag</li>
+              <li>Stores 9 totems in one place, always ready</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="feature">
+        <div class="inner">          <div class="copy">
+            <span class="kicker">THE SUMMONING CIRCLE</span>
+            <h3>Dock, transfer, <em>PLAY</em></h3>
+            <div class="media wide">
+              <img src="assets/use-summoning-circle.webp" alt="Totems arranged around the circular base tray with one docked at the center" loading="lazy">
+            </div>
+            <p style="font-size: 19px">The character lives on the screen, but you change it through the base. Dock a totem, connect over USB-C, send the new art, and a few seconds later it's set. During play the totem is fully standalone.</p>
+            <ul class="micro">
+              <li>One base re-skins your whole collection</li>
+              <li>Simple wired transfer, nothing to pair mid-game</li>
+              <li>Totems play untethered once loaded</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="feature flip">
+        <div class="inner">          <div class="copy">
+            <span class="kicker">ANDROID APP</span>
+            <h3><em>ORGIZINE</em> YOUR ART</h3>
+            <div class="media tall">
+              <img src="assets/app-phone.webp" alt="The Totem Forge app gallery full of character portraits" loading="lazy">
+            </div>
+            <p style="font-size: 19px">Browse your gallery, search by tag, and load a character in a tap. Use our ready-made art packs tuned for e-ink, drop in commissioned art or your own drawings, or share any image straight from your phone.</p>
+            <ul class="micro">
+              <li>Free companion app for Android</li>
+              <li>Organise a whole cast by tag and campaign</li>
+              <li>Curated art packs are coming soon</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="feature">
+        <div class="inner">          <div class="copy">
+            <span class="kicker">ANY TABLETOP</span>
+            <h3>At home on <em>any board</em></h3>
+            <div class="media wide">
+              <img src="assets/use-any-tabletop.webp" alt="A Totem Forge mini standing on a colorful children's maze board game" loading="lazy">
+            </div>
+            <p style="font-size: 19px">Totem Forge isn't tied to one ruleset. Set it on a dungeon map, a hex grid, or the family board game on a rainy afternoon. Anywhere a piece can stand, a totem comes alive, so the right character shows up at every table you play at.</p>
+            <ul class="micro">
+              <li>Fits any board, grid, or open tabletop</li>
+              <li>System-agnostic: RPGs, skirmish, even party games</li>
+              <li>One totem set ready for all your games</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="feature flip">
+        <div class="inner">          <div class="copy">
+            <span class="kicker">PUZZLES &amp; TRAPS</span>
+            <h3>Set a <em>living puzzle</em></h3>
+            <div class="media wide">
+              <img src="assets/use-puzzles.webp" alt="Rune totems showing question marks, a serpent and a trap symbol arranged on a grid map" loading="lazy">
+            </div>
+            <p style="font-size: 19px">Totems aren't only characters. Load them with runes, sigils and symbols to turn any piece into a riddle, a pressure plate or a hidden trap. Players study the table, try combinations, and the screens change the instant a puzzle is solved or sprung.</p>
+            <ul class="micro">
+              <li>Swap symbols to set riddles, locks and traps</li>
+              <li>Flip a screen to reveal a clue or trigger the trap</li>
+              <li>Turn any encounter into a hands-on mystery</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ============ Tech specs ============ -->
+  <section class="specs" data-screen-label="Specs">
+    <div class="wrap">
+      <div class="head">
+        <span class="section-num">03 · THE SPECS</span>
+      </div>
+      <div class="specgrid">
+        <dl>
+          <dt>Display</dt><dd>Always-on e-ink, holds image without power</dd>
+          <dt>Footprint</dt><dd>1-inch base, D&amp;D &amp; Pathfinder grid</dd>
+          <dt>Art transfer</dt><dd>Via the dock base over USB-C</dd>
+          <dt>Lighting</dt><dd>Internal LED with colour status effects</dd>
+          <dt>Battery</dt><dd>Powers light effects only</dd>
+          <dt>App</dt><dd>Free companion app (<b style="color: var(--gold); font-weight: 800;">Android ONLY</b>)</dd>
+          <dt>Body</dt><dd>Hand-painted, high-resolution 3D-printed</dd>
+          <dt>In the box</dt><dd>Totems, dock base, USB-C cable,  NFC-tag for the manual</dd>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Story ============ -->
+  <section class="story" data-screen-label="Story">
+    <div class="wrap">
+      <div class="head">
+        <span class="section-num">04 · THE STORY</span>
+      </div>
+      <div class="story-card">
+        <img src="assets/photo-totems-table.png" alt="Totem Forge tokens beside a classic miniature and a d20 on a battle map" loading="lazy">
+        <div class="txt">
+          <h2>Built by a player, for players</h2>
+          <p style="font-size: 21px">Totem Forge started at our own game table, born from the wish to swap a hero's face mid-session without repainting anything. So we built the thing we wished existed. Every part of Totem Forge is made in-house, from the electronics and the companion app to the hand-painted, 3D-printed bodies and compact storage case. Designed by players who actually sit down and roll the dice.</p>
+          <ul class="story-facts">
+            <li><b>6</b><span>MONTHS PLAYTESTED</span></li>
+            <li><b>20+</b><span>design iterations</span></li>
+            <li><b>Magic</b><span>IN REAL USE</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FAQ ============ -->
+  <section class="faq-sec" data-screen-label="FAQ">
+    <div class="wrap">
+      <div class="head">
+        <span class="section-num">05 · FAQ</span>
+      </div>
+      <div class="faq">
+        <details>
+          <summary>Does it need charging?</summary>
+          <div class="a">Not really. The screen itself needs no battery: e-ink holds the image physically, so the portrait stays forever without power. A small battery powers only the LED light effects.</div>
+        </details>
+        <details>
+          <summary>Does the screen really stay on all the time?</summary>
+          <div class="a">Yes. That's the magic of e-ink: the image is physically held by the display, so it's always visible. No backlight, no sleep mode, no power used.</div>
+        </details>
+        <details>
+          <summary>Which games does it work with?</summary>
+          <div class="a">Any tabletop that uses tokens or miniatures. The 1-inch square footprint matches D&amp;D and Pathfinder grids and blends with standard minis, so you can mix collections freely.</div>
+        </details>
+        <details>
+          <summary>Where does the art come from?</summary>
+          <div class="a">Anywhere you like: import commissioned art or your own drawings, share any image straight to the app, or use our ready-made art packs tuned for e-ink.</div>
+        </details>
+        <details>
+          <summary>Do I need the app to play?</summary>
+          <div class="a">Only to change what's on the screen: dock the totem on its base and connect to your phone via USB. During play the totem is fully standalone, and the portrait stays on without a phone nearby.</div>
+        </details>
+        <details>
+          <summary>How is it shipped?</summary>
+          <div class="a">Each totem is assembled and tested in our workshop, then shipped tracked and padded. See the listing for current shipping regions and times.</div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Final CTA ============ -->
+  <section class="final" data-screen-label="Closing CTA">
+    <div class="wrap">
+      <h2>BE ALWAYS READY FOR YOUR GAME</h2>
+      <p>Each totem is assembled, painted, and tested in our workshop, then shipped tracked and padded.</p>
+      <!-- TODO(owner): replace # with the Etsy listing URL -->
+      <a class="btn-forge" href="#" title="Placeholder — add your Etsy listing link">ORDER NOW</a>
+      <!-- TODO(owner): replace with your real contact address before publishing. -->
+      <p class="feedback-line">Got an idea or a question? <a href="/cdn-cgi/l/email-protection#c3aba6afafac83b7acb7a6aea5acb1a4a6eda6bba2aeb3afa6fcb0b6a1a9a6a0b7fee6f68197acb7a6aee6f1f385acb1a4a6e6f687e6f1f385a6a6a7a1a2a0a8">Send us feedback</a></p>
+    </div>
+  </section>
+</main>
+
+<footer data-screen-label="Footer">
+  <img src="assets/logo-horizontal.png" alt="Totem Forge">
+  <p>A project by resuSover · © 2026 Totem Forge. All rights reserved.<br>
+The Netherlands · KvK: 42061826</p>
+</footer>
+
+<!-- ============ Sticky buy bar ============ -->
+<div class="buybar" id="buybar" data-screen-label="Sticky buy bar">
+  <span class="label">TOTEM FORGE<small>Interactive tokens</small></span>
+  <!-- TODO(owner): replace # with the Etsy listing URL -->
+  <a class="btn-forge" href="#" title="Placeholder — add your Etsy listing link">ORDER NOW</a>
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  (function () {
+    var bar = document.getElementById("buybar");
+    var hero = document.querySelector(".hero");
+    var final = document.querySelector(".final");
+    function update() {
+      var heroGone = hero.getBoundingClientRect().bottom < 0;
+      var finalVisible = final.getBoundingClientRect().top < window.innerHeight;
+      bar.classList.toggle("show", heroGone && !finalVisible);
+    }
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    update();
+  })();
+</script>
+</body>
+</html>
