@@ -2,8 +2,17 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Totem Forge: The Interactive Miniature, Explained</title>
+<meta name="description" content="Totem Forge is an interactive tabletop token with an always-on e-ink screen. One mini becomes every character. Swap art from the Android app in seconds.">
+<link rel="icon" type="image/png" href="assets/logo-vertical.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Totem Forge">
+<meta property="og:title" content="Totem Forge: One mini. Every character.">
+<meta property="og:description" content="Interactive tabletop tokens with always-on e-ink screens. Swap character art in seconds from the app.">
+<meta property="og:url" content="https://totemforge.nl/">
+<meta property="og:image" content="https://totemforge.nl/assets/photo-totems-closeup.jpg">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&amp;family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;1,400&amp;display=swap" rel="stylesheet">
@@ -168,24 +177,6 @@
   }
   .specstrip b { color: var(--ember); font-weight: 700; }
 
-  /* ============ Problem / lead-in ============ */
-  .lead { padding: 64px 0 8px; text-align: center; }
-  .lead .section-num { display: block; margin-bottom: 14px; }
-  .lead h2 {
-    font-size: clamp(27px, 7vw, 40px);
-    font-weight: 900;
-    text-transform: uppercase;
-  }
-  .lead h2 .gold { color: var(--gold); }
-  .lead p {
-    margin: 20px auto 0;
-    max-width: 30em;
-    font-size: clamp(17px, 4.4vw, 19px);
-    color: var(--cream-dim);
-  }
-  .lead p + p { margin-top: 16px; }
-  .lead p b { color: var(--cream); font-weight: 700; }
-
   /* ============ Feature deep-dives ============ */
   .features { padding: 40px 0 10px; }
   .feature { padding: 30px 0; }
@@ -219,19 +210,19 @@
   .feature .copy p b { color: var(--cream); font-weight: 700; }
   .micro {
     list-style: none;
-    margin-top: 16px;
+    margin-top: 18px;
     display: grid;
-    gap: 9px;
+    gap: 11px;
   }
   .micro li {
     position: relative;
-    padding-left: 24px;
-    font-size: 15.5px;
+    padding-left: 26px;
+    font-size: 18px;
     color: var(--cream-dim);
   }
   .micro li::before {
     content: "";
-    position: absolute; left: 2px; top: 9px;
+    position: absolute; left: 2px; top: 10px;
     width: 9px; height: 9px;
     transform: rotate(45deg);
     background: var(--ember);
@@ -242,41 +233,11 @@
   .how { padding: 54px 0 12px; text-align: center; }
   .how .section-num { display: block; margin-bottom: 14px; }
   .how h2 { font-size: clamp(25px, 6.6vw, 36px); font-weight: 900; text-transform: uppercase; }
-  .steps { margin-top: 8px; }
+  .how .lead-in { margin: 16px auto 0; max-width: 30em; font-size: clamp(17px, 4.4vw, 19px); color: var(--cream-dim); }
+  .how .lead-in b { color: var(--cream); font-weight: 700; }
+  .steps { margin-top: 22px; }
   .steps img { display: block; width: 100%; height: auto; }
   .how .under { margin: 22px auto 0; max-width: 26em; font-size: 15.5px; color: var(--cream-dimmer); }
-
-  /* ============ Comparison ============ */
-  .compare { padding: 56px 0 12px; }
-  .compare .head { text-align: center; }
-  .compare .section-num { display: block; margin-bottom: 14px; }
-  .compare h2 { font-size: clamp(25px, 6.6vw, 36px); font-weight: 900; text-transform: uppercase; }
-  .ctable {
-    margin-top: 26px;
-    border: 1px solid var(--line);
-    border-radius: 14px;
-    overflow: hidden;
-  }
-  .crow { display: grid; grid-template-columns: 1.25fr 1fr 1fr; }
-  .crow > div { padding: 13px 12px; border-bottom: 1px solid #2a1909; }
-  .crow:last-child > div { border-bottom: none; }
-  .crow .rowlabel { font-size: 14.5px; color: var(--cream); font-weight: 500; }
-  .crow .cell { text-align: center; font-size: 14px; color: var(--cream-dim); display: flex; align-items: center; justify-content: center; gap: 6px; }
-  .crow.head-row > div {
-    font-family: "Cinzel", serif;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    background: var(--panel-2);
-    color: var(--cream);
-    text-align: center;
-  }
-  .crow.head-row .rowlabel { text-align: left; color: var(--cream-dimmer); }
-  .crow .tf { background: rgba(255, 157, 61, 0.06); }
-  .crow.head-row .tf { color: var(--gold); }
-  .yes { color: var(--ember); font-weight: 700; }
-  .no { color: #7c5a3a; }
 
   /* ============ Tech specs ============ */
   .specs { padding: 56px 0 12px; }
@@ -329,6 +290,32 @@
   .story-facts li { padding: 18px 8px 4px; }
   .story-facts b { display: block; font-family: "Cinzel", serif; font-size: clamp(20px, 6vw, 26px); font-weight: 900; color: var(--gold); }
   .story-facts span { font-size: 12.5px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--cream-dimmer); }
+
+  .story-quotes {
+    position: relative;
+    margin-top: 20px;
+    border-top: 1px solid #2a1909;
+  }
+  .story-quotes blockquote {
+    position: absolute;
+    left: 0; right: 0; top: 0;
+    margin: 0;
+    padding: 20px 14px 0;
+    font-style: italic;
+    font-size: 16.5px;
+    color: var(--cream);
+    opacity: 0;
+    transition: opacity 0.7s ease;
+  }
+  .story-quotes blockquote.on { opacity: 1; }
+  .story-quotes blockquote footer {
+    margin-top: 8px;
+    font-style: normal;
+    font-size: 12.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--cream-dimmer);
+  }
 
   /* ============ FAQ ============ */
   .faq-sec { padding: 58px 0 12px; }
@@ -417,10 +404,9 @@
       <img src="assets/logo-horizontal.png" alt="Totem Forge">
     </div>
     <div class="wrap hero-pitch">
-      <h1 style="font-size: 46px">ONE MINI.<br><em>EVERY CHARACTER.</em></h1>
+      <h1>ONE MINI.<br><em>EVERY CHARACTER.</em></h1>
       <p class="what">An interactive token with an always-on screen. Fill your entire tabletop session and keep your painted miniatures for special moments. </p>
-      <!-- TODO(owner): replace # with the Etsy listing URL -->
-      <a class="btn-forge" href="#" title="Placeholder — add your Etsy listing link">ORDER NOW</a>
+            <a class="btn-forge" href="https://www.etsy.com/listing/4532716407/e-ink-totem-tokens-dnd-pathfinder-rpg?ref=shop_home_feat_1&amp;sr_prefetch=1&amp;pf_from=shop_home&amp;logging_key=e60f645209ea1d1a70c8df0583f6ee4e9870ba97%3A4532716407" target="_blank" rel="noopener">ORDER NOW</a>
     </div>
   </section>
 
@@ -428,6 +414,7 @@
   <section class="how" id="how" data-screen-label="How it works">
     <div class="wrap">
       <span class="section-num">01 · HOW IT WORKS</span>
+      <p class="lead-in">Stop letting dice and coins stand in for goblins and bosses. One totem becomes <b>any character</b>: pick art in the app, summon it through the base, and it stays on the always-on screen all session. Then it becomes someone else next game.</p>
       <div class="steps">
         <img src="assets/how-it-works.webp" alt="Three steps: 1. Choose a portrait in the app, 2. Summon it onto a totem in the base, 3. Play with it on the battle map">
       </div>
@@ -442,18 +429,9 @@
       <li>SWAP ART <span style="color: rgb(255, 157, 61)">IN SECONDS</span></li>
       <li><b>1-inch</b> grid base</li>
       <li>LED <span style="color: rgb(255, 157, 61)">LIGHT &amp; STATUS FX </span></li>
-      <li><b>ANDROID</b> app</li>
+      <li><b>ANDROID-only</b> app</li>
     </ul>
   </div>
-
-  <!-- ============ The gap (problem → solution) ============ -->
-  <section class="lead" data-screen-label="The idea">
-    <div class="wrap narrow">
-      <span class="section-num">02 · THE IDEA</span>
-      <p style="font-size: 21px">Every campaign is the same: one painted figure for your character, and a pile of dice, coins and crumpled paper standing in for the goblins, the bandits, the boss. The table never quite <b>sees</b> what you're fighting.</p>
-      <p style="font-size: 21px">Totem Forge is one small device that becomes any of them. Choose a picture in the app, transfer it through the base, and the character appears on totem screen that stays on for the whole game, then becomes someone else next session.</p>
-    </div>
-  </section>
 
   <!-- ============ Feature deep-dives ============ -->
   <section class="features" data-screen-label="Features">
@@ -466,9 +444,8 @@
             <div class="media tall">
               <img src="assets/photo-totems-closeup.jpg" alt="Three Totem Forge minis with crisp character portraits on their screens" loading="lazy">
             </div>
-            <p style="font-size: 19px">Totems use color e-ink, the same technology as a modern e-reader. The image is held physically by the display, so it stays sharp and visible with zero power, no backlight glow, no sleep timeout.</p>
             <ul class="micro">
-              <li>Paper-crisp detail, readable across the table</li>
+              <li>Color e-ink: paper-crisp, readable across the table</li>
               <li>No battery is needed to keep a character on screen</li>
               <li>Digital flexibility combined with physical presence</li>
             </ul>
@@ -483,7 +460,6 @@
             <div class="media wide">
               <img src="assets/use-minion-army.webp" alt="A full case of loaded totems beside the phone gallery" loading="lazy">
             </div>
-            <p style="font-size: 19px">Because one totem becomes anyone, a handful covers a session. Now every minion gets a beautiful totem, while hand-painted minis are reserved for important bosses. </p>
             <ul class="micro">
               <li>A small set covers an entire night of play</li>
               <li>Mixes naturally with painted miniatures</li>
@@ -500,7 +476,6 @@
             <div class="media tall">
               <img src="assets/use-lighting.webp" alt="A cursed skull totem shown with its LED glow off, then on" loading="lazy">
             </div>
-            <p style="font-size: 19px">A built-in LED lights the totem from within. Mark a curse, a buff, a burning aura or a downed enemy with colour. The table tracks the state of a fight at a glance.</p>
             <ul class="micro">
               <li>Press down on the colored inserts to turn ON</li>
               <li>Signal status: poisoned, blessed, or any text</li>
@@ -517,7 +492,6 @@
             <div class="media wide">
               <img src="assets/use-storage.webp" alt="The round Totem Forge case tucked into a backpack pocket" loading="lazy">
             </div>
-            <p style="font-size: 19px">The collection lives in a padded, compartmented case that doubles as a summoning circle. Throw it in a bag, arrive at game night, and your whole cast is protected, organized and ready.</p>
             <ul class="micro">
               <li>Padded slots keep screens scratch-free</li>
               <li>Compact enough for any game bag</li>
@@ -534,10 +508,9 @@
             <div class="media wide">
               <img src="assets/use-summoning-circle.webp" alt="Totems arranged around the circular base tray with one docked at the center" loading="lazy">
             </div>
-            <p style="font-size: 19px">The character lives on the screen, but you change it through the base. Dock a totem, connect over USB-C, send the new art, and a few seconds later it's set. During play the totem is fully standalone.</p>
             <ul class="micro">
               <li>One base re-skins your whole collection</li>
-              <li>Simple wired transfer, nothing to pair mid-game</li>
+              <li>Simple USB-C transfer via the base, no pairing mid-game</li>
               <li>Totems play untethered once loaded</li>
             </ul>
           </div>
@@ -547,15 +520,14 @@
       <article class="feature flip">
         <div class="inner">          <div class="copy">
             <span class="kicker">ANDROID APP</span>
-            <h3><em>ORGIZINE</em> YOUR ART</h3>
+            <h3><em>ORGANIZE</em> YOUR ART</h3>
             <div class="media tall">
               <img src="assets/app-phone.webp" alt="The Totem Forge app gallery full of character portraits" loading="lazy">
             </div>
-            <p style="font-size: 19px">Browse your gallery, search by tag, and load a character in a tap. Use our ready-made art packs tuned for e-ink, drop in commissioned art or your own drawings, or share any image straight from your phone.</p>
             <ul class="micro">
               <li>Free companion app for Android</li>
               <li>Organise a whole cast by tag and campaign</li>
-              <li>Curated art packs are coming soon</li>
+              <li>Use your own art, or curated packs tuned for e-ink</li>
             </ul>
           </div>
         </div>
@@ -568,7 +540,6 @@
             <div class="media wide">
               <img src="assets/use-any-tabletop.webp" alt="A Totem Forge mini standing on a colorful children's maze board game" loading="lazy">
             </div>
-            <p style="font-size: 19px">Totem Forge isn't tied to one ruleset. Set it on a dungeon map, a hex grid, or the family board game on a rainy afternoon. Anywhere a piece can stand, a totem comes alive, so the right character shows up at every table you play at.</p>
             <ul class="micro">
               <li>Fits any board, grid, or open tabletop</li>
               <li>System-agnostic: RPGs, skirmish, even party games</li>
@@ -585,7 +556,6 @@
             <div class="media wide">
               <img src="assets/use-puzzles.webp" alt="Rune totems showing question marks, a serpent and a trap symbol arranged on a grid map" loading="lazy">
             </div>
-            <p style="font-size: 19px">Totems aren't only characters. Load them with runes, sigils and symbols to turn any piece into a riddle, a pressure plate or a hidden trap. Players study the table, try combinations, and the screens change the instant a puzzle is solved or sprung.</p>
             <ul class="micro">
               <li>Swap symbols to set riddles, locks and traps</li>
               <li>Flip a screen to reveal a clue or trigger the trap</li>
@@ -602,7 +572,7 @@
   <section class="specs" data-screen-label="Specs">
     <div class="wrap">
       <div class="head">
-        <span class="section-num">03 · THE SPECS</span>
+        <span class="section-num">02 · THE SPECS</span>
       </div>
       <div class="specgrid">
         <dl>
@@ -623,18 +593,23 @@
   <section class="story" data-screen-label="Story">
     <div class="wrap">
       <div class="head">
-        <span class="section-num">04 · THE STORY</span>
+        <span class="section-num">03 · THE STORY</span>
       </div>
       <div class="story-card">
         <img src="assets/photo-totems-table.png" alt="Totem Forge tokens beside a classic miniature and a d20 on a battle map" loading="lazy">
         <div class="txt">
           <h2>Built by a player, for players</h2>
-          <p style="font-size: 21px">Totem Forge started at our own game table, born from the wish to swap a hero's face mid-session without repainting anything. So we built the thing we wished existed. Every part of Totem Forge is made in-house, from the electronics and the companion app to the hand-painted, 3D-printed bodies and compact storage case. Designed by players who actually sit down and roll the dice.</p>
+          <p style="font-size: 21px">Totem Forge started at our own game table, born from the wish to swap a hero's face mid-session without repainting anything. Every part is made in-house, from the electronics and app to the hand-painted 3D-printed bodies, by players who actually roll the dice.</p>
           <ul class="story-facts">
             <li><b>6</b><span>MONTHS PLAYTESTED</span></li>
             <li><b>20+</b><span>design iterations</span></li>
-            <li><b>Magic</b><span>IN REAL USE</span></li>
+            <li><b>40+</b><span>FEEDBACK POINTS IMPLEMENTED</span></li>
           </ul>
+          <div class="story-quotes" id="storyQuotes" aria-label="What playtesters say">
+            <blockquote class="on">“Great storage in a form of summoning circle. Easy to use, easy to put in the backpack, looks great.”<footer>Playtest participant</footer></blockquote>
+            <blockquote>“Vivid totems which stand out!”<footer>Playtest participant</footer></blockquote>
+            <blockquote>“Great to keep all of your collection in one place.”<footer>Playtest participant</footer></blockquote>
+          </div>
         </div>
       </div>
     </div>
@@ -644,7 +619,7 @@
   <section class="faq-sec" data-screen-label="FAQ">
     <div class="wrap">
       <div class="head">
-        <span class="section-num">05 · FAQ</span>
+        <span class="section-num">04 · FAQ</span>
       </div>
       <div class="faq">
         <details>
@@ -680,10 +655,8 @@
     <div class="wrap">
       <h2>BE ALWAYS READY FOR YOUR GAME</h2>
       <p>Each totem is assembled, painted, and tested in our workshop, then shipped tracked and padded.</p>
-      <!-- TODO(owner): replace # with the Etsy listing URL -->
-      <a class="btn-forge" href="#" title="Placeholder — add your Etsy listing link">ORDER NOW</a>
-      <!-- TODO(owner): replace with your real contact address before publishing. -->
-      <p class="feedback-line">Got an idea or a question? <a href="/cdn-cgi/l/email-protection#c3aba6afafac83b7acb7a6aea5acb1a4a6eda6bba2aeb3afa6fcb0b6a1a9a6a0b7fee6f68197acb7a6aee6f1f385acb1a4a6e6f687e6f1f385a6a6a7a1a2a0a8">Send us feedback</a></p>
+            <a class="btn-forge" href="https://www.etsy.com/listing/4532716407/e-ink-totem-tokens-dnd-pathfinder-rpg?ref=shop_home_feat_1&amp;sr_prefetch=1&amp;pf_from=shop_home&amp;logging_key=e60f645209ea1d1a70c8df0583f6ee4e9870ba97%3A4532716407" target="_blank" rel="noopener">ORDER NOW</a>
+            <p class="feedback-line">Got an idea or a question? <a href="/cdn-cgi/l/email-protection#f380929f9680b3879c87969e959c819496dd9d9f">Send us feedback</a></p>
     </div>
   </section>
 </main>
@@ -697,8 +670,7 @@ The Netherlands · KvK: 42061826</p>
 <!-- ============ Sticky buy bar ============ -->
 <div class="buybar" id="buybar" data-screen-label="Sticky buy bar">
   <span class="label">TOTEM FORGE<small>Interactive tokens</small></span>
-  <!-- TODO(owner): replace # with the Etsy listing URL -->
-  <a class="btn-forge" href="#" title="Placeholder — add your Etsy listing link">ORDER NOW</a>
+    <a class="btn-forge" href="https://www.etsy.com/listing/4532716407/e-ink-totem-tokens-dnd-pathfinder-rpg?ref=shop_home_feat_1&amp;sr_prefetch=1&amp;pf_from=shop_home&amp;logging_key=e60f645209ea1d1a70c8df0583f6ee4e9870ba97%3A4532716407" target="_blank" rel="noopener">ORDER NOW</a>
 </div>
 
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
@@ -714,6 +686,26 @@ The Netherlands · KvK: 42061826</p>
     window.addEventListener("scroll", update, { passive: true });
     window.addEventListener("resize", update);
     update();
+  })();
+
+  (function () {
+    var box = document.getElementById("storyQuotes");
+    if (!box) return;
+    var quotes = box.querySelectorAll("blockquote");
+    function size() {
+      var max = 0;
+      quotes.forEach(function (q) { max = Math.max(max, q.offsetHeight); });
+      box.style.minHeight = (max + 24) + "px";
+    }
+    size();
+    window.addEventListener("resize", size);
+    window.addEventListener("load", size);
+    var i = 0;
+    setInterval(function () {
+      quotes[i].classList.remove("on");
+      i = (i + 1) % quotes.length;
+      quotes[i].classList.add("on");
+    }, 4500);
   })();
 </script>
 </body>
