@@ -235,6 +235,20 @@
   .how h2 { font-size: clamp(25px, 6.6vw, 36px); font-weight: 900; text-transform: uppercase; }
   .how .lead-in { margin: 16px auto 0; max-width: 30em; font-size: clamp(17px, 4.4vw, 19px); color: var(--cream-dim); }
   .how .lead-in b { color: var(--cream); font-weight: 700; }
+  .demo-video { margin-top: 22px; }
+  .demo-video video {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    border-radius: 14px;
+    border: 1.5px solid #4d3014;
+    background: var(--night-2);
+    box-shadow: 0 14px 34px rgba(0,0,0,0.5);
+  }
+  .demo-video .yt-link { margin-top: 10px; text-align: center; font-size: 15px; }
+  .demo-video .yt-link a { color: var(--cream-dim); text-decoration: underline; text-underline-offset: 3px; }
+  .demo-video .yt-link a:hover { color: var(--ember); }
   .steps { margin-top: 22px; }
   .steps img { display: block; width: 100%; height: auto; }
   .how .under { margin: 22px auto 0; max-width: 26em; font-size: 15.5px; color: var(--cream-dimmer); }
@@ -417,6 +431,10 @@
     <div class="wrap">
       <span class="section-num">01 · HOW IT WORKS</span>
       <p class="lead-in">Stop letting dice and coins stand in for goblins and bosses. One totem becomes <b>any character</b>: pick art in the app, summon it through the base, and it stays on the always-on screen all session. Then it becomes someone else next game.</p>
+      <div class="demo-video">
+        <video id="demoVideo" src="assets/totem-demo.mp4" muted loop playsinline preload="metadata" aria-label="Demo: swapping character art on a Totem Forge token"></video>
+        <p class="yt-link"><a href="https://youtu.be/3Jc6HUF-CyA" target="_blank" rel="noopener">&#9654; Watch on YouTube (with sound)</a></p>
+      </div>
       <div class="steps">
         <img src="assets/how-it-works.webp" alt="Three steps: 1. Choose a portrait in the app, 2. Summon it onto a totem in the base, 3. Play with it on the battle map">
       </div>
@@ -708,6 +726,25 @@ The Netherlands · KvK: 42061826</p>
       i = (i + 1) % quotes.length;
       quotes[i].classList.add("on");
     }, 4500);
+  })();
+
+  (function () {
+    var vid = document.getElementById("demoVideo");
+    if (!vid) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) {
+      vid.controls = true;
+      return;
+    }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          vid.play().catch(function () { vid.controls = true; });
+        } else {
+          vid.pause();
+        }
+      });
+    }, { threshold: 0.4 });
+    io.observe(vid);
   })();
 </script>
 </body>
