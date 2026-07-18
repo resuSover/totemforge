@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Totem Forge: The Interactive Miniature, Explained</title>
+<title>Totem Forge — Interactive Miniature Tokens for D&amp;D &amp; Pathfinder</title>
+<link rel="canonical" href="https://totemforge.nl/">
 <meta name="description" content="Totem Forge is an interactive tabletop token with an always-on e-ink screen. One mini becomes every character. Swap art from the Android app in seconds.">
 <link rel="icon" type="image/png" href="assets/logo_icon_32.png">
 <meta property="og:type" content="website">
@@ -13,6 +14,44 @@
 <meta property="og:url" content="https://totemforge.nl/">
 <meta property="og:image" content="https://totemforge.nl/assets/photo-totems-closeup.jpg">
 <meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Does it need charging?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Not really. The screen itself needs no battery: e-ink holds the image physically, so the portrait stays forever without power. A small battery powers only the LED light effects." }
+    },
+    {
+      "@type": "Question",
+      "name": "Does the screen really stay on all the time?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. That's the magic of e-ink: the image is physically held by the display, so it's always visible. No backlight, no sleep mode, no power used." }
+    },
+    {
+      "@type": "Question",
+      "name": "Which games does it work with?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Any tabletop that uses tokens or miniatures. The 1-inch square footprint matches D&D and Pathfinder grids and blends with standard minis, so you can mix collections freely." }
+    },
+    {
+      "@type": "Question",
+      "name": "Where does the art come from?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Anywhere you like: import commissioned art or your own drawings, share any image straight to the app, or use our ready-made art packs tuned for e-ink." }
+    },
+    {
+      "@type": "Question",
+      "name": "Do I need the app to play?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Only to change what's on the screen: dock the totem on its base and connect to your phone via USB. During play the totem is fully standalone, and the portrait stays on without a phone nearby." }
+    },
+    {
+      "@type": "Question",
+      "name": "How is it shipped?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Each totem is assembled and tested in our workshop, then shipped tracked and padded. See the listing for current shipping regions and times." }
+    }
+  ]
+}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&amp;family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;1,400&amp;display=swap" rel="stylesheet">
@@ -84,6 +123,14 @@
     font-weight: 700;
     letter-spacing: 0.3em;
     color: var(--cream-dimmer);
+  }
+  .sr-only {
+    position: absolute;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
   }
 
   /* ============ Hero ============ */
@@ -246,9 +293,6 @@
     background: var(--night-2);
     box-shadow: 0 14px 34px rgba(0,0,0,0.5);
   }
-  .demo-video .yt-link { margin-top: 10px; text-align: center; font-size: 15px; }
-  .demo-video .yt-link a { color: var(--cream-dim); text-decoration: underline; text-underline-offset: 3px; }
-  .demo-video .yt-link a:hover { color: var(--ember); }
   .steps { margin-top: 22px; }
   .steps img { display: block; width: 100%; height: auto; }
   .how .under { margin: 22px auto 0; max-width: 26em; font-size: 15.5px; color: var(--cream-dimmer); }
@@ -291,7 +335,7 @@
   .story-card img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
   .story-card .txt { padding: 26px 24px 28px; text-align: center; }
   .story-card .kicker { margin-bottom: 8px; }
-  .story-card h2 { font-size: clamp(22px, 5.8vw, 30px); font-weight: 900; text-transform: uppercase; }
+  .story-card h3 { font-size: clamp(22px, 5.8vw, 30px); font-weight: 900; text-transform: uppercase; }
   .story-card p { margin-top: 14px; color: var(--cream-dim); font-size: 16.5px; }
   .story-card p b { color: var(--cream); font-weight: 700; }
   .story-facts {
@@ -422,21 +466,20 @@
     <div class="wrap hero-pitch">
       <h1>ONE MINI.<br><em>EVERY CHARACTER.</em></h1>
       <p class="what">An interactive token with an always-on screen. Fill your entire tabletop session and keep your painted miniatures for special moments. </p>
-            <a class="btn-forge" href="https://www.etsy.com/shop/TotemForgeNL?ref=seller-platform-mcnav" target="_blank" rel="noopener">ORDER ON ETSY</a>
+            <a class="btn-forge" href="https://www.etsy.com/shop/TotemForgeNL?utm_source=totemforge.nl&amp;utm_medium=website" target="_blank" rel="noopener">ORDER ON ETSY</a>
     </div>
   </section>
 
   <!-- ============ How it works ============ -->
   <section class="how" id="how" data-screen-label="How it works">
     <div class="wrap">
-      <span class="section-num">01 · HOW IT WORKS</span>
+      <h2 class="section-num">01 · HOW IT WORKS</h2>
       <p class="lead-in">Stop letting dice and coins stand in for goblins and bosses. One totem becomes <b>any character</b>: pick art in the app, summon it through the base, and it stays on the always-on screen all session. Then it becomes someone else next game.</p>
       <div class="steps">
         <img src="assets/how-it-works.webp" alt="Three steps: 1. Choose a portrait in the app, 2. Summon it onto a totem in the base, 3. Play with it on the battle map">
       </div>
       <div class="demo-video">
         <video id="demoVideo" src="assets/totem-demo.mp4" muted loop playsinline preload="metadata" aria-label="Demo: swapping character art on a Totem Forge token"></video>
-        <p class="yt-link"><a href="https://youtu.be/3Jc6HUF-CyA" target="_blank" rel="noopener">&#9654; Watch on YouTube (with sound)</a></p>
       </div>
     </div>
   </section>
@@ -445,10 +488,10 @@
   <div class="specstrip" data-screen-label="Spec strip">
     <ul>
       <li><b>Always-on</b> e-ink screen</li>
-      <li style="color: rgb(255, 157, 61)">NO CHARGING</li>
-      <li>SWAP ART <span style="color: rgb(255, 157, 61)">IN SECONDS</span></li>
+      <li><b>NO CHARGING</b></li>
+      <li>SWAP ART <b>IN SECONDS</b></li>
       <li><b>1-inch</b> grid base</li>
-      <li>LED <span style="color: rgb(255, 157, 61)">LIGHT &amp; STATUS FX </span></li>
+      <li>LED <b>LIGHT &amp; STATUS FX</b></li>
       <li><b>ANDROID-only</b> app</li>
     </ul>
   </div>
@@ -456,6 +499,7 @@
   <!-- ============ Feature deep-dives ============ -->
   <section class="features" data-screen-label="Features">
     <div class="wrap">
+      <h2 class="sr-only">Features</h2>
 
       <article class="feature">
         <div class="inner">          <div class="copy">
@@ -592,7 +636,7 @@
   <section class="specs" data-screen-label="Specs">
     <div class="wrap">
       <div class="head">
-        <span class="section-num">02 · THE SPECS</span>
+        <h2 class="section-num">02 · THE SPECS</h2>
       </div>
       <div class="specgrid">
         <dl>
@@ -603,7 +647,7 @@
           <dt>Battery</dt><dd>Powers light effects only</dd>
           <dt>App</dt><dd>Free companion app (<b style="color: var(--gold); font-weight: 800;">Android ONLY</b>)</dd>
           <dt>Body</dt><dd>Hand-painted, high-resolution 3D-printed</dd>
-          <dt>In the box</dt><dd>Totems, dock base, USB-C cable,  NFC-tag for the manual</dd>
+          <dt>In the box</dt><dd>Totems, dock base, USB-C cable, NFC-tag for the manual</dd>
         </dl>
       </div>
     </div>
@@ -613,12 +657,12 @@
   <section class="story" data-screen-label="Story">
     <div class="wrap">
       <div class="head">
-        <span class="section-num">03 · THE STORY</span>
+        <h2 class="section-num">03 · THE STORY</h2>
       </div>
       <div class="story-card">
-        <img src="assets/photo-totems-table.png" alt="Totem Forge tokens beside a classic miniature and a d20 on a battle map" loading="lazy">
+        <img src="assets/photo-totems-table.webp" alt="Totem Forge tokens beside a classic miniature and a d20 on a battle map" loading="lazy">
         <div class="txt">
-          <h2>Built by a player, for players</h2>
+          <h3>Built by a player, for players</h3>
           <p style="font-size: 21px">Totem Forge started at our own game table, born from the wish to swap a hero's face mid-session without repainting anything. Every part is made in-house, from the electronics and app to the hand-painted 3D-printed bodies, by players who actually roll the dice.</p>
           <ul class="story-facts">
             <li><b>6</b><span>MONTHS PLAYTESTED</span></li>
@@ -639,7 +683,7 @@
   <section class="faq-sec" data-screen-label="FAQ">
     <div class="wrap">
       <div class="head">
-        <span class="section-num">04 · FAQ</span>
+        <h2 class="section-num">04 · FAQ</h2>
       </div>
       <div class="faq">
         <details>
@@ -675,7 +719,7 @@
     <div class="wrap">
       <h2>BE ALWAYS READY FOR YOUR GAME</h2>
       <p>Each totem is assembled, painted, and tested in our workshop, then shipped tracked and padded.</p>
-            <a class="btn-forge" href="https://www.etsy.com/shop/TotemForgeNL?ref=seller-platform-mcnav" target="_blank" rel="noopener">ORDER ON ETSY</a>
+            <a class="btn-forge" href="https://www.etsy.com/shop/TotemForgeNL?utm_source=totemforge.nl&amp;utm_medium=website" target="_blank" rel="noopener">ORDER ON ETSY</a>
             <p class="feedback-line">Got an idea or a question? <a href="/cdn-cgi/l/email-protection#f380929f9680b3879c87969e959c819496dd9d9f">Send us feedback</a></p>
     </div>
   </section>
@@ -690,7 +734,7 @@ The Netherlands · KvK: 42061826</p>
 <!-- ============ Sticky buy bar ============ -->
 <div class="buybar" id="buybar" data-screen-label="Sticky buy bar">
   <span class="label">TOTEM FORGE<small>Interactive tokens</small></span>
-    <a class="btn-forge" href="https://www.etsy.com/shop/TotemForgeNL?ref=seller-platform-mcnav" target="_blank" rel="noopener">ORDER ON ETSY</a>
+    <a class="btn-forge" href="https://www.etsy.com/shop/TotemForgeNL?utm_source=totemforge.nl&amp;utm_medium=website" target="_blank" rel="noopener">ORDER ON ETSY</a>
 </div>
 
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
