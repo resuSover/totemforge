@@ -720,7 +720,7 @@
       <h2>BE ALWAYS READY FOR YOUR GAME</h2>
       <p>Each totem is assembled, painted, and tested in our workshop, then shipped tracked and padded.</p>
             <a class="btn-forge" href="https://www.etsy.com/shop/TotemForgeNL?utm_source=totemforge.nl&amp;utm_medium=website" target="_blank" rel="noopener">ORDER ON ETSY</a>
-            <p class="feedback-line">Got an idea or a question? <a href="/cdn-cgi/l/email-protection#f380929f9680b3879c87969e959c819496dd9d9f">Send us feedback</a></p>
+            <p class="feedback-line">Got an idea or a question? <a id="feedbackMail" href="#">Send us feedback</a></p>
     </div>
   </section>
 </main>
@@ -737,7 +737,14 @@ The Netherlands · KvK: 42061826</p>
     <a class="btn-forge" href="https://www.etsy.com/shop/TotemForgeNL?utm_source=totemforge.nl&amp;utm_medium=website" target="_blank" rel="noopener">ORDER ON ETSY</a>
 </div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
+  (function () {
+    var a = document.getElementById("feedbackMail");
+    if (!a) return;
+    var addr = ["sales", "totemforge.nl"].join("@");
+    a.href = "mail" + "to:" + addr;
+  })();
+
   (function () {
     var bar = document.getElementById("buybar");
     var hero = document.querySelector(".hero");
