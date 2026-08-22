@@ -22,7 +22,7 @@
     {
       "@type": "Question",
       "name": "Does it need charging?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Not really. The screen itself needs no battery: e-ink holds the image physically, so the portrait stays forever without power. A small battery powers only the LED light effects." }
+      "acceptedAnswer": { "@type": "Answer", "text": "Not really. The screen itself needs no battery: e-ink holds the image physically, so the portrait stays forever without power. A small replaceable CR927 battery powers only the LED light effects, and lasts several months for normal use." }
     },
     {
       "@type": "Question",
@@ -275,6 +275,7 @@
     background: var(--ember);
     border-radius: 1px;
   }
+  .feature-cta { margin-top: 20px; font-size: 15px; padding: 11px 24px; }
 
   /* ============ How it works ============ */
   .how { padding: 54px 0 12px; text-align: center; }
@@ -296,6 +297,18 @@
   .steps { margin-top: 22px; }
   .steps img { display: block; width: 100%; height: auto; }
   .how .under { margin: 22px auto 0; max-width: 26em; font-size: 15.5px; color: var(--cream-dimmer); }
+  .start-link {
+    display: block;
+    margin: 20px auto 0;
+    font-family: "Cinzel", serif;
+    font-size: clamp(18px, 4.6vw, 21px);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--gold);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+  .start-link:hover { color: var(--ember); }
 
   /* ============ Tech specs ============ */
   .specs { padding: 56px 0 12px; }
@@ -466,7 +479,7 @@
     <div class="wrap hero-pitch">
       <h1>ONE MINI.<br><em>EVERY CHARACTER.</em></h1>
       <p class="what">An interactive token with an always-on screen. Fill your entire tabletop session and keep your painted miniatures for special moments. </p>
-            <a class="btn-forge" href="https://www.etsy.com/shop/TotemForgeNL?utm_source=totemforge.nl&amp;utm_medium=website" target="_blank" rel="noopener">ORDER ON ETSY</a>
+            <a class="btn-forge" href="https://www.etsy.com/shop/TotemForgeNL?utm_source=totemforge.nl&amp;utm_medium=website" target="_blank" rel="noopener">SHOP ON ETSY</a>
     </div>
   </section>
 
@@ -475,6 +488,7 @@
     <div class="wrap">
       <h2 class="section-num">01 · HOW IT WORKS</h2>
       <p class="lead-in">Stop letting dice and coins stand in for goblins and bosses. One totem becomes <b>any character</b>: pick art in the app, summon it through the base, and it stays on the always-on screen all session. Then it becomes someone else next game.</p>
+      <a class="start-link" href="start.html">Read the Quick Start Guide</a>
       <div class="steps">
         <img src="assets/how-it-works.webp" alt="Three steps: 1. Choose a portrait in the app, 2. Summon it onto a totem in the base, 3. Play with it on the battle map">
       </div>
@@ -593,6 +607,7 @@
               <li>Organise a whole cast by tag and campaign</li>
               <li>Use your own art, or curated packs tuned for e-ink</li>
             </ul>
+            <a class="btn-forge feature-cta" href="https://play.google.com/store/apps/details?id=com.minitoo.android&amp;utm_source=emea_Med" target="_blank" rel="noopener">GET IT ON GOOGLE PLAY</a>
           </div>
         </div>
       </article>
@@ -680,7 +695,7 @@
   </section>
 
   <!-- ============ FAQ ============ -->
-  <section class="faq-sec" data-screen-label="FAQ">
+  <section class="faq-sec" id="faq" data-screen-label="FAQ">
     <div class="wrap">
       <div class="head">
         <h2 class="section-num">04 · FAQ</h2>
@@ -688,7 +703,7 @@
       <div class="faq">
         <details>
           <summary>Does it need charging?</summary>
-          <div class="a">Not really. The screen itself needs no battery: e-ink holds the image physically, so the portrait stays forever without power. A small battery powers only the LED light effects.</div>
+          <div class="a">Not really. The screen itself needs no battery: e-ink holds the image physically, so the portrait stays forever without power. A small replaceable CR927 battery powers only the LED light effects, and lasts several months for normal use.</div>
         </details>
         <details>
           <summary>Does the screen really stay on all the time?</summary>
@@ -719,7 +734,7 @@
     <div class="wrap">
       <h2>BE ALWAYS READY FOR YOUR GAME</h2>
       <p>Each totem is assembled, painted, and tested in our workshop, then shipped tracked and padded.</p>
-            <a class="btn-forge" href="https://www.etsy.com/shop/TotemForgeNL?utm_source=totemforge.nl&amp;utm_medium=website" target="_blank" rel="noopener">ORDER ON ETSY</a>
+            <a class="btn-forge" href="https://www.etsy.com/shop/TotemForgeNL?utm_source=totemforge.nl&amp;utm_medium=website" target="_blank" rel="noopener">SHOP ON ETSY</a>
             <p class="feedback-line">Got an idea or a question? <a id="feedbackMail" href="#">Send us feedback</a></p>
     </div>
   </section>
@@ -734,7 +749,7 @@ The Netherlands · KvK: 42061826</p>
 <!-- ============ Sticky buy bar ============ -->
 <div class="buybar" id="buybar" data-screen-label="Sticky buy bar">
   <span class="label">TOTEM FORGE<small>Interactive tokens</small></span>
-    <a class="btn-forge" href="https://www.etsy.com/shop/TotemForgeNL?utm_source=totemforge.nl&amp;utm_medium=website" target="_blank" rel="noopener">ORDER ON ETSY</a>
+    <a class="btn-forge" href="https://www.etsy.com/shop/TotemForgeNL?utm_source=totemforge.nl&amp;utm_medium=website" target="_blank" rel="noopener">SHOP ON ETSY</a>
 </div>
 
 <script>

@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Quick Start Guide — Totem Forge</title>
+<link rel="canonical" href="https://totemforge.nl/start.html">
+<meta name="description" content="Get your Totem Forge set up and running in minutes: unbox, install the app, load art, and start playing.">
+<link rel="icon" type="image/png" href="assets/logo_icon_32.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Totem Forge">
+<meta property="og:title" content="Totem Forge: Quick Start Guide">
+<meta property="og:description" content="Get your Totem Forge set up and running in minutes: unbox, install the app, load art, and start playing.">
+<meta property="og:url" content="https://totemforge.nl/start.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&amp;family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;1,400&amp;display=swap" rel="stylesheet">
+<style>
+  :root {
+    --night: #120a05;
+    --night-2: #1b0f08;
+    --panel: #1e1107;
+    --panel-2: #25160a;
+    --ember: #ff9d3d;
+    --gold: #f0c046;
+    --cream: #f3e7c9;
+    --cream-dim: #b9a482;
+    --cream-dimmer: #8a7659;
+    --red: #a32b14;
+    --red-hot: #c84a1d;
+    --red-deep: #6e1a0a;
+    --line: #3d2814;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--night);
+    color: var(--cream);
+    font-family: "Alegreya Sans", sans-serif;
+    font-size: 17px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  img { display: block; max-width: 100%; }
+  h1, h2, h3 { font-family: "Cinzel", serif; line-height: 1.12; text-wrap: balance; }
+  p { text-wrap: pretty; }
+  .wrap { max-width: 660px; margin: 0 auto; padding: 0 22px; }
+
+  .btn-forge {
+    display: inline-block;
+    font-family: "Cinzel", serif;
+    font-size: 19px;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-decoration: none;
+    text-align: center;
+    color: var(--gold);
+    text-shadow: 0 2px 2px rgba(0,0,0,0.5);
+    background: linear-gradient(180deg, var(--red-hot) 0%, var(--red) 48%, var(--red-deep) 100%);
+    border: 2px solid #d8a437;
+    border-radius: 8px;
+    padding: 14px 36px;
+    box-shadow: 0 5px 0 #471107, 0 10px 24px rgba(0,0,0,0.6);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+  }
+  .btn-forge:hover { transform: translateY(-2px); }
+  .btn-forge:active { transform: translateY(3px); box-shadow: 0 2px 0 #471107, 0 6px 12px rgba(0,0,0,0.5); }
+
+  .kicker {
+    display: block;
+    font-family: "Cinzel", serif;
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--ember);
+  }
+
+  /* ============ Page header ============ */
+  .pagehead {
+    padding: 22px 0 6px;
+    text-align: center;
+  }
+  .pagehead .back {
+    display: inline-block;
+    margin-bottom: 20px;
+    font-family: "Cinzel", serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--cream-dim);
+    text-decoration: none;
+  }
+  .pagehead .back:hover { color: var(--ember); }
+  .pagehead img.logo { height: 44px; width: auto; margin: 0 auto 26px; }
+  .pagehead h1 {
+    font-size: clamp(28px, 8vw, 42px);
+    font-weight: 900;
+    text-transform: uppercase;
+    color: #ffffff;
+  }
+  .pagehead h1 em { font-style: normal; color: var(--gold); }
+
+  /* ============ Steps ============ */
+  .guide { padding: 40px 0 20px; }
+  .step { padding: 26px 0; display: flex; gap: 18px; align-items: flex-start; }
+  .step + .step { border-top: 1px solid #251608; }
+  .step .num {
+    flex-shrink: 0;
+    width: 44px; height: 44px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: "Cinzel", serif;
+    font-size: 19px;
+    font-weight: 900;
+    color: var(--night);
+    background: linear-gradient(180deg, var(--gold), var(--ember));
+    border-radius: 50%;
+    box-shadow: 0 3px 0 #7a4a10, 0 6px 14px rgba(0,0,0,0.5);
+  }
+  .step .body { padding-top: 2px; }
+  .step h2 {
+    font-size: clamp(19px, 5vw, 23px);
+    font-weight: 900;
+    text-transform: uppercase;
+    color: var(--cream);
+  }
+  .step .body p {
+    margin-top: 8px;
+    font-size: 16px;
+    color: var(--cream-dim);
+  }
+  .step .body p b { color: var(--cream); font-weight: 700; }
+  .step .body ul {
+    list-style: none;
+    margin-top: 10px;
+    display: grid;
+    gap: 6px;
+  }
+  .step .body ul li {
+    position: relative;
+    padding-left: 20px;
+    font-size: 15.5px;
+    color: var(--cream-dim);
+  }
+  .step .body ul li::before {
+    content: "";
+    position: absolute; left: 2px; top: 8px;
+    width: 7px; height: 7px;
+    transform: rotate(45deg);
+    background: var(--ember);
+    border-radius: 1px;
+  }
+  .step .body ol {
+    list-style: none;
+    counter-reset: substep;
+    margin-top: 10px;
+    display: grid;
+    gap: 8px;
+  }
+  .step .body ol li {
+    position: relative;
+    padding-left: 26px;
+    font-size: 15.5px;
+    color: var(--cream-dim);
+    counter-increment: substep;
+  }
+  .step .body ol li::before {
+    content: counter(substep) ".";
+    position: absolute;
+    left: 0; top: 0;
+    font-family: "Cinzel", serif;
+    font-weight: 700;
+    color: var(--ember);
+  }
+  .step .body .btn-forge {
+    margin-top: 14px;
+    font-size: 15px;
+    padding: 11px 24px;
+  }
+  .step-video { margin-top: 16px; }
+  .step-video video {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: 14px;
+    border: 1.5px solid #4d3014;
+    background: var(--night-2);
+    box-shadow: 0 14px 34px rgba(0,0,0,0.5);
+  }
+  .step-video.square video { aspect-ratio: 1 / 1; }
+
+  /* ============ Closing ============ */
+  .closing {
+    margin-top: 20px;
+    padding: 40px 0 56px;
+    text-align: center;
+    background:
+      radial-gradient(120% 90% at 50% 110%, rgba(200, 74, 29, 0.22), transparent 60%),
+      var(--night-2);
+    border-top: 1px solid var(--line);
+  }
+  .closing h2 { font-size: clamp(22px, 6vw, 28px); font-weight: 900; text-transform: uppercase; }
+  .closing p { margin: 12px auto 0; max-width: 26em; color: var(--cream-dim); font-size: 15.5px; }
+  .closing p a { color: var(--ember); text-decoration: underline; text-underline-offset: 3px; }
+  .closing .btn-forge { margin-top: 20px; font-size: 15px; padding: 11px 24px; }
+
+  footer { padding: 28px 0 40px; text-align: center; background: var(--night); }
+  footer img { height: 72px; width: auto; margin: 0 auto 10px; }
+  footer p { font-size: 13.5px; color: #7a6448; }
+
+  @media (min-width: 760px) {
+    footer img { height: 36px; }
+  }
+</style>
+</head>
+<body>
+
+<main>
+  <div class="wrap pagehead">
+    <a class="back" href="index.html">&larr; Back to Totem Forge</a>
+    <img class="logo" src="assets/logo-horizontal.png" alt="Totem Forge">
+    <h1>QUICK <em>START</em> GUIDE</h1>
+  </div>
+
+  <section class="guide wrap" aria-label="Setup steps">
+
+    <article class="step">
+      <div class="num">1</div>
+      <div class="body">
+        <h2>Unbox your set</h2>
+        <p>Every Totem Forge set includes:</p>
+        <ul>
+          <li>Your Totems</li>
+          <li>The summoning circle (Forge) also acting as a protective storage</li>
+          <li>A USB-C cable</li>
+          <li>An NFC tag linking to this guide (hidden in the center of the lid)</li>
+        </ul>
+      </div>
+    </article>
+
+    <article class="step">
+      <div class="num">2</div>
+      <div class="body">
+        <h2>Install the app</h2>
+        <p>Download the free Totem Forge companion app from Google Play. <b>Android only</b> for now.</p>
+        <a class="btn-forge" href="https://play.google.com/store/apps/details?id=com.minitoo.android&amp;utm_source=emea_Med" target="_blank" rel="noopener">GET IT ON GOOGLE PLAY</a>
+      </div>
+    </article>
+
+    <article class="step">
+      <div class="num">3</div>
+      <div class="body">
+        <h2>Dock &rarr; Summon &rarr; Play</h2>
+        <ol>
+          <li>Place a totem on the dock base by firmly pressing on it.</li>
+          <li>Connect the base to your phone with the USB-C cable.</li>
+          <li>The app opens automatically &mdash; pick a portrait from your gallery or a curated art pack, and transfer it to the totem.</li>
+          <li>Lift the totem off the base and set it on the table.</li>
+        </ol>
+        <p>The e-ink screen holds the portrait <b>without any power</b>, so it stays visible all session, no phone required nearby.</p>
+        <div class="step-video">
+          <video src="assets/totem-demo.mp4" muted loop playsinline preload="metadata" aria-label="Demo: docking a totem, summoning character art onto it, and playing with it on the table"></video>
+        </div>
+      </div>
+    </article>
+
+    <article class="step">
+      <div class="num">4</div>
+      <div class="body">
+        <h2>Light it up (optional)</h2>
+        <p>Press down on the colored insert to switch on the internal LED. Use it to signal status effects like poisoned or blessed, or just to make a boss moment glow.</p>
+        <div class="step-video square">
+          <video src="assets/totem-use_LED_light.mp4" muted loop playsinline preload="metadata" aria-label="Demo: pressing the colored insert to switch on the totem's LED light"></video>
+        </div>
+        <p>The light runs on a small CR927 battery that lasts several months if turned off between sessions. To replace it: firmly press on the bottom piece of the totem from the side where the inserts are, then remove the insert and take out the LED unit to swap the battery.</p>
+      </div>
+    </article>
+
+    <article class="step">
+      <div class="num">5</div>
+      <div class="body">
+        <h2>Swap for next session</h2>
+        <p>Dock the totem again anytime to load a different character. One set covers an entire campaign, one portrait at a time.</p>
+      </div>
+    </article>
+
+  </section>
+
+  <section class="closing wrap" aria-label="Need more help">
+    <h2>NEED MORE HELP?</h2>
+    <p>Check the <a href="index.html#faq">FAQ on the homepage</a> for common questions, or <a id="feedbackMail" href="#">send us feedback</a> if something isn't covered here.</p>
+    <a class="btn-forge" href="index.html">BACK TO TOTEM FORGE</a>
+  </section>
+</main>
+
+<footer>
+  <img src="assets/logo-horizontal.png" alt="Totem Forge">
+  <p>A project by resuSover · © 2026 Totem Forge. All rights reserved.<br>
+The Netherlands · KvK: 42061826</p>
+</footer>
+
+<script>
+  (function () {
+    var a = document.getElementById("feedbackMail");
+    if (!a) return;
+    var addr = ["sales", "totemforge.nl"].join("@");
+    a.href = "mail" + "to:" + addr;
+  })();
+
+  (function () {
+    var vids = document.querySelectorAll(".step-video video");
+    if (!vids.length) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) {
+      vids.forEach(function (vid) { vid.controls = true; });
+      return;
+    }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          e.target.play().catch(function () { e.target.controls = true; });
+        } else {
+          e.target.pause();
+        }
+      });
+    }, { threshold: 0.4 });
+    vids.forEach(function (vid) { io.observe(vid); });
+  })();
+</script>
+</body>
+</html>
