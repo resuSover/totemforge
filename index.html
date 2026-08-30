@@ -448,6 +448,28 @@
   }
   .buybar .btn-forge { font-size: 15px; padding: 11px 22px; flex-shrink: 0; }
 
+  /* ============ Event announcement bar ============ */
+  .eventbar {
+    background: linear-gradient(180deg, var(--panel-2), var(--night-2));
+    border-bottom: 1px solid var(--line);
+    color: var(--cream-dim);
+    text-align: center;
+    font-size: 13.5px;
+    line-height: 1.45;
+    padding: 9px 20px;
+  }
+  .eventbar p { margin: 0; text-wrap: pretty; }
+  .eventbar p + p { margin-top: 3px; }
+  .eventbar b {
+    font-family: "Cinzel", serif;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+  .eventbar .disc,
+  .eventbar .booth { color: var(--ember); font-weight: 700; }
+
   /* ============ Larger screens: alternate feature layout ============ */
   @media (min-width: 760px) {
     .hero-bg { height: 66svh; }
@@ -459,6 +481,12 @@
 </style>
 </head>
 <body>
+
+<!-- Event bar: remove this block after MainQuestCon (13 Sept 2026) -->
+<div class="eventbar">
+  <p>See Totem Forge at <b>Main Quest Con</b> on 12&ndash;13 Sept</p>
+  <p>and get <span class="disc">Founder Discount: 21% off</span> at <span class="booth">Booth 70</span> behind Play Area</p>
+</div>
 
 <main>
   <!-- ============ Hero ============ -->
