@@ -339,6 +339,7 @@
   .story { padding: 58px 0 12px; }
   .story .head { text-align: center; }
   .story .section-num { display: block; margin-bottom: 14px; }
+  .story h2 { font-size: clamp(25px, 6.6vw, 36px); font-weight: 900; text-transform: uppercase; }
   .story-card {
     border: 1px solid var(--line);
     border-radius: 16px;
@@ -469,6 +470,37 @@
   }
   .eventbar .disc,
   .eventbar .booth { color: var(--ember); font-weight: 700; }
+  .eventbar a { color: var(--cream); text-decoration: underline; text-underline-offset: 3px; }
+  .eventbar a:hover { color: var(--ember); }
+
+  /* ============ Launch (Main Quest Con 2026) ============ */
+  .launch { padding: 58px 0 12px; }
+  .launch .head { text-align: center; }
+  .launch .section-num { display: block; margin-bottom: 14px; }
+  .launch h2 { font-size: clamp(25px, 6.6vw, 36px); font-weight: 900; text-transform: uppercase; }
+  .launch .story-card { background: linear-gradient(180deg, #261407, #170d06); }
+  .launch .story-card img { height: auto; aspect-ratio: 4 / 3; }
+  .launch .story-card .txt { padding-top: 24px; }
+  .launch .stamp {
+    display: inline-block;
+    font-family: "Cinzel", serif;
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--gold);
+    border: 1.5px solid #d8a437;
+    border-radius: 6px;
+    padding: 6px 14px;
+    margin-bottom: 14px;
+    transform: rotate(-2deg);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+  }
+  .launch h3 em { font-style: normal; color: var(--gold); }
+  .launch .story-facts { grid-template-columns: repeat(3, 1fr); }
+  .launch .story-facts b { font-size: clamp(18px, 5.4vw, 24px); }
+  .launch .btn-forge { margin-top: 24px; font-size: 15px; padding: 11px 24px; }
+  .launch .thanks { margin-top: 16px; font-size: 14.5px; color: var(--cream-dimmer); }
 
   /* ============ Larger screens: alternate feature layout ============ */
   @media (min-width: 760px) {
@@ -482,10 +514,10 @@
 </head>
 <body>
 
-<!-- Event bar: remove this block after MainQuestCon (13 Sept 2026) -->
+<!-- Event bar: launch result from Main Quest Con 2026 (12–13 Sept) -->
 <div class="eventbar">
-  <p>See Totem Forge at <b>Main Quest Con</b> on 12&ndash;13 Sept</p>
-  <p>and get <span class="disc">Founder Discount: 21% off</span> at <span class="booth">Booth 70</span> behind Play Area</p>
+  <p><span class="disc">SOLD OUT</span> on both days at <b>Main Quest Con 2026</b></p>
+  <p>Thank you, adventurers! <a href="#launch">See the launch</a> · Next batch on Etsy</p>
 </div>
 
 <main>
@@ -687,11 +719,40 @@
     </div>
   </section>
 
+  <!-- ============ Launch: Main Quest Con 2026 ============ -->
+  <section class="launch" id="launch" data-screen-label="Launch">
+    <div class="wrap">
+      <div class="head">
+        <h2 class="section-num">03 · THE LAUNCH</h2>
+      </div>
+      <div class="story-card">
+        <img src="assets/mainquestcon2026-booth.webp"
+             srcset="assets/mainquestcon2026-booth-720.webp 720w, assets/mainquestcon2026-booth.webp 1200w"
+             sizes="(min-width: 700px) 616px, calc(100vw - 44px)"
+             width="1200" height="900"
+             alt="The Totem Forge booth at Main Quest Con 2026: summoning circle cases, loaded totems on a dungeon tile, and the app demo on a tablet"
+             loading="lazy">
+        <div class="txt">
+          <span class="stamp">Sold out · both days</span>
+          <h3>First public launch: <em>sold out</em></h3>
+          <p style="font-size: 21px">Totem Forge went on sale for the first time at <b>Main Quest Con 2026</b> on 12&ndash;13 September. Every totem we brought found a new table before the doors closed, on both days. Thank you to everyone who stopped by Booth 70, played with the demo set, and took a totem home.</p>
+          <ul class="story-facts">
+            <li><b>1st</b><span>Public launch</span></li>
+            <li><b>2 of 2</b><span>Days sold out</span></li>
+            <li><b>100%</b><span>Stock gone</span></li>
+          </ul>
+          <a class="btn-forge" href="https://www.etsy.com/shop/TotemForgeNL?utm_source=totemforge.nl&amp;utm_medium=website&amp;utm_campaign=mqc2026" target="_blank" rel="noopener">MISSED IT? SHOP ON ETSY</a>
+          <p class="thanks">The next batch is being assembled and painted in the workshop right now.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- ============ Story ============ -->
   <section class="story" data-screen-label="Story">
     <div class="wrap">
       <div class="head">
-        <h2 class="section-num">03 · THE STORY</h2>
+        <h2 class="section-num">04 · THE STORY</h2>
       </div>
       <div class="story-card">
         <img src="assets/photo-totems-table.webp" alt="Totem Forge tokens beside a classic miniature and a d20 on a battle map" loading="lazy">
@@ -717,7 +778,7 @@
   <section class="faq-sec" id="faq" data-screen-label="FAQ">
     <div class="wrap">
       <div class="head">
-        <h2 class="section-num">04 · FAQ</h2>
+        <h2 class="section-num">05 · FAQ</h2>
       </div>
       <div class="faq">
         <details>
