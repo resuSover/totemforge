@@ -363,6 +363,45 @@
   .story-facts b { display: block; font-family: "Cinzel", serif; font-size: clamp(20px, 6vw, 26px); font-weight: 900; color: var(--gold); }
   .story-facts span { font-size: 12.5px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--cream-dimmer); }
 
+  .story-press {
+    margin-top: 22px;
+    padding: 20px 18px 18px;
+    border: 1px solid #d8a437;
+    border-radius: 12px;
+    background: linear-gradient(180deg, #2a1808, #1f1207);
+  }
+  .story-press .stars {
+    display: block;
+    font-size: 20px;
+    letter-spacing: 0.18em;
+    color: var(--gold);
+  }
+  .story-press .stars span { color: #5a4224; }
+  .story-press .press-quote {
+    margin: 10px 0 0;
+    font-style: italic;
+    font-size: 17.5px;
+    color: var(--cream);
+  }
+  .story-press .press-source {
+    margin-top: 12px;
+    font-family: "Cinzel", serif;
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--cream-dimmer);
+  }
+  .story-press .press-source a { color: var(--gold); text-decoration: underline; text-underline-offset: 3px; }
+  .story-press .press-link {
+    display: inline-block;
+    margin-top: 10px;
+    font-size: 14.5px;
+    color: var(--ember);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
   .story-quotes {
     position: relative;
     margin-top: 20px;
@@ -764,6 +803,12 @@
             <li><b>20+</b><span>design iterations</span></li>
             <li><b>40+</b><span>FEEDBACK POINTS IMPLEMENTED</span></li>
           </ul>
+          <div class="story-press">
+            <span class="stars" aria-label="Rated 4 out of 5 stars">★★★★<span>★</span></span>
+            <blockquote class="press-quote">“Feels thoughtfully and lovingly made. An original way of solving a familiar problem.”</blockquote>
+            <p class="press-source">Reviewed by <a href="https://www.brdgmz.nl/2026/08/30/totem-forge-review/" target="_blank" rel="noopener">BRDGMZ</a> · 4/5</p>
+            <a class="press-link" href="https://www.brdgmz.nl/2026/08/30/totem-forge-review/" target="_blank" rel="noopener">Read the full review (in Dutch)</a>
+          </div>
           <div class="story-quotes" id="storyQuotes" aria-label="What playtesters say">
             <blockquote class="on">“Great storage in a form of summoning circle. Easy to use, easy to put in the backpack, looks great.”</blockquote>
             <blockquote>“Vivid totems which stand out!”</blockquote>
