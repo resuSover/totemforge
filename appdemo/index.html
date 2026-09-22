@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TotemForge base</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #dfe1dc; --paper-2: #cfd2cc; --ink: #1d2226; --ink-soft: #545b61; --live: #2f6f5e; --warn: #9a3b2c;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --paper: #1b1f22; --paper-2: #262b2f; --ink: #e3e5e0; --ink-soft: #9aa1a6; --live: #6fbfa6; --warn: #e0806d; }
+  }
+  :root[data-theme="dark"] { --paper: #1b1f22; --paper-2: #262b2f; --ink: #e3e5e0; --ink-soft: #9aa1a6; --live: #6fbfa6; --warn: #e0806d; }
+  *, *::before, *::after { box-sizing: inherit; }
+  html, body { margin: 0; }
+  body {
+    background: var(--paper); color: var(--ink);
+    font: 400 1rem/1.5 "IBM Plex Sans", system-ui, sans-serif;
+    max-width: 34rem; margin: 0 auto; padding: 1.25rem;
+  }
+  h1 { font: 700 1.5rem/1.2 "Chakra Petch", system-ui, sans-serif; margin: .5rem 0 .25rem; }
+  h2 { font: 700 1.15rem/1.2 "Chakra Petch", system-ui, sans-serif; margin: 1.75rem 0 .5rem; }
+  .sub { color: var(--ink-soft); margin: 0 0 1.25rem; font-size: .95rem; }
+  .status { display: flex; align-items: center; gap: .6rem; font-weight: 500; margin-bottom: 1rem; }
+  .dot { width: .75rem; height: .75rem; border-radius: 50%; background: var(--ink-soft); flex: none; }
+  .status.on .dot { background: var(--live); box-shadow: 0 0 0 4px color-mix(in srgb, var(--live) 25%, transparent); }
+  .status.err .dot { background: var(--warn); }
+  button, .filebtn {
+    font: 700 1rem "Chakra Petch", system-ui, sans-serif;
+    border: 2px solid var(--ink); background: transparent; color: var(--ink);
+    padding: .8rem 1rem; border-radius: 10px; cursor: pointer; width: 100%; text-align: center; display: block;
+  }
+  button:focus-visible, .filebtn:focus-within { outline: 3px solid var(--live); outline-offset: 3px; }
+  button:disabled { opacity: .35; cursor: not-allowed; }
+  .primary {
+    margin: 1rem 0; padding: 1.6rem 1rem; font-size: 1.6rem; letter-spacing: .02em;
+    background: var(--ink); color: var(--paper); border-radius: 18px;
+    clip-path: polygon(6% 0, 94% 0, 100% 50%, 94% 100%, 6% 100%, 0 50%);
+  }
+  .primary:active:not(:disabled) { transform: translateY(2px); }
+  .row { display: flex; gap: .6rem; }
+  .row > * { flex: 1; }
+  .row button { font-size: .95rem; }
+  .filebtn input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .stage {
+    margin: 1rem 0 .5rem; padding: .75rem; background: var(--paper-2); border-radius: 12px;
+    display: flex; justify-content: center; align-items: center; min-height: 10rem;
+  }
+  #preview { image-rendering: pixelated; touch-action: none; cursor: grab; background: #fff; box-shadow: 0 0 0 2px var(--ink); }
+  .hint { color: var(--ink-soft); font-size: .88rem; margin: 0; text-align: center; }
+  details { margin-top: 1rem; }
+  summary { cursor: pointer; color: var(--ink-soft); }
+  label { display: block; font-size: .9rem; color: var(--ink-soft); margin-top: .75rem; }
+  input, select {
+    width: 100%; font: inherit; padding: .5rem .6rem; margin-top: .25rem;
+    background: var(--paper-2); color: var(--ink); border: 1px solid var(--ink-soft); border-radius: 8px;
+  }
+  input[type="range"] { padding: 0; accent-color: var(--live); }
+  label.check { display: flex; gap: .5rem; align-items: flex-start; }
+  label.check input { width: auto; margin-top: .3rem; }
+  #log {
+    min-height: 8rem; max-height: 16rem; margin-top: 1.5rem; padding: .75rem;
+    background: var(--paper-2); border-radius: 10px; overflow: auto;
+    font: .82rem/1.45 ui-monospace, "Cascadia Mono", Menlo, monospace; white-space: pre-wrap; word-break: break-word;
+  }
+  .tx { color: var(--live); } .e { color: var(--warn); }
+  @media (prefers-reduced-motion: reduce) { .primary:active { transform: none; } }
+</style>
+</head>
+<body>
+  <h1>TotemForge base</h1>
+  <p class="sub">Plug the base into this phone with a USB-C cable and tap Connect.</p>
+
+  <div id="status" class="status"><span class="dot"></span><span id="statusText">Not connected</span></div>
+
+  <div class="row">
+    <button id="connect">Connect</button>
+    <button id="disconnect" disabled>Disconnect</button>
+  </div>
+
+  <button id="send" class="primary" disabled>Show demo</button>
+
+  <h2>Send your own image</h2>
+  <div class="row">
+    <label class="filebtn">Choose image<input id="file" type="file" accept="image/*"></label>
+    <button id="testPattern">Test pattern</button>
+  </div>
+
+  <div class="stage" id="stage"><canvas id="preview" width="88" height="184" aria-label="Preview of the image as the display will show it"></canvas></div>
+  <p class="hint" id="hint">Pick an image. Drag it to move the crop.</p>
+
+  <label>Zoom
+    <input id="zoom" type="range" min="1" max="4" step="0.01" value="1">
+  </label>
+  <label class="check"><input id="dither" type="checkbox" checked> Dither (smoother shading with the four ink colors)</label>
+
+  <button id="sendImg" class="primary" disabled>Send image</button>
+
+  <details>
+    <summary>Display settings</summary>
+    <label>Panel width in pixels (one memory row)
+      <input id="panelW" type="number" value="184" inputmode="numeric">
+    </label>
+    <label>Panel height in pixels (rows)
+      <input id="panelH" type="number" value="88" inputmode="numeric">
+    </label>
+    <label>Orientation (use the test pattern to check which one is upright)
+      <select id="rot">
+        <option value="0">Landscape (0°)</option>
+        <option value="90" selected>Portrait (90°)</option>
+        <option value="180">Landscape flipped (180°)</option>
+        <option value="270">Portrait flipped (270°)</option>
+      </select>
+    </label>
+    <label>2-bit codes for black, white, yellow, red
+      <input id="codes" value="0,1,2,3" autocomplete="off">
+    </label>
+    <p class="hint" id="sizeInfo" style="text-align:left;margin-top:.5rem"></p>
+  </details>
+
+  <details>
+    <summary>Connection settings</summary>
+    <label>Demo command
+      <input id="cmd" value="show demo" autocomplete="off">
+    </label>
+    <label>Line ending
+      <select id="eol">
+        <option value="\n" selected>LF (\n)</option>
+        <option value="\r\n">CR LF (\r\n)</option>
+        <option value="\r">CR (\r)</option>
+      </select>
+    </label>
+    <label class="check"><input id="anyDevice" type="checkbox"> Show all USB devices in the picker (use if the base doesn't appear)</label>
+    <label>Baud rate (native USB ignores it; avoid 1200, which reboots the RP2040 into the bootloader)
+      <input id="baud" type="number" value="921600" inputmode="numeric">
+    </label>
+  </details>
+
+  <div id="log" aria-live="polite"></div>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const logEl = $('log');
+  const enc = new TextEncoder();
+  const RPI_VID = 0x2E8A;
+  const REFRESH_GUARD_MS = 20000;
+  const FIRMWARE_BYTES = 4048; // ALLSCREEN_BYTES in the firmware
+
+  // Palette index order: black, white, yellow, red
+  const PAL = [[0, 0, 0], [255, 255, 255], [242, 197, 0], [200, 16, 46]];
+
+  let transport = null;
+  let rx = '';
+  let busy = false, busyTimer = null, handshakeTimer = null;
+  let waitReady = null;
+
+  // ---------- UI helpers ----------
+  function log(msg, cls) {
+    const line = document.createElement('div');
+    if (cls) line.className = cls;
+    line.textContent = msg;
+    logEl.appendChild(line);
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+  function setStatus(text, state) {
+    $('statusText').textContent = text;
+    $('status').className = 'status' + (state ? ' ' + state : '');
+  }
+  function refreshButtons() {
+    $('connect').disabled = !!transport;
+    $('disconnect').disabled = !transport;
+    $('send').disabled = !transport || busy;
+    $('sendImg').disabled = !transport || busy || !source;
+  }
+  function setBusy(on, label) {
+    busy = on;
+    clearTimeout(busyTimer);
+    if (on) busyTimer = setTimeout(() => { setBusy(false); setStatus('No reply from the base', 'err'); }, REFRESH_GUARD_MS);
+    $('send').textContent = on && label === 'demo' ? 'Refreshing…' : 'Show demo';
+    $('sendImg').textContent = on && label === 'img' ? 'Sending…' : 'Send image';
+    refreshButtons();
+  }
+
+  // ---------- Firmware protocol ----------
+  function onLine(line) {
+    if (!line) return;
+    const isErr = line.startsWith('ERROR');
+    log('← ' + line, isErr ? 'e' : undefined);
+    if (line === 'READY' && waitReady) { waitReady(); waitReady = null; return; }
+    if (line.startsWith('CONNECTED:')) {
+      clearTimeout(handshakeTimer);
+      setStatus('Connected to TotemForge base (v' + line.split(':')[1] + ')', 'on');
+    } else if (line === 'REFRESHING' || line.startsWith('Displaying demo')) {
+      busy = true;
+      setStatus('Refreshing display…', 'on');
+    } else if (line === 'OK') {
+      setBusy(false);
+      setStatus('Display updated', 'on');
+    } else if (line.startsWith('BUSY')) {
+      setStatus('Display still refreshing, try again in a moment', 'on');
+    } else if (isErr) {
+      setBusy(false);
+      setStatus(line.replace(/^ERROR:\s*/, ''), 'err');
+    }
+  }
+  function onData(text) {
+    rx += text;
+    let i;
+    while ((i = rx.indexOf('\n')) >= 0) {
+      onLine(rx.slice(0, i).replace(/\r$/, '').trim());
+      rx = rx.slice(i + 1);
+    }
+  }
+  async function sendLine(cmd) {
+    const eol = JSON.parse('"' + $('eol').value + '"');
+    await transport.write(enc.encode(cmd + eol));
+    log('→ ' + cmd, 'tx');
+  }
+
+  // ---------- Web Serial ----------
+  async function connectSerial() {
+    const opts = $('anyDevice').checked ? {} : { filters: [{ usbVendorId: RPI_VID }] };
+    const port = await navigator.serial.requestPort(opts);
+    await port.open({ baudRate: Number($('baud').value) || 921600, bufferSize: 8192 });
+    try { await port.setSignals({ dataTerminalReady: true, requestToSend: true }); } catch {}
+    const writer = port.writable.getWriter();
+    const reader = port.readable.getReader();
+    const dec = new TextDecoder();
+    let alive = true;
+    (async () => {
+      try {
+        while (alive) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          if (value) onData(dec.decode(value, { stream: true }));
+        }
+      } catch (e) { if (alive) lost(e); }
+    })();
+    return {
+      name: 'Web Serial',
+      write: bytes => writer.write(bytes),
+      close: async () => {
+        alive = false;
+        try { await reader.cancel(); } catch {}
+        try { reader.releaseLock(); writer.releaseLock(); } catch {}
+        await port.close();
+      }
+    };
+  }
+
+  // ---------- WebUSB CDC-ACM fallback ----------
+  async function connectUsb() {
+    const opts = { filters: $('anyDevice').checked ? [] : [{ vendorId: RPI_VID }] };
+    const device = await navigator.usb.requestDevice(opts);
+    await device.open();
+    if (device.configuration === null) await device.selectConfiguration(1);
+    const ifaces = device.configuration.interfaces;
+    const comm = ifaces.find(i => i.alternates[0].interfaceClass === 0x02);
+    const data = ifaces.find(i => i.alternates[0].interfaceClass === 0x0A);
+    if (!data) throw new Error('No USB serial interface found on this device. Check that the base firmware is flashed.');
+    if (comm) { try { await device.claimInterface(comm.interfaceNumber); } catch {} }
+    await device.claimInterface(data.interfaceNumber);
+    const eps = data.alternates[0].endpoints;
+    const epOut = eps.find(e => e.direction === 'out' && e.type === 'bulk');
+    const epIn = eps.find(e => e.direction === 'in' && e.type === 'bulk');
+    const ctrlIdx = comm ? comm.interfaceNumber : data.interfaceNumber;
+    const baud = Number($('baud').value) || 921600;
+    const lc = new Uint8Array([baud & 0xff, (baud >> 8) & 0xff, (baud >> 16) & 0xff, (baud >> 24) & 0xff, 0, 0, 8]);
+    try { await device.controlTransferOut({ requestType: 'class', recipient: 'interface', request: 0x20, value: 0, index: ctrlIdx }, lc); } catch {}
+    try { await device.controlTransferOut({ requestType: 'class', recipient: 'interface', request: 0x22, value: 0x03, index: ctrlIdx }); } catch {}
+    const dec = new TextDecoder();
+    let alive = true;
+    (async () => {
+      while (alive && epIn) {
+        try {
+          const r = await device.transferIn(epIn.endpointNumber, 64);
+          if (r.data && r.data.byteLength) onData(dec.decode(r.data, { stream: true }));
+        } catch (e) { if (alive) lost(e); break; }
+      }
+    })();
+    return {
+      name: 'WebUSB',
+      write: bytes => device.transferOut(epOut.endpointNumber, bytes),
+      close: async () => {
+        alive = false;
+        try { await device.releaseInterface(data.interfaceNumber); } catch {}
+        await device.close();
+      }
+    };
+  }
+
+  function lost(e) {
+    log('Connection lost: ' + (e?.message || e), 'e');
+    transport = null; rx = '';
+    clearTimeout(handshakeTimer);
+    setBusy(false);
+    setStatus('Connection lost. Check the cable and connect again.', 'err');
+  }
+
+  $('connect').addEventListener('click', async () => {
+    setStatus('Connecting…');
+    try {
+      if ('serial' in navigator) transport = await connectSerial();
+      else if ('usb' in navigator) transport = await connectUsb();
+      else throw new Error('This browser has neither Web Serial nor WebUSB. Use Chrome on Android over HTTPS.');
+      rx = '';
+      refreshButtons();
+      setStatus('Connected via ' + transport.name + ', waiting for the base…', 'on');
+      log('Connected via ' + transport.name);
+      handshakeTimer = setTimeout(() => setStatus('Connected, but the base did not answer the handshake', 'err'), 2500);
+      await sendLine('connect');
+    } catch (e) {
+      transport = null;
+      refreshButtons();
+      if (e.name === 'NotFoundError') {
+        setStatus('Not connected');
+        log('No device picked. If the base wasn\'t listed, turn on "Show all USB devices" in Connection settings.');
+        return;
+      }
+      setStatus('Connection failed', 'err');
+      log(e.message, 'e');
+      if (e.name === 'SecurityError') log('The page must be served over HTTPS (or localhost).', 'e');
+    }
+  });
+
+  $('disconnect').addEventListener('click', async () => {
+    try { await transport?.close(); } catch {}
+    transport = null; rx = '';
+    clearTimeout(handshakeTimer);
+    setBusy(false);
+    setStatus('Not connected');
+    log('Disconnected');
+  });
+
+  $('send').addEventListener('click', async () => {
+    if (!transport || busy) return;
+    try { setBusy(true, 'demo'); await sendLine($('cmd').value.trim() || 'show demo'); }
+    catch (e) { lost(e); }
+  });
+
+  // ---------- Image: crop, quantize, pack ----------
+  const preview = $('preview');
+  const pctx = preview.getContext('2d');
+  const work = document.createElement('canvas');
+  const wctx = work.getContext('2d', { willReadFrequently: true });
+  let source = null, srcW = 0, srcH = 0;
+  let panX = 0, panY = 0;
+  let lastIdx = null;
+
+  function panel() {
+    const W = Math.max(4, parseInt($('panelW').value) || 184);
+    const H = Math.max(1, parseInt($('panelH').value) || 88);
+    const rot = parseInt($('rot').value) || 0;
+    const [vw, vh] = rot % 180 === 0 ? [W, H] : [H, W];
+    return { W, H, rot, vw, vh };
+  }
+  function codes() {
+    const c = $('codes').value.split(/[,\s]+/).map(n => parseInt(n)).filter(n => !isNaN(n));
+    return c.length === 4 ? c.map(n => n & 3) : [0, 1, 2, 3];
+  }
+
+  function nearest(r, g, b) {
+    let best = 0, bd = Infinity;
+    for (let k = 0; k < 4; k++) {
+      const p = PAL[k];
+      const dr = r - p[0], dg = g - p[1], db = b - p[2];
+      const d = 0.3 * dr * dr + 0.59 * dg * dg + 0.11 * db * db;
+      if (d < bd) { bd = d; best = k; }
+    }
+    return best;
+  }
+
+  function quantize(img, w, h, dither) {
+    const buf = new Float32Array(w * h * 3);
+    for (let i = 0, j = 0; i < img.length; i += 4, j += 3) {
+      const a = img[i + 3] / 255; // flatten transparency onto white
+      buf[j] = img[i] * a + 255 * (1 - a);
+      buf[j + 1] = img[i + 1] * a + 255 * (1 - a);
+      buf[j + 2] = img[i + 2] * a + 255 * (1 - a);
+    }
+    const idx = new Uint8Array(w * h);
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        const p = y * w + x, j = p * 3;
+        const r = buf[j], g = buf[j + 1], b = buf[j + 2];
+        const k = nearest(r, g, b);
+        idx[p] = k;
+        if (!dither) continue;
+        const er = r - PAL[k][0], eg = g - PAL[k][1], eb = b - PAL[k][2];
+        const spread = (dx, dy, f) => {
+          const xx = x + dx, yy = y + dy;
+          if (xx < 0 || xx >= w || yy >= h) return;
+          const q = (yy * w + xx) * 3;
+          buf[q] += er * f; buf[q + 1] += eg * f; buf[q + 2] += eb * f;
+        };
+        spread(1, 0, 7 / 16); spread(-1, 1, 3 / 16); spread(0, 1, 5 / 16); spread(1, 1, 1 / 16);
+      }
+    }
+    return idx;
+  }
+
+  function fitPreview() {
+    const { vw, vh } = panel();
+    const box = $('stage').clientWidth - 24;
+    const scale = Math.max(1, Math.min(box / vw, (window.innerHeight * 0.45) / vh));
+    preview.style.width = Math.round(vw * scale) + 'px';
+    preview.style.height = Math.round(vh * scale) + 'px';
+  }
+
+  function render() {
+    const { W, H, vw, vh } = panel();
+    work.width = vw; work.height = vh;
+    preview.width = vw; preview.height = vh;
+    wctx.fillStyle = '#fff';
+    wctx.fillRect(0, 0, vw, vh);
+    if (source) {
+      const zoom = parseFloat($('zoom').value) || 1;
+      const s = (containFit ? Math.min(vw / srcW, vh / srcH) : Math.max(vw / srcW, vh / srcH)) * zoom;
+      const dw = srcW * s, dh = srcH * s;
+      const mx = Math.abs(dw - vw) / 2, my = Math.abs(dh - vh) / 2;
+      panX = Math.max(-mx, Math.min(mx, panX));
+      panY = Math.max(-my, Math.min(my, panY));
+      wctx.imageSmoothingEnabled = true;
+      wctx.imageSmoothingQuality = 'high';
+      wctx.drawImage(source, (vw - dw) / 2 + panX, (vh - dh) / 2 + panY, dw, dh);
+    }
+    const img = wctx.getImageData(0, 0, vw, vh);
+    lastIdx = quantize(img.data, vw, vh, $('dither').checked);
+    const out = pctx.createImageData(vw, vh);
+    for (let p = 0; p < lastIdx.length; p++) {
+      const c = PAL[lastIdx[p]];
+      out.data[p * 4] = c[0]; out.data[p * 4 + 1] = c[1]; out.data[p * 4 + 2] = c[2]; out.data[p * 4 + 3] = 255;
+    }
+    pctx.putImageData(out, 0, 0);
+    fitPreview();
+    const bytes = (W * H) / 4;
+    $('sizeInfo').textContent = `${W} × ${H} pixels at 2 bits each = ${bytes} bytes + 2 bytes CRC. ` +
+      (bytes === FIRMWARE_BYTES ? 'Matches the firmware.' : `The firmware expects ${FIRMWARE_BYTES} bytes, so this size won't be accepted.`);
+    $('hint').textContent = source ? `Crop is ${vw} × ${vh} pixels. Drag to move, use Zoom to crop tighter.` : 'Pick an image. Drag it to move the crop.';
+  }
+
+  // CRC-CCITT (poly 0x1021, init 0xFFFF), same as the firmware
+  function crc16(data) {
+    let crc = 0xFFFF;
+    for (let i = 0; i < data.length; i++) {
+      crc ^= data[i] << 8;
+      for (let j = 0; j < 8; j++) crc = (crc & 0x8000) ? ((crc << 1) ^ 0x1021) & 0xFFFF : (crc << 1) & 0xFFFF;
+    }
+    return crc;
+  }
+
+  // Walk the panel in memory order (row by row), 4 pixels per byte, first pixel in the top 2 bits
+  function pack() {
+    const { W, H, rot, vw, vh } = panel();
+    const map = codes();
+    const n = (W * H) >> 2;
+    const out = new Uint8Array(n + 2);
+    for (let py = 0; py < H; py++) {
+      for (let px = 0; px < W; px++) {
+        let x, y;
+        if (rot === 0) { x = px; y = py; }
+        else if (rot === 90) { x = py; y = vh - 1 - px; }
+        else if (rot === 180) { x = vw - 1 - px; y = vh - 1 - py; }
+        else { x = vw - 1 - py; y = px; }
+        const i = py * W + px;
+        out[i >> 2] |= map[lastIdx[y * vw + x]] << (6 - 2 * (i & 3));
+      }
+    }
+    const crc = crc16(out.subarray(0, n));
+    out[n] = crc >> 8;
+    out[n + 1] = crc & 0xFF;
+    return out;
+  }
+
+  $('sendImg').addEventListener('click', async () => {
+    if (!transport || busy || !source) return;
+    const { W, H } = panel();
+    if ((W * H) / 4 !== FIRMWARE_BYTES) {
+      log(`Image is ${(W * H) / 4} bytes but the firmware expects ${FIRMWARE_BYTES}. Check Display settings.`, 'e');
+      return;
+    }
+    const payload = pack();
+    setBusy(true, 'img');
+    setStatus('Sending image…', 'on');
+    try {
+      const ready = new Promise((res, rej) => {
+        waitReady = res;
+        setTimeout(() => rej(new Error('The base did not answer READY')), 3000);
+      });
+      await sendLine('img');
+      await ready;
+      const t0 = performance.now();
+      await transport.write(payload);
+      log(`→ ${payload.length} bytes in ${Math.round(performance.now() - t0)} ms`, 'tx');
+    } catch (e) {
+      waitReady = null;
+      setBusy(false);
+      setStatus(e.message, 'err');
+      log(e.message, 'e');
+    }
+  });
+
+  let containFit = false;
+  function loadSource(img, w, h, contain = false) {
+    source = img; srcW = w; srcH = h; containFit = contain;
+    panX = 0; panY = 0;
+    $('zoom').value = 1;
+    render();
+    refreshButtons();
+  }
+
+  $('file').addEventListener('change', async e => {
+    const f = e.target.files[0];
+    if (!f) return;
+    try {
+      const bmp = await createImageBitmap(f);
+      loadSource(bmp, bmp.width, bmp.height);
+      log('Loaded ' + f.name + ` (${bmp.width} × ${bmp.height})`);
+    } catch {
+      log('Could not read that image. Try a JPG or PNG.', 'e');
+    }
+    e.target.value = '';
+  });
+
+  // TotemForge logo, 88 x 184, already in the four ink colors
+  const TEST_PATTERN = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFgAAAC4CAYAAABn0Su2AAAAAXNSR0IArs4c6QAAAARzQklUCAgICHwIZIgAAAVjSURBVHic7Z3Pad1AEIfHcUBgcBlpwDc3YEgZubkBV5EGfHMZD9yAb27AZTwI+PBILhEIeaWd/fObnV39PgjEz9Jq9Wk0Oyv5SVci8lcIjG+tOzA6FAyGgsFQMBgKBkPBYCgYDAWDoWAwFAyGgsFQMBgKBkPBYCgYDAWDoWAwFAyGgsFQMBgKBkPBYCgYDAWDoWAwFAyGgsFQMBgKBkPBYCgYDAWDoWAw31MWPp/P6mVvb29VbYSWy9mOZp31tpbrbPU3ZbkQsAgO7XCKOC+U9jlbcOxI7kWL5vOZm4+n3Z/3tq9ddqsfNQLiSgq+BJNy6qyXLVk3toymzdA66/Viv9dgMsiFBMV2pBVzX2r1yU0V4VGySHrEroEL3utsaeeXpOTbEKG+1OgfVHBqVJZE8fXd85e21v9i1DzgM2YpYqvziJ0qITRGlOAmB3ui5kFPmsmlsizHzudz8awtddseMI3gmEwvUmoCF4ya4/eCeQ6uXciv2/WGieDYdYlRo1cEPMgtWV9/WH6OYCuirQ8my7QIpamn6GraUbi8P4rI19miBgoGwxQBhoLBUDCYamXaaZo2f/fz87PWZrqjyiC3J9cjlge8WHBvcnPJPSjMwWAoGAwFgykSfJT8WwIjGAwFg6FgMNmCj5R/SyYmZnc0Uhlleu1K8ChSl7gQPKLYmaaCRxY706yKOIJckUaCjyJXJDNFlJRoHuTOd4m15NxNnjGNYA9yret3M8Ee5IqIPLz9Mt3eoabKqamhBiaCW0fvaZqayBVxFMGX90dIfry8P5qnhSUuZnJzdD28/ZLL/89KRu5W0RrCheAQa0mv9y+7qeY0TU0jdQu3gtcso7sn3OTgUaFgMBQMxoXgkorBOy4Ej4xJFXGapuazuVRqnVXdlGkWIFJV1p+v5k5pY1HcagaGHAMOHcEWg6upYC+52LJqMY/glpJblIOuyjSUgNf7l6y2U573s4V5BFtHb67YWpgI7iUlIJ45ARHc20CGfJhHsWAPMte83r+olrN4SkqWYI9Sl2j6V+NZyBqGm2jEotf62T6uyrQaU2VvZ1eTiYbHm5MooIK9yWzx6K+qglv/PYLHOyPZglvL7IWsQY5y9biqIkaEgsEcRnCrh4cOI9hjBSGSWUXU2JmjDJTNrkVsHaTRxLtLEdd3z25P9xzcCZ6pKbnl07HdCh4F14K1Uay9g9GCokGudECKCdS27+0a8JKmF3tCbczSR6km3N0yGkXsjOscPALDC279ApNswSNNBpB0H8HeD3T3gr3TtWDv0SvSseAe5IpUeki+Ze1q/fe+pS+X4qt2wHSbInqBgsFQMBgKBlNdsKaiSP1qVOlXqUraKN12chWh3Zj2JdXa1wJrlte2E3uJ6xY5206O4NovHU2NjpzoXxLqP/JFqsUX3LWdW7+kOlXsep35/ylngLavNYWbDHKxUz3lFL35eIq2Hfq81bubzauIrR3VSr6+e47mUC9yRQwE772/vtaO77XT+q3jUMGpF4E0Ubwe5HIrAiuyLvbEdmLe6T0RW+1t5ebQwBiTu/f71AOTeyZ0M5PzlFdTMC3TtJOPEDcfT/Lnx+9oX2qkiG7KtNSO7i2/vtCuzdetgaeIvXo3Z7IRW9/boGeeg7d2uOYsy5NkE8Gx3FuS87QHbPhvGeVMjTVt7bWXe+CWT5sqffJUsuDakZAroaZkZHSbXq6sPVVerl8yXUbW1LxtD6abmVyvUDAYCgZDwWAoGAwFg6FgMBQMhoLBUDAYCgZDwWAoGAwFg6FgMBQMhoLBUDAYCgZDwWAoGAwFg6FgMBQMhoLBUDAYCgZDwWAoGAwFg6FgMBQMhoLB/AMWA0GcDQptDwAAAABJRU5ErkJggg==';
+  $('testPattern').addEventListener('click', () => {
+    const img = new Image();
+    img.onload = () => {
+      $('dither').checked = false;
+      loadSource(img, img.naturalWidth, img.naturalHeight, true);
+      log('Test pattern: TotemForge logo. Upright with TOTEM at the top means the orientation is right.');
+    };
+    img.src = TEST_PATTERN;
+  });
+
+  // Drag to pan
+  let drag = null;
+  preview.addEventListener('pointerdown', e => {
+    if (!source) return;
+    drag = { x: e.clientX, y: e.clientY, px: panX, py: panY };
+    preview.setPointerCapture(e.pointerId);
+    preview.style.cursor = 'grabbing';
+  });
+  preview.addEventListener('pointermove', e => {
+    if (!drag) return;
+    const k = preview.width / preview.clientWidth;
+    panX = drag.px + (e.clientX - drag.x) * k;
+    panY = drag.py + (e.clientY - drag.y) * k;
+    render();
+  });
+  const endDrag = () => { drag = null; preview.style.cursor = 'grab'; };
+  preview.addEventListener('pointerup', endDrag);
+  preview.addEventListener('pointercancel', endDrag);
+
+  ['zoom', 'dither', 'panelW', 'panelH', 'rot', 'codes'].forEach(id => $(id).addEventListener('input', render));
+  window.addEventListener('resize', fitPreview);
+
+  render();
+  refreshButtons();
+
+  if (!('serial' in navigator) && !('usb' in navigator)) {
+    setStatus('Browser not supported', 'err');
+    log('Web Serial and WebUSB are unavailable here. Open this page in Chrome on Android over HTTPS.', 'e');
+  } else if (!window.isSecureContext) {
+    setStatus('Needs HTTPS', 'err');
+    log('Serve this page over HTTPS, otherwise Chrome blocks USB access.', 'e');
+  }
+})();
+</script>
+</body>
+</html>
