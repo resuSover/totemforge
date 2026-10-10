@@ -48,13 +48,17 @@
   .row { display: flex; gap: .6rem; }
   .row > * { flex: 1; }
   .row button { font-size: .95rem; }
-  .row .primary { font-size: 1.1rem; }
   .filebtn { margin-top: 0; }
   .filebtn input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .studio { display: grid; grid-template-columns: auto 1fr; gap: .9rem; margin: 1rem 0 .4rem; }
   .stage {
-    margin: 1rem 0 .4rem; padding: .75rem; background: var(--paper-2); border-radius: 12px;
+    padding: .75rem; background: var(--paper-2); border-radius: 12px;
     display: flex; justify-content: center; align-items: center;
   }
+  .controls { display: flex; flex-direction: column; gap: .6rem; min-width: 0; }
+  .controls label { margin-top: 0; }
+  .controls button, .controls .filebtn { font-size: .95rem; padding: .65rem .75rem; }
+  .controls .primary { margin-top: auto; font-size: 1.1rem; padding: .9rem .75rem; }
   #preview { image-rendering: pixelated; touch-action: none; cursor: grab; background: #fff; box-shadow: 0 0 0 2px var(--ink); }
   .hint { color: var(--ink-soft); font-size: .88rem; margin: 0; text-align: center; }
   label { display: block; font-size: .9rem; color: var(--ink-soft); margin-top: .75rem; }
@@ -72,7 +76,6 @@
   }
   #log:empty { display: none; }
   .tx { color: var(--live); } .e { color: var(--warn); } .w { color: var(--caution); }
-  .actions { margin-top: 1rem; }
   .fw { margin-top: 2rem; padding: 1rem 1.1rem 1.1rem; background: var(--paper-2); border-radius: 14px; border-top: 4px solid var(--ink-soft); }
   .fw h2 { margin-top: 0; }
   .fw button { background: var(--paper); }
@@ -93,22 +96,20 @@
     <button id="disconnect" disabled>Disconnect</button>
   </div>
 
-  <div class="stage" id="stage"><canvas id="preview" width="88" height="184" aria-label="Preview of the image as the display will show it"></canvas></div>
+  <div class="studio">
+    <div class="stage" id="stage"><canvas id="preview" width="88" height="184" aria-label="Preview of the image as the display will show it"></canvas></div>
+    <div class="controls">
+      <label class="filebtn">Choose image<input id="file" type="file" accept="image/*"></label>
+      <button id="testPattern">Logo</button>
+      <label>Zoom
+        <input id="zoom" type="range" min="1" max="4" step="0.01" value="1">
+      </label>
+      <label class="check"><input id="dither" type="checkbox"> Dither</label>
+      <button id="sendImg" class="primary" disabled>Send image</button>
+      <button id="send" disabled>Show demo</button>
+    </div>
+  </div>
   <p class="hint" id="hint"></p>
-
-  <div class="row actions">
-    <label class="filebtn">Choose image<input id="file" type="file" accept="image/*"></label>
-    <button id="testPattern">Logo</button>
-  </div>
-  <label>Zoom
-    <input id="zoom" type="range" min="1" max="4" step="0.01" value="1">
-  </label>
-  <label class="check"><input id="dither" type="checkbox"> Dither (smoother shading with the four ink colors)</label>
-
-  <div class="row actions">
-    <button id="sendImg" class="primary" disabled>Send image</button>
-    <button id="send" disabled>Show demo</button>
-  </div>
 
   <section class="fw" aria-labelledby="fwTitle">
     <h2 id="fwTitle">Firmware update</h2>
@@ -519,7 +520,7 @@
   }
 
   function fitPreview() {
-    const box = $('stage').clientWidth - 24;
+    const box = document.querySelector('.studio').clientWidth * 0.45 - 24; // leave room for the controls
     const scale = Math.max(1, Math.min(box / W, (window.innerHeight * 0.45) / H) / 2);
     preview.style.width = Math.round(W * scale) + 'px';
     preview.style.height = Math.round(H * scale) + 'px';
@@ -596,6 +597,7 @@
     source = img; srcW = w; srcH = h; containFit = contain;
     panX = 0; panY = 0;
     $('zoom').value = 1;
+    $('dither').checked = !contain; // dither photos, not the logo (already in the four ink colors)
     $('hint').textContent = hint;
     render();
     refreshButtons();
