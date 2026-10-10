@@ -8,15 +8,15 @@
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --paper: #dfe1dc; --paper-2: #cfd2cc; --ink: #1d2226; --ink-soft: #545b61; --live: #2f6f5e; --warn: #9a3b2c;
+    --paper: #dfe1dc; --paper-2: #cfd2cc; --ink: #1d2226; --ink-soft: #545b61; --live: #2f6f5e; --warn: #9a3b2c; --caution: #a87b00;
     box-sizing: border-box;
     padding-top: env(safe-area-inset-top, 0px);
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
   @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) { --paper: #1b1f22; --paper-2: #262b2f; --ink: #e3e5e0; --ink-soft: #9aa1a6; --live: #6fbfa6; --warn: #e0806d; }
+    :root:not([data-theme="light"]) { --paper: #1b1f22; --paper-2: #262b2f; --ink: #e3e5e0; --ink-soft: #9aa1a6; --live: #6fbfa6; --warn: #e0806d; --caution: #e0b84a; }
   }
-  :root[data-theme="dark"] { --paper: #1b1f22; --paper-2: #262b2f; --ink: #e3e5e0; --ink-soft: #9aa1a6; --live: #6fbfa6; --warn: #e0806d; }
+  :root[data-theme="dark"] { --paper: #1b1f22; --paper-2: #262b2f; --ink: #e3e5e0; --ink-soft: #9aa1a6; --live: #6fbfa6; --warn: #e0806d; --caution: #e0b84a; }
   *, *::before, *::after { box-sizing: inherit; }
   html, body { margin: 0; }
   body {
@@ -31,6 +31,7 @@
   .dot { width: .75rem; height: .75rem; border-radius: 50%; background: var(--ink-soft); flex: none; }
   .status.on .dot { background: var(--live); box-shadow: 0 0 0 4px color-mix(in srgb, var(--live) 25%, transparent); }
   .status.err .dot { background: var(--warn); }
+  .status.warn .dot { background: var(--caution); box-shadow: 0 0 0 4px color-mix(in srgb, var(--caution) 25%, transparent); }
   button, .filebtn {
     font: 700 1rem "Chakra Petch", system-ui, sans-serif;
     border: 2px solid var(--ink); background: transparent; color: var(--ink);
@@ -39,23 +40,23 @@
   button:focus-visible, .filebtn:focus-within { outline: 3px solid var(--live); outline-offset: 3px; }
   button:disabled { opacity: .35; cursor: not-allowed; }
   .primary {
-    margin: 1rem 0; padding: 1.6rem 1rem; font-size: 1.6rem; letter-spacing: .02em;
-    background: var(--ink); color: var(--paper); border-radius: 18px;
+    padding: .9rem 1rem; font-size: 1.15rem; letter-spacing: .02em;
+    background: var(--ink); color: var(--paper); border-radius: 14px;
     clip-path: polygon(6% 0, 94% 0, 100% 50%, 94% 100%, 6% 100%, 0 50%);
   }
   .primary:active:not(:disabled) { transform: translateY(2px); }
   .row { display: flex; gap: .6rem; }
   .row > * { flex: 1; }
   .row button { font-size: .95rem; }
+  .row .primary { font-size: 1.1rem; }
+  .filebtn { margin-top: 0; }
   .filebtn input { position: absolute; opacity: 0; width: 1px; height: 1px; }
   .stage {
-    margin: 1rem 0 .5rem; padding: .75rem; background: var(--paper-2); border-radius: 12px;
-    display: flex; justify-content: center; align-items: center; min-height: 10rem;
+    margin: 1rem 0 .4rem; padding: .75rem; background: var(--paper-2); border-radius: 12px;
+    display: flex; justify-content: center; align-items: center;
   }
   #preview { image-rendering: pixelated; touch-action: none; cursor: grab; background: #fff; box-shadow: 0 0 0 2px var(--ink); }
   .hint { color: var(--ink-soft); font-size: .88rem; margin: 0; text-align: center; }
-  details { margin-top: 1rem; }
-  summary { cursor: pointer; color: var(--ink-soft); }
   label { display: block; font-size: .9rem; color: var(--ink-soft); margin-top: .75rem; }
   input, select {
     width: 100%; font: inherit; padding: .5rem .6rem; margin-top: .25rem;
@@ -65,84 +66,66 @@
   label.check { display: flex; gap: .5rem; align-items: flex-start; }
   label.check input { width: auto; margin-top: .3rem; }
   #log {
-    min-height: 8rem; max-height: 16rem; margin-top: 1.5rem; padding: .75rem;
+    min-height: 4rem; max-height: 12rem; margin-top: 1.25rem; padding: .75rem;
     background: var(--paper-2); border-radius: 10px; overflow: auto;
     font: .82rem/1.45 ui-monospace, "Cascadia Mono", Menlo, monospace; white-space: pre-wrap; word-break: break-word;
   }
-  .tx { color: var(--live); } .e { color: var(--warn); }
-  .steps { padding-left: 1.25rem; margin: .5rem 0 0; }
-  .steps li { margin-bottom: 1rem; }
-  .steps p { margin: 0 0 .5rem; }
-  .note { color: var(--ink-soft); font-size: .88rem; margin: 0; }
+  #log:empty { display: none; }
+  .tx { color: var(--live); } .e { color: var(--warn); } .w { color: var(--caution); }
+  .actions { margin-top: 1rem; }
+  .fw { margin-top: 2rem; padding: 1rem 1.1rem 1.1rem; background: var(--paper-2); border-radius: 14px; border-top: 4px solid var(--ink-soft); }
+  .fw h2 { margin-top: 0; }
+  .fw button { background: var(--paper); }
+  .steps { padding-left: 1.25rem; margin: .75rem 0 0; }
+  .steps li { margin-bottom: .9rem; }
+  .steps p { margin: 0 0 .4rem; font-size: .92rem; }
+  .note { color: var(--ink-soft); font-size: .85rem; margin: 0; }
   @media (prefers-reduced-motion: reduce) { .primary:active { transform: none; } }
 </style>
 </head>
 <body>
   <h1>TotemForge base</h1>
-  <p class="sub">Plug the base into this device with a USB-C cable and click Connect. Works in Chrome or Edge on a computer or Android phone.</p>
+  <p class="sub">Connect the base with a USB-C cable. Works in Chrome or Edge on a computer or Android phone.</p>
 
   <div id="status" class="status"><span class="dot"></span><span id="statusText">Not connected</span></div>
-
   <div class="row">
     <button id="connect">Connect</button>
     <button id="disconnect" disabled>Disconnect</button>
   </div>
 
-  <button id="send" class="primary" disabled>Show demo</button>
-
-  <h2>Send your own image</h2>
-  <div class="row">
-    <label class="filebtn">Choose image<input id="file" type="file" accept="image/*"></label>
-    <button id="testPattern">Test pattern</button>
-  </div>
-
   <div class="stage" id="stage"><canvas id="preview" width="88" height="184" aria-label="Preview of the image as the display will show it"></canvas></div>
-  <p class="hint" id="hint">Pick an image. Drag it to move the crop.</p>
+  <p class="hint" id="hint"></p>
 
+  <div class="row actions">
+    <label class="filebtn">Choose image<input id="file" type="file" accept="image/*"></label>
+    <button id="testPattern">Logo</button>
+  </div>
   <label>Zoom
     <input id="zoom" type="range" min="1" max="4" step="0.01" value="1">
   </label>
-  <label class="check"><input id="dither" type="checkbox" checked> Dither (smoother shading with the four ink colors)</label>
+  <label class="check"><input id="dither" type="checkbox"> Dither (smoother shading with the four ink colors)</label>
 
-  <button id="sendImg" class="primary" disabled>Send image</button>
+  <div class="row actions">
+    <button id="sendImg" class="primary" disabled>Send image</button>
+    <button id="send" disabled>Show demo</button>
+  </div>
 
-  <details>
-    <summary>Display settings</summary>
-    <label>Panel width in pixels (one memory row)
-      <input id="panelW" type="number" value="88" inputmode="numeric">
-    </label>
-    <label>Panel height in pixels (rows)
-      <input id="panelH" type="number" value="184" inputmode="numeric">
-    </label>
-    <label>Orientation (use the test pattern to check which one is upright)
-      <select id="rot">
-        <option value="0" selected>Portrait (0°)</option>
-        <option value="90">Landscape (90°)</option>
-        <option value="180">Portrait flipped (180°)</option>
-        <option value="270">Landscape flipped (270°)</option>
-      </select>
-    </label>
-    <label>2-bit codes for black, white, yellow, red
-      <input id="codes" value="3,0,1,2" autocomplete="off">
-    </label>
-    <p class="hint" id="sizeInfo" style="text-align:left;margin-top:.5rem"></p>
-  </details>
-
-  <h2>Update firmware</h2>
-  <ol class="steps">
-    <li>
-      <p>Keep the base plugged in and restart it in update mode. A drive named <strong>RPI-RP2</strong> appears.</p>
-      <button id="bootloader">Restart in update mode</button>
-    </li>
-    <li>
-      <p>Save the firmware file onto the <strong>RPI-RP2</strong> drive. The base installs it and restarts by itself, and the drive disappears.</p>
-      <button id="saveFw">Save firmware to RPI-RP2</button>
-    </li>
-    <li>
-      <p>Click <strong>Connect</strong> above to check that the base answers.</p>
-    </li>
-  </ol>
-  <p class="note">Don't unplug the base while the firmware is being saved. A warning that the drive was not ejected properly, or that the save could not finish, is normal: the base restarts as soon as it has the firmware.</p>
+  <section class="fw" aria-labelledby="fwTitle">
+    <h2 id="fwTitle">Firmware update</h2>
+    <p class="note" id="fwInfo">Connect to check whether your base needs an update.</p>
+    <ol class="steps">
+      <li>
+        <p>Restart the base in update mode. A drive named <strong>RPI-RP2</strong> appears.</p>
+        <button id="bootloader">Restart in update mode</button>
+      </li>
+      <li>
+        <p>Save the firmware onto <strong>RPI-RP2</strong>. The base installs it and restarts.</p>
+        <button id="saveFw">Save firmware</button>
+      </li>
+      <li><p>Click <strong>Connect</strong> to check the new version.</p></li>
+    </ol>
+    <p class="note">Don't unplug the base while saving. A warning that the drive wasn't ejected properly is normal.</p>
+  </section>
 
   <div id="log" aria-live="polite"></div>
 
@@ -153,7 +136,10 @@
   const logEl = $('log');
   const RPI_VID = 0x2E8A;
   const REFRESH_GUARD_MS = 20000;
-  const FIRMWARE_BYTES = 4048; // ALLSCREEN_BYTES in the firmware
+  // Panel memory layout: 88-pixel rows (Source_BITS), 184 rows (Gate_BITS), portrait
+  const W = 88, H = 184;
+  // 2-bit codes the firmware's Color_get() expects for black, white, yellow, red
+  const CODES = [3, 0, 1, 2];
   const FIRMWARE_URL = 'firmware/totemforge-base.uf2';
   const FIRMWARE_NAME = 'totemforge-base.uf2';
 
@@ -166,6 +152,7 @@
   let transport = null;
   let busy = false, busyTimer = null, handshakeTimer = null;
   let expectRestart = false; // set when we asked the base to restart into the bootloader
+  let baseVersion = null;     // reported by the connected base
 
   // ---------- UI helpers ----------
   function log(msg, cls) {
@@ -202,7 +189,14 @@
     log('← ' + line, isErr ? 'e' : undefined);
     if (line.startsWith('CONNECTED:')) {
       clearTimeout(handshakeTimer);
-      setStatus('Connected to TotemForge base (v' + line.split(':')[1] + ')', 'on');
+      setStatus('Connected to TotemForge base', 'on');
+      sendCommand('version');
+    } else if (line.startsWith('VERSION:')) {
+      baseVersion = line.slice('VERSION:'.length);
+      checkVersion();
+    } else if (line.startsWith("ERROR: Unknown command: 'version'")) {
+      baseVersion = 'older than 2.0.0'; // firmware before the version command
+      checkVersion();
     } else if (line === 'REFRESHING' || line.startsWith('Displaying demo')) {
       busy = true;
       setStatus('Refreshing display…', 'on');
@@ -235,6 +229,51 @@
     return out;
   }
 
+  // ---------- Firmware version ----------
+  // The page reads the version of the bundled .uf2 from the file itself (the firmware's
+  // "VERSION:x.y.z" reply string), so replacing the file is all an update needs.
+  const bundledVersion = (async () => {
+    try {
+      const res = await fetch(FIRMWARE_URL, { cache: 'no-store' });
+      if (!res.ok) return null;
+      const buf = new Uint8Array(await res.arrayBuffer());
+      const dv = new DataView(buf.buffer);
+      const blocks = [];
+      for (let off = 0; off + 512 <= buf.length; off += 512) {
+        if (dv.getUint32(off, true) !== 0x0A324655 || dv.getUint32(off + 4, true) !== 0x9E5D5157) continue;
+        const size = dv.getUint32(off + 16, true);
+        blocks.push({ addr: dv.getUint32(off + 12, true), data: buf.subarray(off + 32, off + 32 + size) });
+      }
+      blocks.sort((a, b) => a.addr - b.addr);
+      const text = blocks.map(b => String.fromCharCode(...b.data)).join('');
+      const m = text.match(/VERSION:([0-9A-Za-z.+-]+)\0/);
+      return m ? m[1] : null;
+    } catch { return null; }
+  })();
+
+  // [major, minor, patch] or null for anything else (e.g. "older than 2.0.0")
+  const parseVersion = v => { const m = /^(\d+)\.(\d+)\.(\d+)/.exec(v || ''); return m ? m.slice(1).map(Number) : null; };
+  function isOlder(a, b) {
+    const x = parseVersion(a), y = parseVersion(b);
+    if (!y) return false;
+    if (!x) return true;
+    for (let i = 0; i < 3; i++) if (x[i] !== y[i]) return x[i] < y[i];
+    return false;
+  }
+
+  async function checkVersion() {
+    const latest = await bundledVersion;
+    if (!transport || !baseVersion) return;
+    if (latest && isOlder(baseVersion, latest)) {
+      setStatus('Connected. Firmware ' + baseVersion + ' is out of date: update it below.', 'warn');
+      $('fwInfo').textContent = 'Your base has firmware ' + baseVersion + '. Version ' + latest + ' is available: follow the steps below.';
+      log('Firmware ' + baseVersion + ' on the base, ' + latest + ' available. Update it below.', 'w');
+    } else {
+      setStatus('Connected to TotemForge base, firmware ' + baseVersion, 'on');
+      $('fwInfo').textContent = 'Your base has firmware ' + baseVersion + (latest ? ', the latest is ' + latest + '.' : '.') + ' No update needed.';
+    }
+  }
+
   // ---------- Web MIDI ----------
   const isBase = port => /totemforge/i.test(port.name || '') || /totemforge/i.test(port.manufacturer || '');
 
@@ -245,7 +284,7 @@
     if (!input || !output) {
       const names = [...access.inputs.values()].map(p => p.name).join(', ') || 'none';
       throw new Error('No TotemForge base found among the MIDI devices (' + names + '). ' +
-        'If the base is plugged in, its firmware may be too old: use Update firmware below.');
+        'If the base is plugged in, its firmware is older than 2.0.0: use Update firmware below.');
     }
     await input.open();
     await output.open();
@@ -292,6 +331,7 @@
     try {
       if (!navigator.requestMIDIAccess) throw new Error('This browser has no Web MIDI. Use Chrome or Edge.');
       expectRestart = false;
+      baseVersion = null;
       transport = await connectMidi();
       refreshButtons();
       setStatus('Connected, waiting for the base…', 'on');
@@ -419,28 +459,32 @@
   let panX = 0, panY = 0;
   let lastIdx = null;
 
-  function panel() {
-    const W = Math.max(4, parseInt($('panelW').value) || 88);
-    const H = Math.max(1, parseInt($('panelH').value) || 184);
-    const rot = parseInt($('rot').value) || 0;
-    const [vw, vh] = rot % 180 === 0 ? [W, H] : [H, W];
-    return { W, H, rot, vw, vh };
+  // Nearest ink by perceptual distance (CIE Lab), so greys map to black/white, not yellow/red
+  function toLab(r, g, b) {
+    const lin = v => { v /= 255; return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+    const R = lin(r), G = lin(g), B = lin(b);
+    const f = t => t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116;
+    const fx = f((0.4124 * R + 0.3576 * G + 0.1805 * B) / 0.95047);
+    const fy = f(0.2126 * R + 0.7152 * G + 0.0722 * B);
+    const fz = f((0.0193 * R + 0.1192 * G + 0.9505 * B) / 1.08883);
+    return [116 * fy - 16, 500 * (fx - fy), 200 * (fy - fz)];
   }
-  function codes() {
-    const c = $('codes').value.split(/[,\s]+/).map(n => parseInt(n)).filter(n => !isNaN(n));
-    return c.length === 4 ? c.map(n => n & 3) : [3, 0, 1, 2];
-  }
-
+  const PAL_LAB = PAL.map(c => toLab(...c));
   function nearest(r, g, b) {
+    const [L, A, B] = toLab(r, g, b);
     let best = 0, bd = Infinity;
     for (let k = 0; k < 4; k++) {
-      const p = PAL[k];
-      const dr = r - p[0], dg = g - p[1], db = b - p[2];
-      const d = 0.3 * dr * dr + 0.59 * dg * dg + 0.11 * db * db;
+      const p = PAL_LAB[k];
+      const d = (L - p[0]) ** 2 + (A - p[1]) ** 2 + (B - p[2]) ** 2;
       if (d < bd) { bd = d; best = k; }
     }
     return best;
   }
+
+  // Weakened Floyd-Steinberg: only part of the error spreads, and small errors not at all,
+  // so near-black and near-white areas stay solid instead of gaining stray dots.
+  const DITHER_STRENGTH = 0.5;
+  const DITHER_MIN_ERROR = 24; // per channel, out of 255
 
   function quantize(img, w, h, dither) {
     const buf = new Float32Array(w * h * 3);
@@ -454,11 +498,14 @@
     for (let y = 0; y < h; y++) {
       for (let x = 0; x < w; x++) {
         const p = y * w + x, j = p * 3;
-        const r = buf[j], g = buf[j + 1], b = buf[j + 2];
+        const clamp = v => Math.max(0, Math.min(255, v));
+        const r = clamp(buf[j]), g = clamp(buf[j + 1]), b = clamp(buf[j + 2]);
         const k = nearest(r, g, b);
         idx[p] = k;
         if (!dither) continue;
-        const er = r - PAL[k][0], eg = g - PAL[k][1], eb = b - PAL[k][2];
+        let er = r - PAL[k][0], eg = g - PAL[k][1], eb = b - PAL[k][2];
+        if (Math.max(Math.abs(er), Math.abs(eg), Math.abs(eb)) < DITHER_MIN_ERROR) continue;
+        er *= DITHER_STRENGTH; eg *= DITHER_STRENGTH; eb *= DITHER_STRENGTH;
         const spread = (dx, dy, f) => {
           const xx = x + dx, yy = y + dy;
           if (xx < 0 || xx >= w || yy >= h) return;
@@ -472,15 +519,14 @@
   }
 
   function fitPreview() {
-    const { vw, vh } = panel();
     const box = $('stage').clientWidth - 24;
-    const scale = Math.max(1, Math.min(box / vw, (window.innerHeight * 0.45) / vh));
-    preview.style.width = Math.round(vw * scale) + 'px';
-    preview.style.height = Math.round(vh * scale) + 'px';
+    const scale = Math.max(1, Math.min(box / W, (window.innerHeight * 0.45) / H) / 2);
+    preview.style.width = Math.round(W * scale) + 'px';
+    preview.style.height = Math.round(H * scale) + 'px';
   }
 
   function render() {
-    const { W, H, vw, vh } = panel();
+    const vw = W, vh = H;
     work.width = vw; work.height = vh;
     preview.width = vw; preview.height = vh;
     wctx.fillStyle = '#fff';
@@ -505,10 +551,6 @@
     }
     pctx.putImageData(out, 0, 0);
     fitPreview();
-    const bytes = (W * H) / 4;
-    $('sizeInfo').textContent = `${W} × ${H} pixels at 2 bits each = ${bytes} bytes + 2 bytes CRC. ` +
-      (bytes === FIRMWARE_BYTES ? 'Matches the firmware.' : `The firmware expects ${FIRMWARE_BYTES} bytes, so this size won't be accepted.`);
-    $('hint').textContent = source ? `Crop is ${vw} × ${vh} pixels. Drag to move, use Zoom to crop tighter.` : 'Pick an image. Drag it to move the crop.';
   }
 
   // CRC-CCITT (poly 0x1021, init 0xFFFF), same as the firmware
@@ -521,23 +563,11 @@
     return crc;
   }
 
-  // Walk the panel in memory order (row by row), 4 pixels per byte, first pixel in the top 2 bits
+  // Row by row in panel memory order, 4 pixels per byte, first pixel in the top 2 bits
   function pack() {
-    const { W, H, rot, vw, vh } = panel();
-    const map = codes();
     const n = (W * H) >> 2;
     const out = new Uint8Array(n + 2);
-    for (let py = 0; py < H; py++) {
-      for (let px = 0; px < W; px++) {
-        let x, y;
-        if (rot === 0) { x = px; y = py; }
-        else if (rot === 90) { x = py; y = vh - 1 - px; }
-        else if (rot === 180) { x = vw - 1 - px; y = vh - 1 - py; }
-        else { x = vw - 1 - py; y = px; }
-        const i = py * W + px;
-        out[i >> 2] |= map[lastIdx[y * vw + x]] << (6 - 2 * (i & 3));
-      }
-    }
+    for (let i = 0; i < W * H; i++) out[i >> 2] |= CODES[lastIdx[i]] << (6 - 2 * (i & 3));
     const crc = crc16(out.subarray(0, n));
     out[n] = crc >> 8;
     out[n + 1] = crc & 0xFF;
@@ -547,11 +577,6 @@
 
   $('sendImg').addEventListener('click', () => {
     if (!transport || busy || !source) return;
-    const { W, H } = panel();
-    if ((W * H) / 4 !== FIRMWARE_BYTES) {
-      log(`Image is ${(W * H) / 4} bytes but the firmware expects ${FIRMWARE_BYTES}. Check Display settings.`, 'e');
-      return;
-    }
     const payload = pack();
     setBusy(true, 'img');
     setStatus('Sending image…', 'on');
@@ -567,10 +592,11 @@
   });
 
   let containFit = false;
-  function loadSource(img, w, h, contain = false) {
+  function loadSource(img, w, h, contain, hint) {
     source = img; srcW = w; srcH = h; containFit = contain;
     panX = 0; panY = 0;
     $('zoom').value = 1;
+    $('hint').textContent = hint;
     render();
     refreshButtons();
   }
@@ -580,7 +606,7 @@
     if (!f) return;
     try {
       const bmp = await createImageBitmap(f);
-      loadSource(bmp, bmp.width, bmp.height);
+      loadSource(bmp, bmp.width, bmp.height, false, 'Drag to move the crop, use Zoom to crop tighter.');
       log('Loaded ' + f.name + ` (${bmp.width} × ${bmp.height})`);
     } catch {
       log('Could not read that image. Try a JPG or PNG.', 'e');
@@ -590,15 +616,12 @@
 
   // TotemForge logo, 88 x 184, already in the four ink colors
   const TEST_PATTERN = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFgAAAC4CAYAAABn0Su2AAAAAXNSR0IArs4c6QAAAARzQklUCAgICHwIZIgAAAVjSURBVHic7Z3Pad1AEIfHcUBgcBlpwDc3YEgZubkBV5EGfHMZD9yAb27AZTwI+PBILhEIeaWd/fObnV39PgjEz9Jq9Wk0Oyv5SVci8lcIjG+tOzA6FAyGgsFQMBgKBkPBYCgYDAWDoWAwFAyGgsFQMBgKBkPBYCgYDAWDoWAwFAyGgsFQMBgKBkPBYCgYDAWDoWAwFAyGgsFQMBgKBkPBYCgYDAWDoWAw31MWPp/P6mVvb29VbYSWy9mOZp31tpbrbPU3ZbkQsAgO7XCKOC+U9jlbcOxI7kWL5vOZm4+n3Z/3tq9ddqsfNQLiSgq+BJNy6qyXLVk3toymzdA66/Viv9dgMsiFBMV2pBVzX2r1yU0V4VGySHrEroEL3utsaeeXpOTbEKG+1OgfVHBqVJZE8fXd85e21v9i1DzgM2YpYqvziJ0qITRGlOAmB3ui5kFPmsmlsizHzudz8awtddseMI3gmEwvUmoCF4ya4/eCeQ6uXciv2/WGieDYdYlRo1cEPMgtWV9/WH6OYCuirQ8my7QIpamn6GraUbi8P4rI19miBgoGwxQBhoLBUDCYamXaaZo2f/fz87PWZrqjyiC3J9cjlge8WHBvcnPJPSjMwWAoGAwFgykSfJT8WwIjGAwFg6FgMNmCj5R/SyYmZnc0Uhlleu1K8ChSl7gQPKLYmaaCRxY706yKOIJckUaCjyJXJDNFlJRoHuTOd4m15NxNnjGNYA9yret3M8Ee5IqIPLz9Mt3eoabKqamhBiaCW0fvaZqayBVxFMGX90dIfry8P5qnhSUuZnJzdD28/ZLL/89KRu5W0RrCheAQa0mv9y+7qeY0TU0jdQu3gtcso7sn3OTgUaFgMBQMxoXgkorBOy4Ej4xJFXGapuazuVRqnVXdlGkWIFJV1p+v5k5pY1HcagaGHAMOHcEWg6upYC+52LJqMY/glpJblIOuyjSUgNf7l6y2U573s4V5BFtHb67YWpgI7iUlIJ45ARHc20CGfJhHsWAPMte83r+olrN4SkqWYI9Sl2j6V+NZyBqGm2jEotf62T6uyrQaU2VvZ1eTiYbHm5MooIK9yWzx6K+qglv/PYLHOyPZglvL7IWsQY5y9biqIkaEgsEcRnCrh4cOI9hjBSGSWUXU2JmjDJTNrkVsHaTRxLtLEdd3z25P9xzcCZ6pKbnl07HdCh4F14K1Uay9g9GCokGudECKCdS27+0a8JKmF3tCbczSR6km3N0yGkXsjOscPALDC279ApNswSNNBpB0H8HeD3T3gr3TtWDv0SvSseAe5IpUeki+Ze1q/fe+pS+X4qt2wHSbInqBgsFQMBgKBlNdsKaiSP1qVOlXqUraKN12chWh3Zj2JdXa1wJrlte2E3uJ6xY5206O4NovHU2NjpzoXxLqP/JFqsUX3LWdW7+kOlXsep35/ylngLavNYWbDHKxUz3lFL35eIq2Hfq81bubzauIrR3VSr6+e47mUC9yRQwE772/vtaO77XT+q3jUMGpF4E0Ubwe5HIrAiuyLvbEdmLe6T0RW+1t5ebQwBiTu/f71AOTeyZ0M5PzlFdTMC3TtJOPEDcfT/Lnx+9oX2qkiG7KtNSO7i2/vtCuzdetgaeIvXo3Z7IRW9/boGeeg7d2uOYsy5NkE8Gx3FuS87QHbPhvGeVMjTVt7bWXe+CWT5sqffJUsuDakZAroaZkZHSbXq6sPVVerl8yXUbW1LxtD6abmVyvUDAYCgZDwWAoGAwFg6FgMBQMhoLBUDAYCgZDwWAoGAwFg6FgMBQMhoLBUDAYCgZDwWAoGAwFg6FgMBQMhoLBUDAYCgZDwWAoGAwFg6FgMBQMhoLB/AMWA0GcDQptDwAAAABJRU5ErkJggg==';
-  $('testPattern').addEventListener('click', () => {
+  function loadLogo() {
     const img = new Image();
-    img.onload = () => {
-      $('dither').checked = false;
-      loadSource(img, img.naturalWidth, img.naturalHeight, true);
-      log('Test pattern: TotemForge logo. Upright with TOTEM at the top means the orientation is right.');
-    };
+    img.onload = () => loadSource(img, img.naturalWidth, img.naturalHeight, true, 'TotemForge logo. Choose an image to send your own.');
     img.src = TEST_PATTERN;
-  });
+  }
+  $('testPattern').addEventListener('click', loadLogo);
 
   // Drag to pan
   let drag = null;
@@ -619,11 +642,12 @@
   preview.addEventListener('pointerup', endDrag);
   preview.addEventListener('pointercancel', endDrag);
 
-  ['zoom', 'dither', 'panelW', 'panelH', 'rot', 'codes'].forEach(id => $(id).addEventListener('input', render));
+  ['zoom', 'dither'].forEach(id => $(id).addEventListener('input', render));
   window.addEventListener('resize', fitPreview);
 
   render();
   refreshButtons();
+  loadLogo();
 
   if (location.protocol === 'file:') {
     log('This page was opened as a local file. Firmware update needs it served over http(s), e.g. totemforge.nl/appdemo.', 'e');
