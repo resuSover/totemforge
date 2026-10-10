@@ -78,6 +78,7 @@
   .tx { color: var(--live); } .e { color: var(--warn); } .w { color: var(--caution); }
   .fw { margin-top: 2rem; padding: 1rem 1.1rem 1.1rem; background: var(--paper-2); border-radius: 14px; border-top: 4px solid var(--ink-soft); }
   .fw h2 { margin-top: 0; }
+  .fw.attn { border-top-color: var(--caution); box-shadow: 0 0 0 2px var(--caution); }
   .fw button { background: var(--paper); }
   .steps { padding-left: 1.25rem; margin: .75rem 0 0; }
   .steps li { margin-bottom: .9rem; }
@@ -262,15 +263,24 @@
     return false;
   }
 
+  // Point the user at the firmware update panel
+  function needsUpdate(text) {
+    $('fwInfo').textContent = text;
+    const panel = document.querySelector('.fw');
+    panel.classList.add('attn');
+    panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
   async function checkVersion() {
     const latest = await bundledVersion;
     if (!transport || !baseVersion) return;
     if (latest && isOlder(baseVersion, latest)) {
       setStatus('Connected. Firmware ' + baseVersion + ' is out of date: update it below.', 'warn');
-      $('fwInfo').textContent = 'Your base has firmware ' + baseVersion + '. Version ' + latest + ' is available: follow the steps below.';
+      needsUpdate('Your base has firmware ' + baseVersion + '. Version ' + latest + ' is available: follow the steps below.');
       log('Firmware ' + baseVersion + ' on the base, ' + latest + ' available. Update it below.', 'w');
     } else {
       setStatus('Connected to TotemForge base, firmware ' + baseVersion, 'on');
+      document.querySelector('.fw').classList.remove('attn');
       $('fwInfo').textContent = 'Your base has firmware ' + baseVersion + (latest ? ', the latest is ' + latest + '.' : '.') + ' No update needed.';
     }
   }
@@ -283,9 +293,9 @@
     const input = [...access.inputs.values()].find(isBase);
     const output = [...access.outputs.values()].find(isBase);
     if (!input || !output) {
-      const names = [...access.inputs.values()].map(p => p.name).join(', ') || 'none';
-      throw new Error('No TotemForge base found among the MIDI devices (' + names + '). ' +
-        'If the base is plugged in, its firmware is older than 2.0.0: use Update firmware below.');
+      const e = new Error('No base with firmware 2.0.0 or later found. If it\'s plugged in, update it below.');
+      e.name = 'NoBaseError'; // older firmware has no MIDI, only USB serial
+      throw e;
     }
     await input.open();
     await output.open();
@@ -342,6 +352,12 @@
     } catch (e) {
       transport = null;
       refreshButtons();
+      if (e.name === 'NoBaseError') {
+        setStatus('Your base needs a firmware update', 'warn');
+        log(e.message, 'w');
+        needsUpdate('No base with firmware 2.0.0 or later was found. If yours is plugged in, follow these steps to update it.');
+        return;
+      }
       setStatus('Connection failed', 'err');
       log(e.message, 'e');
       if (e.name === 'SecurityError' || e.name === 'NotAllowedError') {
