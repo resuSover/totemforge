@@ -109,21 +109,21 @@
   <details>
     <summary>Display settings</summary>
     <label>Panel width in pixels (one memory row)
-      <input id="panelW" type="number" value="184" inputmode="numeric">
+      <input id="panelW" type="number" value="88" inputmode="numeric">
     </label>
     <label>Panel height in pixels (rows)
-      <input id="panelH" type="number" value="88" inputmode="numeric">
+      <input id="panelH" type="number" value="184" inputmode="numeric">
     </label>
     <label>Orientation (use the test pattern to check which one is upright)
       <select id="rot">
-        <option value="0">Landscape (0°)</option>
-        <option value="90" selected>Portrait (90°)</option>
-        <option value="180">Landscape flipped (180°)</option>
-        <option value="270">Portrait flipped (270°)</option>
+        <option value="0" selected>Portrait (0°)</option>
+        <option value="90">Landscape (90°)</option>
+        <option value="180">Portrait flipped (180°)</option>
+        <option value="270">Landscape flipped (270°)</option>
       </select>
     </label>
     <label>2-bit codes for black, white, yellow, red
-      <input id="codes" value="0,1,2,3" autocomplete="off">
+      <input id="codes" value="3,0,1,2" autocomplete="off">
     </label>
     <p class="hint" id="sizeInfo" style="text-align:left;margin-top:.5rem"></p>
   </details>
@@ -420,15 +420,15 @@
   let lastIdx = null;
 
   function panel() {
-    const W = Math.max(4, parseInt($('panelW').value) || 184);
-    const H = Math.max(1, parseInt($('panelH').value) || 88);
+    const W = Math.max(4, parseInt($('panelW').value) || 88);
+    const H = Math.max(1, parseInt($('panelH').value) || 184);
     const rot = parseInt($('rot').value) || 0;
     const [vw, vh] = rot % 180 === 0 ? [W, H] : [H, W];
     return { W, H, rot, vw, vh };
   }
   function codes() {
     const c = $('codes').value.split(/[,\s]+/).map(n => parseInt(n)).filter(n => !isNaN(n));
-    return c.length === 4 ? c.map(n => n & 3) : [0, 1, 2, 3];
+    return c.length === 4 ? c.map(n => n & 3) : [3, 0, 1, 2];
   }
 
   function nearest(r, g, b) {
