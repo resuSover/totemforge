@@ -70,12 +70,16 @@
     font: .82rem/1.45 ui-monospace, "Cascadia Mono", Menlo, monospace; white-space: pre-wrap; word-break: break-word;
   }
   .tx { color: var(--live); } .e { color: var(--warn); }
+  .steps { padding-left: 1.25rem; margin: .5rem 0 0; }
+  .steps li { margin-bottom: 1rem; }
+  .steps p { margin: 0 0 .5rem; }
+  .note { color: var(--ink-soft); font-size: .88rem; margin: 0; }
   @media (prefers-reduced-motion: reduce) { .primary:active { transform: none; } }
 </style>
 </head>
 <body>
   <h1>TotemForge base</h1>
-  <p class="sub">Plug the base into this phone with a USB-C cable and tap Connect.</p>
+  <p class="sub">Plug the base into this device with a USB-C cable and click Connect. Works in Chrome or Edge on a computer or Android phone.</p>
 
   <div id="status" class="status"><span class="dot"></span><span id="statusText">Not connected</span></div>
 
@@ -124,42 +128,44 @@
     <p class="hint" id="sizeInfo" style="text-align:left;margin-top:.5rem"></p>
   </details>
 
-  <details>
-    <summary>Connection settings</summary>
-    <label>Demo command
-      <input id="cmd" value="show demo" autocomplete="off">
-    </label>
-    <label>Line ending
-      <select id="eol">
-        <option value="\n" selected>LF (\n)</option>
-        <option value="\r\n">CR LF (\r\n)</option>
-        <option value="\r">CR (\r)</option>
-      </select>
-    </label>
-    <label class="check"><input id="anyDevice" type="checkbox"> Show all USB devices in the picker (use if the base doesn't appear)</label>
-    <label>Baud rate (native USB ignores it; avoid 1200, which reboots the RP2040 into the bootloader)
-      <input id="baud" type="number" value="921600" inputmode="numeric">
-    </label>
-  </details>
+  <h2>Update firmware</h2>
+  <ol class="steps">
+    <li>
+      <p>Keep the base plugged in and restart it in update mode. A drive named <strong>RPI-RP2</strong> appears.</p>
+      <button id="bootloader">Restart in update mode</button>
+    </li>
+    <li>
+      <p>Save the firmware file onto the <strong>RPI-RP2</strong> drive. The base installs it and restarts by itself, and the drive disappears.</p>
+      <button id="saveFw">Save firmware to RPI-RP2</button>
+    </li>
+    <li>
+      <p>Click <strong>Connect</strong> above to check that the base answers.</p>
+    </li>
+  </ol>
+  <p class="note">Don't unplug the base while the firmware is being saved. A warning that the drive was not ejected properly, or that the save could not finish, is normal: the base restarts as soon as it has the firmware.</p>
 
   <div id="log" aria-live="polite"></div>
+
 
 <script>
 (() => {
   const $ = id => document.getElementById(id);
   const logEl = $('log');
-  const enc = new TextEncoder();
   const RPI_VID = 0x2E8A;
   const REFRESH_GUARD_MS = 20000;
   const FIRMWARE_BYTES = 4048; // ALLSCREEN_BYTES in the firmware
+  const FIRMWARE_URL = 'firmware/totemforge-base.uf2';
+  const FIRMWARE_NAME = 'totemforge-base.uf2';
+
+  // SysEx framing, see docs/phone-app-protocol.md in the firmware repo
+  const SYSEX_MFR_ID = 0x7D, SYSEX_TEXT = 0x01, SYSEX_IMAGE = 0x02, SYSEX_REPLY = 0x03;
 
   // Palette index order: black, white, yellow, red
   const PAL = [[0, 0, 0], [255, 255, 255], [242, 197, 0], [200, 16, 46]];
 
   let transport = null;
-  let rx = '';
   let busy = false, busyTimer = null, handshakeTimer = null;
-  let waitReady = null;
+  let expectRestart = false; // set when we asked the base to restart into the bootloader
 
   // ---------- UI helpers ----------
   function log(msg, cls) {
@@ -178,6 +184,7 @@
     $('disconnect').disabled = !transport;
     $('send').disabled = !transport || busy;
     $('sendImg').disabled = !transport || busy || !source;
+    $('bootloader').disabled = busy;
   }
   function setBusy(on, label) {
     busy = on;
@@ -193,7 +200,6 @@
     if (!line) return;
     const isErr = line.startsWith('ERROR');
     log('← ' + line, isErr ? 'e' : undefined);
-    if (line === 'READY' && waitReady) { waitReady(); waitReady = null; return; }
     if (line.startsWith('CONNECTED:')) {
       clearTimeout(handshakeTimer);
       setStatus('Connected to TotemForge base (v' + line.split(':')[1] + ')', 'on');
@@ -210,95 +216,72 @@
       setStatus(line.replace(/^ERROR:\s*/, ''), 'err');
     }
   }
-  function onData(text) {
-    rx += text;
-    let i;
-    while ((i = rx.indexOf('\n')) >= 0) {
-      onLine(rx.slice(0, i).replace(/\r$/, '').trim());
-      rx = rx.slice(i + 1);
-    }
-  }
-  async function sendLine(cmd) {
-    const eol = JSON.parse('"' + $('eol').value + '"');
-    await transport.write(enc.encode(cmd + eol));
+  function sendCommand(cmd) {
+    transport.send([0xF0, SYSEX_MFR_ID, SYSEX_TEXT, ...Array.from(cmd, c => c.charCodeAt(0) & 0x7F), 0xF7]);
     log('→ ' + cmd, 'tx');
   }
 
-  // ---------- Web Serial ----------
-  async function connectSerial() {
-    const opts = $('anyDevice').checked ? {} : { filters: [{ usbVendorId: RPI_VID }] };
-    const port = await navigator.serial.requestPort(opts);
-    await port.open({ baudRate: Number($('baud').value) || 921600, bufferSize: 8192 });
-    try { await port.setSignals({ dataTerminalReady: true, requestToSend: true }); } catch {}
-    const writer = port.writable.getWriter();
-    const reader = port.readable.getReader();
-    const dec = new TextDecoder();
-    let alive = true;
-    (async () => {
-      try {
-        while (alive) {
-          const { value, done } = await reader.read();
-          if (done) break;
-          if (value) onData(dec.decode(value, { stream: true }));
-        }
-      } catch (e) { if (alive) lost(e); }
-    })();
-    return {
-      name: 'Web Serial',
-      write: bytes => writer.write(bytes),
-      close: async () => {
-        alive = false;
-        try { await reader.cancel(); } catch {}
-        try { reader.releaseLock(); writer.releaseLock(); } catch {}
-        await port.close();
-      }
-    };
+  // SysEx data bytes are 7-bit: each group of up to 7 bytes is sent as one byte holding
+  // their top bits (bit i = bit 7 of byte i), then the bytes with bit 7 cleared.
+  function pack7(raw) {
+    const out = [];
+    for (let i = 0; i < raw.length; i += 7) {
+      const n = Math.min(7, raw.length - i);
+      let msbs = 0;
+      for (let j = 0; j < n; j++) msbs |= (raw[i + j] >> 7) << j;
+      out.push(msbs);
+      for (let j = 0; j < n; j++) out.push(raw[i + j] & 0x7F);
+    }
+    return out;
   }
 
-  // ---------- WebUSB CDC-ACM fallback ----------
-  async function connectUsb() {
-    const opts = { filters: $('anyDevice').checked ? [] : [{ vendorId: RPI_VID }] };
-    const device = await navigator.usb.requestDevice(opts);
-    await device.open();
-    if (device.configuration === null) await device.selectConfiguration(1);
-    const ifaces = device.configuration.interfaces;
-    const comm = ifaces.find(i => i.alternates[0].interfaceClass === 0x02);
-    const data = ifaces.find(i => i.alternates[0].interfaceClass === 0x0A);
-    if (!data) throw new Error('No USB serial interface found on this device. Check that the base firmware is flashed.');
-    if (comm) { try { await device.claimInterface(comm.interfaceNumber); } catch {} }
-    await device.claimInterface(data.interfaceNumber);
-    const eps = data.alternates[0].endpoints;
-    const epOut = eps.find(e => e.direction === 'out' && e.type === 'bulk');
-    const epIn = eps.find(e => e.direction === 'in' && e.type === 'bulk');
-    const ctrlIdx = comm ? comm.interfaceNumber : data.interfaceNumber;
-    const baud = Number($('baud').value) || 921600;
-    const lc = new Uint8Array([baud & 0xff, (baud >> 8) & 0xff, (baud >> 16) & 0xff, (baud >> 24) & 0xff, 0, 0, 8]);
-    try { await device.controlTransferOut({ requestType: 'class', recipient: 'interface', request: 0x20, value: 0, index: ctrlIdx }, lc); } catch {}
-    try { await device.controlTransferOut({ requestType: 'class', recipient: 'interface', request: 0x22, value: 0x03, index: ctrlIdx }); } catch {}
-    const dec = new TextDecoder();
-    let alive = true;
-    (async () => {
-      while (alive && epIn) {
-        try {
-          const r = await device.transferIn(epIn.endpointNumber, 64);
-          if (r.data && r.data.byteLength) onData(dec.decode(r.data, { stream: true }));
-        } catch (e) { if (alive) lost(e); break; }
+  // ---------- Web MIDI ----------
+  const isBase = port => /totemforge/i.test(port.name || '') || /totemforge/i.test(port.manufacturer || '');
+
+  async function connectMidi() {
+    const access = await navigator.requestMIDIAccess({ sysex: true });
+    const input = [...access.inputs.values()].find(isBase);
+    const output = [...access.outputs.values()].find(isBase);
+    if (!input || !output) {
+      const names = [...access.inputs.values()].map(p => p.name).join(', ') || 'none';
+      throw new Error('No TotemForge base found among the MIDI devices (' + names + '). ' +
+        'If the base is plugged in, its firmware may be too old: use Update firmware below.');
+    }
+    await input.open();
+    await output.open();
+    input.onmidimessage = e => {
+      const d = e.data;
+      if (d.length < 4 || d[0] !== 0xF0 || d[1] !== SYSEX_MFR_ID || d[2] !== SYSEX_REPLY) return;
+      const end = d[d.length - 1] === 0xF7 ? d.length - 1 : d.length;
+      onLine(String.fromCharCode(...d.subarray(3, end)).trim());
+    };
+    access.onstatechange = e => {
+      if ((e.port.id === input.id || e.port.id === output.id) && e.port.state === 'disconnected' && transport) {
+        lost(new Error('The base was unplugged or restarted'));
       }
-    })();
+    };
     return {
-      name: 'WebUSB',
-      write: bytes => device.transferOut(epOut.endpointNumber, bytes),
+      name: input.name,
+      send: bytes => output.send(bytes),
       close: async () => {
-        alive = false;
-        try { await device.releaseInterface(data.interfaceNumber); } catch {}
-        await device.close();
+        access.onstatechange = null;
+        input.onmidimessage = null;
+        try { await input.close(); await output.close(); } catch {}
       }
     };
   }
 
   function lost(e) {
+    transport?.close();
+    transport = null;
+    if (expectRestart) {
+      expectRestart = false;
+      clearTimeout(handshakeTimer);
+      setBusy(false);
+      log('The base disconnected to restart in update mode.');
+      return;
+    }
     log('Connection lost: ' + (e?.message || e), 'e');
-    transport = null; rx = '';
     clearTimeout(handshakeTimer);
     setBusy(false);
     setStatus('Connection lost. Check the cable and connect again.', 'err');
@@ -307,42 +290,124 @@
   $('connect').addEventListener('click', async () => {
     setStatus('Connecting…');
     try {
-      if ('serial' in navigator) transport = await connectSerial();
-      else if ('usb' in navigator) transport = await connectUsb();
-      else throw new Error('This browser has neither Web Serial nor WebUSB. Use Chrome on Android over HTTPS.');
-      rx = '';
+      if (!navigator.requestMIDIAccess) throw new Error('This browser has no Web MIDI. Use Chrome or Edge.');
+      expectRestart = false;
+      transport = await connectMidi();
       refreshButtons();
-      setStatus('Connected via ' + transport.name + ', waiting for the base…', 'on');
-      log('Connected via ' + transport.name);
+      setStatus('Connected, waiting for the base…', 'on');
+      log('Connected to MIDI port ' + transport.name);
       handshakeTimer = setTimeout(() => setStatus('Connected, but the base did not answer the handshake', 'err'), 2500);
-      await sendLine('connect');
+      sendCommand('connect');
     } catch (e) {
       transport = null;
       refreshButtons();
-      if (e.name === 'NotFoundError') {
-        setStatus('Not connected');
-        log('No device picked. If the base wasn\'t listed, turn on "Show all USB devices" in Connection settings.');
-        return;
-      }
       setStatus('Connection failed', 'err');
       log(e.message, 'e');
-      if (e.name === 'SecurityError') log('The page must be served over HTTPS (or localhost).', 'e');
+      if (e.name === 'SecurityError' || e.name === 'NotAllowedError') {
+        log('The browser needs permission to use MIDI devices ("control and reprogram"). Allow it in the site settings and connect again.', 'e');
+      }
     }
   });
 
   $('disconnect').addEventListener('click', async () => {
     try { await transport?.close(); } catch {}
-    transport = null; rx = '';
+    transport = null;
     clearTimeout(handshakeTimer);
     setBusy(false);
     setStatus('Not connected');
     log('Disconnected');
   });
 
-  $('send').addEventListener('click', async () => {
+  $('send').addEventListener('click', () => {
     if (!transport || busy) return;
-    try { setBusy(true, 'demo'); await sendLine($('cmd').value.trim() || 'show demo'); }
+    try { setBusy(true, 'demo'); sendCommand('show demo'); }
     catch (e) { lost(e); }
+  });
+
+  // ---------- Firmware update ----------
+  // Firmware with MIDI restarts on the "bootloader" command. Older firmware only has USB serial,
+  // where opening the port at 1200 baud and dropping DTR restarts it into the bootloader.
+  async function restartViaSerial() {
+    if ('serial' in navigator) {
+      const port = await navigator.serial.requestPort({ filters: [{ usbVendorId: RPI_VID }] });
+      await port.open({ baudRate: 1200 });
+      try { await port.setSignals({ dataTerminalReady: false }); } catch {}
+      try { await port.close(); } catch {}
+    } else if ('usb' in navigator) {
+      const device = await navigator.usb.requestDevice({ filters: [{ vendorId: RPI_VID }] });
+      await device.open();
+      if (device.configuration === null) await device.selectConfiguration(1);
+      const comm = device.configuration.interfaces.find(i => i.alternates[0].interfaceClass === 0x02);
+      if (!comm) throw new Error('No USB serial interface found on this device.');
+      await device.claimInterface(comm.interfaceNumber);
+      const ctrl = request => ({ requestType: 'class', recipient: 'interface', request, value: 0, index: comm.interfaceNumber });
+      await device.controlTransferOut(ctrl(0x20), new Uint8Array([0xB0, 0x04, 0, 0, 0, 0, 8])); // 1200 baud, 8N1
+      try { await device.controlTransferOut(ctrl(0x22)); } catch {} // DTR off; the base may reset before answering
+      try { await device.close(); } catch {}
+    } else {
+      throw new Error('This browser can\'t restart the base. Use Chrome or Edge.');
+    }
+  }
+
+  $('bootloader').addEventListener('click', async () => {
+    try {
+      if (transport) {
+        expectRestart = true;
+        sendCommand('bootloader');
+      } else {
+        log('Not connected over MIDI, restarting through USB serial instead. Pick the base in the list.');
+        await restartViaSerial();
+      }
+      log('The base is restarting. Wait for a drive named RPI-RP2, then do step 2.');
+      setStatus('Waiting for the RPI-RP2 drive…', 'on');
+    } catch (e) {
+      if (e.name === 'NotFoundError') { log('No device picked.'); return; }
+      setStatus('Could not restart the base', 'err');
+      log(e.message, 'e');
+    }
+  });
+
+  $('saveFw').addEventListener('click', async () => {
+    // Plain download, then the user copies the file onto the drive
+    const download = href => {
+      const a = document.createElement('a');
+      a.href = href;
+      a.download = FIRMWARE_NAME;
+      a.click();
+      log('Downloaded ' + FIRMWARE_NAME + '. Copy it from your downloads onto the RPI-RP2 drive (Files app on Android, Finder or File Explorer on a computer).');
+    };
+    if (!window.showSaveFilePicker) { download(FIRMWARE_URL); return; } // Android, Firefox, Safari
+    let blob;
+    try {
+      const res = await fetch(FIRMWARE_URL, { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      blob = await res.blob();
+    } catch (e) {
+      log('Could not read the firmware for the save dialog (' + e.message + '), downloading it instead.', 'e');
+      download(FIRMWARE_URL);
+      return;
+    }
+    let handle;
+    try {
+      handle = await window.showSaveFilePicker({
+        suggestedName: FIRMWARE_NAME,
+        types: [{ description: 'Firmware', accept: { 'application/octet-stream': ['.uf2'] } }]
+      });
+    } catch (e) {
+      if (e.name !== 'AbortError') log(e.message, 'e');
+      return;
+    }
+    setStatus('Saving firmware… don\'t unplug the base', 'on');
+    try {
+      const w = await handle.createWritable();
+      await w.write(blob);
+      await w.close();
+      log('Firmware saved. If you saved it on RPI-RP2, the base restarts by itself in a few seconds.');
+    } catch (e) {
+      // The base restarts as soon as it has the whole file, so the save often can't finish cleanly
+      log('The browser reported "' + e.message + '" while finishing the save. If the RPI-RP2 drive disappeared, the update worked.');
+    }
+    setStatus('Firmware saved. Click Connect once the base has restarted.', 'on');
   });
 
   // ---------- Image: crop, quantize, pack ----------
@@ -479,7 +544,8 @@
     return out;
   }
 
-  $('sendImg').addEventListener('click', async () => {
+
+  $('sendImg').addEventListener('click', () => {
     if (!transport || busy || !source) return;
     const { W, H } = panel();
     if ((W * H) / 4 !== FIRMWARE_BYTES) {
@@ -490,17 +556,10 @@
     setBusy(true, 'img');
     setStatus('Sending image…', 'on');
     try {
-      const ready = new Promise((res, rej) => {
-        waitReady = res;
-        setTimeout(() => rej(new Error('The base did not answer READY')), 3000);
-      });
-      await sendLine('img');
-      await ready;
-      const t0 = performance.now();
-      await transport.write(payload);
-      log(`→ ${payload.length} bytes in ${Math.round(performance.now() - t0)} ms`, 'tx');
+      const packed = pack7(payload);
+      transport.send([0xF0, SYSEX_MFR_ID, SYSEX_IMAGE, ...packed, 0xF7]);
+      log(`→ image, ${payload.length} bytes (${packed.length} as SysEx)`, 'tx');
     } catch (e) {
-      waitReady = null;
       setBusy(false);
       setStatus(e.message, 'err');
       log(e.message, 'e');
@@ -566,12 +625,15 @@
   render();
   refreshButtons();
 
-  if (!('serial' in navigator) && !('usb' in navigator)) {
+  if (location.protocol === 'file:') {
+    log('This page was opened as a local file. Firmware update needs it served over http(s), e.g. totemforge.nl/appdemo.', 'e');
+  }
+  if (!navigator.requestMIDIAccess) {
     setStatus('Browser not supported', 'err');
-    log('Web Serial and WebUSB are unavailable here. Open this page in Chrome on Android over HTTPS.', 'e');
+    log('This browser has no Web MIDI. Open this page in Chrome or Edge on a computer or Android phone.', 'e');
   } else if (!window.isSecureContext) {
     setStatus('Needs HTTPS', 'err');
-    log('Serve this page over HTTPS, otherwise Chrome blocks USB access.', 'e');
+    log('Serve this page over HTTPS, otherwise the browser blocks MIDI access.', 'e');
   }
 })();
 </script>
