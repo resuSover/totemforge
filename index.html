@@ -222,6 +222,7 @@
     transform: translateY(-50%);
     background: #5a3a18;
   }
+  .specstrip li.line-start::before { display: none; }
   .specstrip b { color: var(--ember); font-weight: 700; }
 
   /* ============ Feature deep-dives ============ */
@@ -773,7 +774,7 @@
           <dt>Battery</dt><dd>Powers light effects only</dd>
           <dt>App</dt><dd>Free <b style="color: var(--gold); font-weight: 800;">Android app</b>, and a <a href="appdemo/">webapp</a> for PC/Mac</dd>
           <dt>Body</dt><dd>Hand-painted, high-resolution 3D-printed</dd>
-          <dt>In the box</dt><dd>Totems, dock base, USB-C cable, NFC-tag for the manual</dd>
+          <dt>In the box</dt><dd>Totems, dock base with built-in USB-C cable, NFC-tag for the manual</dd>
         </dl>
       </div>
     </div>
@@ -873,7 +874,7 @@
         </details>
         <details>
           <summary>Which devices does the app run on?</summary>
-          <div class="a">The full app is free for Android on Google Play. On a PC or Mac, a simplified <a href="appdemo/">webapp</a> runs in Chrome or Edge with the base plugged in over USB; it can also update the base's firmware. iPhone isn't supported yet.</div>
+          <div class="a">The full app is free for Android on Google Play. On a PC or Mac, a simplified <a href="appdemo/">webapp</a> runs in Chrome or Edge with the base plugged in over USB. iPhone isn't supported yet.</div>
         </details>
         <details>
           <summary>How is it shipped?</summary>
@@ -947,6 +948,21 @@ The Netherlands · KvK: 42061826</p>
       i = (i + 1) % quotes.length;
       quotes[i].classList.add("on");
     }, 4500);
+  })();
+
+  // No separator before the first item of each wrapped line in the spec strip
+  (function () {
+    var items = document.querySelectorAll(".specstrip li");
+    function mark() {
+      var top = null;
+      items.forEach(function (li) {
+        li.classList.toggle("line-start", li.offsetTop !== top);
+        top = li.offsetTop;
+      });
+    }
+    mark();
+    window.addEventListener("resize", mark);
+    window.addEventListener("load", mark);
   })();
 
   (function () {
