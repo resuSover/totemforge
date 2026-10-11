@@ -25,6 +25,8 @@
     font: 400 1rem/1.5 "IBM Plex Sans", system-ui, sans-serif;
     max-width: 34rem; margin: 0 auto; padding: 1.25rem;
   }
+  .back { color: var(--ink-soft); font-size: .88rem; text-decoration: none; }
+  .back:hover { color: var(--ink); text-decoration: underline; }
   h1 { font: 700 1.5rem/1.2 "Chakra Petch", system-ui, sans-serif; margin: .5rem 0 .25rem; }
   h2 { font: 700 1.15rem/1.2 "Chakra Petch", system-ui, sans-serif; margin: 1.75rem 0 .5rem; }
   .sub { color: var(--ink-soft); margin: 0 0 1.25rem; font-size: .95rem; }
@@ -71,11 +73,14 @@
   label.check { display: flex; gap: .5rem; align-items: flex-start; }
   label.check input { width: auto; margin-top: .3rem; }
   #log {
-    min-height: 4rem; max-height: 12rem; margin-top: 1.25rem; padding: .75rem;
+    min-height: 4rem; max-height: 12rem; margin-top: .75rem; padding: .75rem;
     background: var(--paper-2); border-radius: 10px; overflow: auto;
     font: .82rem/1.45 ui-monospace, "Cascadia Mono", Menlo, monospace; white-space: pre-wrap; word-break: break-word;
   }
   #log:empty { display: none; }
+  .more { margin-top: 1.25rem; }
+  .more summary { cursor: pointer; color: var(--ink-soft); font-size: .9rem; }
+  .more button { margin-top: .75rem; }
   .tx { color: var(--live); } .e { color: var(--warn); } .w { color: var(--caution); }
   .fw { margin-top: 2rem; padding: 1rem 1.1rem 1.1rem; background: var(--paper-2); border-radius: 14px; border-top: 4px solid var(--ink-soft); }
   .fw h2 { margin-top: 0; }
@@ -89,6 +94,7 @@
 </style>
 </head>
 <body>
+  <a class="back" href="../">&larr; Back to Totem Forge</a>
   <h1>TotemForge base</h1>
   <p class="sub">Connect the base with a USB-C cable. Works in Chrome or Edge on a computer or Android phone.</p>
 
@@ -108,7 +114,6 @@
       </label>
       <label class="check"><input id="dither" type="checkbox"> Dither</label>
       <button id="sendImg" class="primary" disabled>Send image</button>
-      <button id="send" disabled>Show demo</button>
     </div>
   </div>
   <p class="hint" id="hint"></p>
@@ -130,7 +135,11 @@
     <p class="note">Don't unplug the base while saving. A warning that the drive wasn't ejected properly is normal.</p>
   </section>
 
-  <div id="log" aria-live="polite"></div>
+  <details class="more">
+    <summary>Details</summary>
+    <button id="send" disabled>Show the built-in demo image</button>
+    <div id="log" aria-live="polite"></div>
+  </details>
 
 
 <script>
@@ -180,7 +189,7 @@
     busy = on;
     clearTimeout(busyTimer);
     if (on) busyTimer = setTimeout(() => { setBusy(false); setStatus('No reply from the base', 'err'); }, REFRESH_GUARD_MS);
-    $('send').textContent = on && label === 'demo' ? 'Refreshing…' : 'Show demo';
+    $('send').textContent = on && label === 'demo' ? 'Refreshing…' : 'Show the built-in demo image';
     $('sendImg').textContent = on && label === 'img' ? 'Sending…' : 'Send image';
     refreshButtons();
   }
@@ -233,9 +242,9 @@
   }
 
   // ---------- Firmware version ----------
-  // The page reads the version of the bundled .uf2 from the file itself (the firmware's
-  // "VERSION:x.y.z" reply string), so replacing the file is all an update needs.
-  const bundledVersion = (async () => {
+  // The bundled .uf2, downloaded once: its blob for saving and its version, read from the file
+  // itself (the firmware's "VERSION:x.y.z" reply string), so replacing the file is all an update needs.
+  const firmware = (async () => {
     try {
       const res = await fetch(FIRMWARE_URL, { cache: 'no-store' });
       if (!res.ok) return null;
@@ -248,9 +257,8 @@
         blocks.push({ addr: dv.getUint32(off + 12, true), data: buf.subarray(off + 32, off + 32 + size) });
       }
       blocks.sort((a, b) => a.addr - b.addr);
-      const text = blocks.map(b => String.fromCharCode(...b.data)).join('');
-      const m = text.match(/VERSION:([0-9A-Za-z.+-]+)\0/);
-      return m ? m[1] : null;
+      const m = blocks.map(b => String.fromCharCode(...b.data)).join('').match(/VERSION:([0-9A-Za-z.+-]+)\0/);
+      return { blob: new Blob([buf], { type: 'application/octet-stream' }), version: m ? m[1] : null };
     } catch { return null; }
   })();
 
@@ -273,12 +281,11 @@
   }
 
   async function checkVersion() {
-    const latest = await bundledVersion;
+    const latest = (await firmware)?.version;
     if (!transport || !baseVersion) return;
     if (latest && isOlder(baseVersion, latest)) {
       setStatus('Connected. Firmware ' + baseVersion + ' is out of date: update it below.', 'warn');
       needsUpdate('Your base has firmware ' + baseVersion + '. Version ' + latest + ' is available: follow the steps below.');
-      log('Firmware ' + baseVersion + ' on the base, ' + latest + ' available. Update it below.', 'w');
     } else {
       setStatus('Connected to TotemForge base, firmware ' + baseVersion, 'on');
       document.querySelector('.fw').classList.remove('attn');
@@ -355,7 +362,6 @@
       refreshButtons();
       if (e.name === 'NoBaseError') {
         setStatus('Your base needs a firmware update', 'warn');
-        log(e.message, 'w');
         needsUpdate('No base with firmware 2.0.0 or later was found. If yours is plugged in, follow these steps to update it.');
         return;
       }
@@ -413,7 +419,7 @@
         expectRestart = true;
         sendCommand('bootloader');
       } else {
-        log('Not connected over MIDI, restarting through USB serial instead. Pick the base in the list.');
+        log('Pick your base in the list to restart it.');
         await restartViaSerial();
       }
       log('The base is restarting. Wait for a drive named RPI-RP2, then do step 2.');
@@ -435,16 +441,8 @@
       log('Downloaded ' + FIRMWARE_NAME + '. Copy it from your downloads onto the RPI-RP2 drive (Files app on Android, Finder or File Explorer on a computer).');
     };
     if (!window.showSaveFilePicker) { download(FIRMWARE_URL); return; } // Android, Firefox, Safari
-    let blob;
-    try {
-      const res = await fetch(FIRMWARE_URL, { cache: 'no-store' });
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      blob = await res.blob();
-    } catch (e) {
-      log('Could not read the firmware for the save dialog (' + e.message + '), downloading it instead.', 'e');
-      download(FIRMWARE_URL);
-      return;
-    }
+    const fw = await firmware;
+    if (!fw) { download(FIRMWARE_URL); return; } // couldn't read it for the save dialog
     let handle;
     try {
       handle = await window.showSaveFilePicker({
@@ -452,13 +450,14 @@
         types: [{ description: 'Firmware', accept: { 'application/octet-stream': ['.uf2'] } }]
       });
     } catch (e) {
-      if (e.name !== 'AbortError') log(e.message, 'e');
+      if (e.name === 'SecurityError') download(FIRMWARE_URL); // dialog refused, e.g. click too long ago
+      else if (e.name !== 'AbortError') log(e.message, 'e');
       return;
     }
     setStatus('Saving firmware… don\'t unplug the base', 'on');
     try {
       const w = await handle.createWritable();
-      await w.write(blob);
+      await w.write(fw.blob);
       await w.close();
       log('Firmware saved. If you saved it on RPI-RP2, the base restarts by itself in a few seconds.');
     } catch (e) {
