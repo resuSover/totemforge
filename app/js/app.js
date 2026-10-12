@@ -296,6 +296,7 @@ $('fab').onclick = () => openSheet(`
     <button class="item" data-a="photo"><span class="ico">🖼</span><span>Photo or image<small>From your photos or files</small></span></button>`,
   s => s.querySelectorAll('button.item').forEach(b => b.onclick = () => {
     closeSheet();
+    if (iosFiles()) return b.dataset.a === 'photo' ? pickIosPhoto() : pickIosPack();
     $(b.dataset.a === 'photo' ? 'filePick' : 'packPick').click();
   }));
 
@@ -628,7 +629,7 @@ function renderSettings() {
     b.onclick = () => { settings.backupEvery = +b.dataset.v; settings.remindAt = 0; saveSettings(); renderSettings(); renderBanner(); };
   });
   $('setBackup').onclick = () => exportPortraits(portraits, true);
-  $('setRestore').onclick = () => $('packPick').click();
+  $('setRestore').onclick = () => iosFiles() ? pickIosPack() : $('packPick').click();
   body.querySelectorAll('#setSort button').forEach(b => {
     b.setAttribute('aria-pressed', settings.sort === b.dataset.v);
     b.onclick = () => { settings.sort = b.dataset.v; saveSettings(); renderSettings(); renderGallery(); };
@@ -737,6 +738,18 @@ async function openImage(f) {
                fill: 'colour', adjust: { brightness: 0, dither: true }, overlay: null, createdAt: 0, lastUsed: 0, thumb: null }, true);
 }
 $('filePick').onchange = e => { const f = e.target.files[0]; e.target.value = ''; if (f) openImage(f); };
+// iPhone: the shell opens Photos or Files itself. One tap on a photo picks it (no menu first, no Add
+// button), and Files offers .tfc and .zip files (the browser's picker can't always tell .tfc apart)
+async function pickIos(op, open, failed) {
+  try {
+    const got = await iosFiles().postMessage({ op });
+    if (!got) return;                                          // cancelled
+    const b = await (await fetch(got.url)).blob();
+    open(new File([b], got.name, { type: b.type }));
+  } catch { toast(failed); }
+}
+const pickIosPhoto = () => pickIos('pickPhoto', openImage, "Couldn't open that photo.");
+const pickIosPack = () => pickIos('pickPack', importFile, "Couldn't open that file.");
 
 // Files from outside the app (dropped on the window, "Open in" on iPhone, shared on Android):
 // an image opens in the editor, a .tfc file in the import preview

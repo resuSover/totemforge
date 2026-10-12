@@ -12,7 +12,7 @@
   }
   [hidden] { display: none !important; }
   html, body { height: 100%; margin: 0; }
-  html { -webkit-text-size-adjust: 100%; }
+  html { -webkit-text-size-adjust: 100%; touch-action: pan-x pan-y; }   /* scrolling only: no pinch or double-tap zoom (the crop view has its own) */
   /* the top inset keeps clear of the iPhone status bar; bottom insets are handled per element */
   body { background: var(--bg); color: var(--fg); font: 400 16px/1.45 var(--body);
          padding-top: env(safe-area-inset-top, 0px); box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
