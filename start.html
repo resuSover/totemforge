@@ -12,9 +12,7 @@
 <meta property="og:title" content="Totem Forge: Quick Start Guide">
 <meta property="og:description" content="Get your Totem Forge set up and running in minutes: unbox, install the app, load art, and start playing.">
 <meta property="og:url" content="https://totemforge.nl/start.html">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&amp;family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;1,400&amp;display=swap" rel="stylesheet">
+<link href="assets/fonts.css" rel="stylesheet">
 <style>
   :root {
     --night: #120a05;
@@ -319,14 +317,14 @@
 <footer>
   <img src="assets/logo-horizontal.png" alt="Totem Forge">
   <p>A project by resuSover · © 2026 Totem Forge. All rights reserved.<br>
-The Netherlands · KvK: 42061826</p>
+The Netherlands · KvK: 42061826 · <a href="terms.html" style="color:inherit">Terms of use</a> · <a href="privacy.html" style="color:inherit">Privacy policy</a></p>
 </footer>
 
 <script>
   (function () {
     var a = document.getElementById("feedbackMail");
     if (!a) return;
-    var addr = ["sales", "totemforge.nl"].join("@");
+    var addr = ["info", "totemforge.nl"].join("@");
     a.href = "mail" + "to:" + addr;
   })();
 

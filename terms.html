@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Terms of Use · Totem Forge</title>
+<link rel="canonical" href="https://totemforge.nl/terms.html">
+<meta name="description" content="The terms for using the Totem Forge app, website and art packs.">
+<link rel="icon" type="image/png" href="assets/logo_icon_32.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Totem Forge">
+<meta property="og:title" content="Totem Forge: Terms of Use">
+<meta property="og:description" content="The terms for using the Totem Forge app, website and art packs.">
+<meta property="og:url" content="https://totemforge.nl/terms.html">
+<link href="assets/fonts.css" rel="stylesheet">
+<style>
+  :root {
+    --night: #120a05;
+    --night-2: #1b0f08;
+    --panel: #1e1107;
+    --panel-2: #25160a;
+    --ember: #ff9d3d;
+    --gold: #f0c046;
+    --cream: #f3e7c9;
+    --cream-dim: #b9a482;
+    --cream-dimmer: #8a7659;
+    --red: #a32b14;
+    --red-hot: #c84a1d;
+    --red-deep: #6e1a0a;
+    --line: #3d2814;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--night);
+    color: var(--cream);
+    font-family: "Alegreya Sans", sans-serif;
+    font-size: 17px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  img { display: block; max-width: 100%; }
+  h1, h2, h3 { font-family: "Cinzel", serif; line-height: 1.12; text-wrap: balance; }
+  p { text-wrap: pretty; }
+  .wrap { max-width: 660px; margin: 0 auto; padding: 0 22px; }
+
+  .btn-forge {
+    display: inline-block;
+    font-family: "Cinzel", serif;
+    font-size: 19px;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-decoration: none;
+    text-align: center;
+    color: var(--gold);
+    text-shadow: 0 2px 2px rgba(0,0,0,0.5);
+    background: linear-gradient(180deg, var(--red-hot) 0%, var(--red) 48%, var(--red-deep) 100%);
+    border: 2px solid #d8a437;
+    border-radius: 8px;
+    padding: 14px 36px;
+    box-shadow: 0 5px 0 #471107, 0 10px 24px rgba(0,0,0,0.6);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+  }
+  .btn-forge:hover { transform: translateY(-2px); }
+  .btn-forge:active { transform: translateY(3px); box-shadow: 0 2px 0 #471107, 0 6px 12px rgba(0,0,0,0.5); }
+
+  .kicker {
+    display: block;
+    font-family: "Cinzel", serif;
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--ember);
+  }
+
+  /* ============ Page header ============ */
+  .pagehead {
+    padding: 22px 0 6px;
+    text-align: center;
+  }
+  .pagehead .back {
+    display: inline-block;
+    margin-bottom: 20px;
+    font-family: "Cinzel", serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--cream-dim);
+    text-decoration: none;
+  }
+  .pagehead .back:hover { color: var(--ember); }
+  .pagehead img.logo { height: 44px; width: auto; margin: 0 auto 26px; }
+  .pagehead h1 {
+    font-size: clamp(28px, 8vw, 42px);
+    font-weight: 900;
+    text-transform: uppercase;
+    color: #ffffff;
+  }
+  .pagehead h1 em { font-style: normal; color: var(--gold); }
+
+  /* ============ Steps ============ */
+  .guide { padding: 40px 0 20px; }
+  .step { padding: 26px 0; display: flex; gap: 18px; align-items: flex-start; }
+  .step + .step { border-top: 1px solid #251608; }
+  .step .num {
+    flex-shrink: 0;
+    width: 44px; height: 44px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: "Cinzel", serif;
+    font-size: 19px;
+    font-weight: 900;
+    color: var(--night);
+    background: linear-gradient(180deg, var(--gold), var(--ember));
+    border-radius: 50%;
+    box-shadow: 0 3px 0 #7a4a10, 0 6px 14px rgba(0,0,0,0.5);
+  }
+  .step .body { padding-top: 2px; }
+  .step h2 {
+    font-size: clamp(19px, 5vw, 23px);
+    font-weight: 900;
+    text-transform: uppercase;
+    color: var(--cream);
+  }
+  .step .body p {
+    margin-top: 8px;
+    font-size: 16px;
+    color: var(--cream-dim);
+  }
+  .step .body p b { color: var(--cream); font-weight: 700; }
+  .step .body p a { color: var(--ember); text-decoration: underline; text-underline-offset: 3px; }
+  .step .body ul {
+    list-style: none;
+    margin-top: 10px;
+    display: grid;
+    gap: 6px;
+  }
+  .step .body ul li {
+    position: relative;
+    padding-left: 20px;
+    font-size: 15.5px;
+    color: var(--cream-dim);
+  }
+  .step .body ul li b { color: var(--cream); font-weight: 700; }
+  .step .body ul li a { color: var(--ember); text-decoration: underline; text-underline-offset: 3px; }
+  .step .body ul li::before {
+    content: "";
+    position: absolute; left: 2px; top: 8px;
+    width: 7px; height: 7px;
+    transform: rotate(45deg);
+    background: var(--ember);
+    border-radius: 1px;
+  }
+  .step .body ol {
+    list-style: none;
+    counter-reset: substep;
+    margin-top: 10px;
+    display: grid;
+    gap: 8px;
+  }
+  .step .body ol li {
+    position: relative;
+    padding-left: 26px;
+    font-size: 15.5px;
+    color: var(--cream-dim);
+    counter-increment: substep;
+  }
+  .step .body ol li::before {
+    content: counter(substep) ".";
+    position: absolute;
+    left: 0; top: 0;
+    font-family: "Cinzel", serif;
+    font-weight: 700;
+    color: var(--ember);
+  }
+  .step .body .btn-forge {
+    margin-top: 14px;
+    font-size: 15px;
+    padding: 11px 24px;
+  }
+  .step-video { margin-top: 16px; }
+  .step-video video {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: 14px;
+    border: 1.5px solid #4d3014;
+    background: var(--night-2);
+    box-shadow: 0 14px 34px rgba(0,0,0,0.5);
+  }
+  .step-video.square video { aspect-ratio: 1 / 1; }
+
+  /* ============ Closing ============ */
+  .closing {
+    margin-top: 20px;
+    padding: 40px 0 56px;
+    text-align: center;
+    background:
+      radial-gradient(120% 90% at 50% 110%, rgba(200, 74, 29, 0.22), transparent 60%),
+      var(--night-2);
+    border-top: 1px solid var(--line);
+  }
+  .closing h2 { font-size: clamp(22px, 6vw, 28px); font-weight: 900; text-transform: uppercase; }
+  .closing p { margin: 12px auto 0; max-width: 26em; color: var(--cream-dim); font-size: 15.5px; }
+  .closing p a { color: var(--ember); text-decoration: underline; text-underline-offset: 3px; }
+  .closing .btn-forge { margin-top: 20px; font-size: 15px; padding: 11px 24px; }
+
+  footer { padding: 28px 0 40px; text-align: center; background: var(--night); }
+  footer img { height: 72px; width: auto; margin: 0 auto 10px; }
+  footer p { font-size: 13.5px; color: #7a6448; }
+
+  @media (min-width: 760px) {
+    footer img { height: 36px; }
+  }
+  /* ============ Terms ============ */
+  .terms { padding: 36px 0 40px; max-width: 42em; }
+  .terms .updated { color: var(--cream-dimmer); font-size: 15px; margin: 0 0 20px; }
+  .terms h2 { font-size: 19px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--cream); margin: 28px 0 8px; }
+  .terms p, .terms li { color: var(--cream-dim); font-size: 16.5px; }
+  .terms p + p { margin-top: 10px; }
+  .terms ul { margin: 8px 0 0 1.2em; display: grid; gap: 6px; }
+  .terms a { color: var(--ember); text-decoration: underline; text-underline-offset: 3px; }
+  footer .links a { color: var(--cream-dim); }
+</style>
+</head>
+<body>
+
+<main>
+  <div class="wrap pagehead">
+    <a class="back" href="index.html">&larr; Back to Totem Forge</a>
+    <img class="logo" src="assets/logo-horizontal.png" alt="Totem Forge">
+    <h1>TERMS OF <em>USE</em></h1>
+  </div>
+
+  <section class="terms wrap" aria-label="Terms of use">
+    <p class="updated">Last updated: 12 October 2026</p>
+
+    <h2>Who we are</h2>
+    <p>Totem Forge is a project by resuSover, the Netherlands (KvK 42061826). Questions: <span id="termsMail">info@totemforge.nl</span>.</p>
+
+    <h2>Copyright</h2>
+    <p>© 2026 Totem Forge. All rights reserved. The Totem Forge app, its code and design, the firmware, the logo and the art packs are protected by copyright.</p>
+    <p>You may use them with your own Totem Forge products. Without our written permission you may not copy, modify, redistribute or sell them, or use them to build a competing product.</p>
+
+    <h2>Your images</h2>
+    <ul>
+      <li>Only use images you have the right to use.</li>
+      <li>Your images stay on your device. The app doesn't upload or collect them (see the <a href="privacy.html">privacy policy</a>).</li>
+      <li>You are responsible for the images you put on your totems.</li>
+    </ul>
+
+    <h2>Art packs</h2>
+    <p>Art packs, free or paid, are for personal, non-commercial use with your totems. Don't resell or share them.</p>
+
+    <h2>The app</h2>
+    <p>The app is provided as it is, without guarantees that it is free of errors. Your gallery is stored only on your device, so keep a backup. To the extent the law allows, we are not liable for indirect damage or lost data.</p>
+    <p>These terms don't limit your statutory rights as a consumer for the products you buy from us.</p>
+
+    <h2>Changes</h2>
+    <p>We may update these terms. The date at the top shows the latest version. Dutch law applies.</p>
+  </section>
+</main>
+
+<footer>
+  <img src="assets/logo-horizontal.png" alt="Totem Forge">
+  <p>A project by resuSover · © 2026 Totem Forge. All rights reserved.<br>
+The Netherlands · KvK: 42061826 · <a href="terms.html" style="color:inherit">Terms of use</a> · <a href="privacy.html" style="color:inherit">Privacy policy</a></p>
+</footer>
+</body>
+</html>
