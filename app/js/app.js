@@ -61,8 +61,38 @@ function show(id) {
   }
   if (id === 'gallery') current = null;
   renderGallery();
+  syncHistory();
 }
 window.addEventListener('resize', () => { show(currentScreen); if (currentScreen === 'editor') placeBezel(); });
+
+// Back (Android's button or gesture, the browser's arrow) walks the page history. Anywhere but the
+// plain gallery one extra entry is kept, so Back takes one step inside the app (closes a sheet,
+// leaves selecting, cancels the editor, returns to the gallery) instead of closing it. Back in
+// the app itself drops that entry again, so Back on the gallery still closes the app.
+const atGallery = () => currentScreen === 'gallery' && !selecting && $('sheet').hidden;
+let backEntry = false, dropping = false, syncQueued = false;
+function syncHistory() {
+  // after the current step, so closing a sheet and opening a screen in one tap is one change
+  if (syncQueued) return;
+  syncQueued = true;
+  setTimeout(() => {
+    syncQueued = false;
+    if (dropping) return;   // the popstate of history.back() syncs again
+    if (!atGallery() && !backEntry) { history.pushState({ back: true }, ''); backEntry = true; }
+    else if (atGallery() && backEntry) { backEntry = false; dropping = true; history.back(); }
+  });
+}
+function stepBack() {
+  if (!$('sheet').hidden) $('scrim').onclick();
+  else if (selecting) $('selCancel').onclick();
+  else if (currentScreen === 'editor') $('eCancel').onclick();
+  else if (currentScreen !== 'gallery') show('gallery');
+}
+window.addEventListener('popstate', () => {
+  if (dropping) dropping = false;
+  else { backEntry = false; stepBack(); }
+  syncHistory();
+});
 
 // ---------- gallery ----------
 const filter = { q: '', mode: 'all', untagged: false };
@@ -208,6 +238,7 @@ function syncSelect() {
   $('fab').hidden = selecting; $('protoBtn').hidden = selecting || !PROTO;
   $('selCount').textContent = `${selected.size} selected`;
   renderGallery();
+  syncHistory();
 }
 function longPress(el, fn) {
   let t = null;
@@ -277,8 +308,8 @@ function manageTags() {
 }
 
 // ---------- sheets and toast ----------
-function openSheet(html, bind) { $('sheet').innerHTML = html; $('sheet').hidden = false; $('scrim').hidden = false; bind && bind($('sheet')); }
-function closeSheet() { $('sheet').hidden = true; $('scrim').hidden = true; }
+function openSheet(html, bind) { $('sheet').innerHTML = html; $('sheet').hidden = false; $('scrim').hidden = false; bind && bind($('sheet')); syncHistory(); }
+function closeSheet() { $('sheet').hidden = true; $('scrim').hidden = true; syncHistory(); }
 $('scrim').onclick = closeSheet;
 let toastTimer = null;
 function toast(text, action, actionLabel = 'Undo') {
@@ -618,7 +649,7 @@ function renderSettings() {
       <a class="secondary" style="text-align:center;text-decoration:none" href="https://totemforge.nl/appdemo/" target="_blank" rel="noopener">Update firmware</a></div>` : ''}
     <div class="group"><h3>About</h3>
       <div class="rows">
-        <div class="srow"><span class="k">App version</span><span class="v">0.1 (test build)</span></div>
+        <div class="srow"><span class="k">App version</span><span class="v">${escapeHtml(window.totemShell?.version || 'Web app')}</span></div>
         <div class="srow"><span class="k">Base firmware</span><span class="v">${escapeHtml(fw)}</span></div>
         <div class="srow"><span class="k">Contact</span><span class="v">info@totemforge.nl</span></div>
         <div class="srow"><a href="https://totemforge.nl/terms.html" target="_blank" rel="noopener">Terms of use</a><a href="https://totemforge.nl/privacy.html" target="_blank" rel="noopener">Privacy policy</a><a href="https://totemforge.nl/" target="_blank" rel="noopener">totemforge.nl</a></div>
