@@ -362,12 +362,36 @@ $('fab').onclick = () => openSheet(`
 
 $('menuBtn').onclick = () => openSheet(`
     <button class="item" data-a="select"><span class="ico">☑</span><span>Select portraits</span></button>
-    <button class="item" data-a="settings"><span class="ico">⚙</span><span>Settings<small>Order, backup, firmware, about</small></span></button>`,
+    <button class="item" data-a="settings"><span class="ico">⚙</span><span>Settings<small>Order, backup, firmware, about</small></span></button>
+    <button class="item" data-a="help"><span class="ico">?</span><span>Help & feedback<small>Quick start, Discord, email</small></span></button>`,
   s => s.querySelectorAll('button.item').forEach(b => b.onclick = () => {
     closeSheet();
     if (b.dataset.a === 'select') { selecting = true; syncSelect(); }
+    else if (b.dataset.a === 'help') helpSheet();
     else { renderSettings(); show('settings'); }
   }));
+
+// ---------- help and feedback ----------
+const DISCORD = 'https://discord.gg/fgyvRsuTGd', EMAIL = 'info@totemforge.nl';
+// "iPhone · iOS 18.2" from the iOS shell; in a browser the system and browser from its user agent
+function deviceInfo() {
+  if (window.totemShell?.device) return window.totemShell.device;
+  const ua = navigator.userAgent;
+  const system = (ua.match(/Android [\d.]+/) || [/Windows/.test(ua) ? 'Windows' : /Mac OS X/.test(ua) ? 'Mac' : /Linux/.test(ua) ? 'Linux' : 'unknown system'])[0];
+  const browser = (ua.match(/Edg\/\d+/) || ua.match(/Chrome\/\d+/) || ua.match(/Firefox\/\d+/) || ua.match(/Version\/[\d.]+(?= .*Safari)/) || ['browser'])[0]
+    .replace(/^Edg\//, 'Edge ').replace(/^Chrome\//, 'Chrome ').replace(/^Firefox\//, 'Firefox ').replace(/^Version\//, 'Safari ');
+  return `${system} · ${browser}`;
+}
+// The email starts with a line about the app, device and base, so a problem can be answered at once;
+// people see it before sending (nothing is sent by the app itself)
+function helpSheet() {
+  const about = `Totem Forge ${window.totemShell?.version || 'web app'} · ${deviceInfo()} · base firmware ${base?.version || 'not known yet'}`;
+  const mail = `mailto:${EMAIL}?subject=${encodeURIComponent('Totem Forge feedback')}&body=${encodeURIComponent(`\n\n\n--\n${about}`)}`;
+  openSheet(`<h3>Help & feedback</h3>
+    <a class="item" href="https://totemforge.nl/start.html" target="_blank" rel="noopener"><span class="ico">📖</span><span>Quick start and FAQ<small>Setting up and using your totems</small></span></a>
+    <a class="item" href="${DISCORD}" target="_blank" rel="noopener"><span class="ico">💬</span><span>Discord<small>Questions, ideas and other players</small></span></a>
+    <a class="item" href="${escapeHtml(mail)}"><span class="ico">✉</span><span>Email us<small>${EMAIL}</small></span></a>`);
+}
 
 // ---------- art packs and backups (.tfc) ----------
 const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
@@ -680,7 +704,7 @@ function renderSettings() {
       <div class="rows">
         <div class="srow"><span class="k">App version</span><span class="v">${escapeHtml(window.totemShell?.version || 'Web app')}</span></div>
         <div class="srow"><span class="k">Base firmware</span><span class="v">${escapeHtml(fw)}</span></div>
-        <div class="srow"><span class="k">Contact</span><span class="v">info@totemforge.nl</span></div>
+        <button class="srow" id="setHelp"><span class="k">Help & feedback</span><span class="v">Quick start, Discord, email ›</span></button>
         <div class="srow"><a href="https://totemforge.nl/terms.html" target="_blank" rel="noopener">Terms of use</a><a href="https://totemforge.nl/privacy.html" target="_blank" rel="noopener">Privacy policy</a><a href="https://totemforge.nl/" target="_blank" rel="noopener">totemforge.nl</a></div>
       </div>
       <p class="hint">© 2026 Totem Forge. All rights reserved.</p></div>`;
@@ -690,6 +714,7 @@ function renderSettings() {
   });
   $('setBackup').onclick = () => exportPortraits(portraits, true);
   $('setRestore').onclick = () => iosFiles() ? pickIosPack() : $('packPick').click();
+  $('setHelp').onclick = helpSheet;
   body.querySelectorAll('#setSort button').forEach(b => {
     b.setAttribute('aria-pressed', settings.sort === b.dataset.v);
     b.onclick = () => { settings.sort = b.dataset.v; saveSettings(); renderSettings(); renderGallery(); };
