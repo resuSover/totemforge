@@ -65,23 +65,51 @@ function show(id) {
 }
 window.addEventListener('resize', () => { show(currentScreen); if (currentScreen === 'editor') placeBezel(); });
 
-// Back (Android's button or gesture, the browser's arrow) walks the page history. Anywhere but the
-// plain gallery one extra entry is kept, so Back takes one step inside the app (closes a sheet,
-// leaves selecting, cancels the editor, returns to the gallery) instead of closing it. Back in
-// the app itself drops that entry again, so Back on the gallery still closes the app.
-const atGallery = () => currentScreen === 'gallery' && !selecting && $('sheet').hidden;
-let backEntry = false, dropping = false, syncQueued = false;
+// Back (Android's button or gesture, the browser's arrow) walks the page history, so the history
+// follows how deep the app is: the gallery 0, a portrait or Settings 1, the editor of a portrait 2,
+// and an open sheet or selecting one more. A step in pushes an entry, Back pops it and the app
+// steps back to match, and going back in the app itself pops entries with history.go.
+// Chrome's Back skips an entry when the page pushed the next one without a tap in between (it
+// stops pages from trapping Back), so entries are pushed only after a tap, never on Back: a step
+// in without a tap (a long press, the finger still down) waits for the next one.
+const entry = () => ({ level: history.state?.level || 0, index: history.state?.index || 0 });
+const levels = [];          // level of each entry of the app's history, by index
+let tapped = false, waiting = false, going = false, syncQueued = false;
+function depth() {
+  let d = currentScreen === 'gallery' ? 0 : currentScreen === 'editor' && !isNew && current ? 2 : 1;
+  if (selecting) d++;
+  if (!$('sheet').hidden) d++;
+  return d;
+}
 function syncHistory() {
   // after the current step, so closing a sheet and opening a screen in one tap is one change
   if (syncQueued) return;
   syncQueued = true;
   setTimeout(() => {
-    syncQueued = false;
-    if (dropping) return;   // the popstate of history.back() syncs again
-    if (!atGallery() && !backEntry) { history.pushState({ back: true }, ''); backEntry = true; }
-    else if (atGallery() && backEntry) { backEntry = false; dropping = true; history.back(); }
+    syncQueued = false; waiting = false;
+    if (going) return;      // history.go's popstate syncs again
+    const want = depth(), { level, index } = entry();
+    levels[index] = level;
+    if (want > level) {
+      if (!tapped) { waiting = true; return; }
+      tapped = false;
+      history.pushState({ level: want, index: index + 1 }, '');
+      levels[index + 1] = want; levels.length = index + 2;
+    } else if (want < level && index === 0) {
+      history.replaceState({ level: want, index }, '');    // never back out of the app
+    } else if (want < level) {
+      // back to the nearest entry that isn't deeper; if it's less deep, the popstate pushes again
+      let to = index - 1;
+      while (to > 0 && (levels[to] || 0) > want) to--;
+      going = true; history.go(to - index);
+    }
   });
 }
+// What counts as a tap for Chrome (a user activation)
+const tap = () => { tapped = true; if (waiting) syncHistory(); };
+window.addEventListener('pointerdown', e => { if (e.pointerType === 'mouse') tap(); }, true);
+window.addEventListener('pointerup', e => { if (e.pointerType !== 'mouse') tap(); }, true);
+window.addEventListener('keydown', e => { if (e.key !== 'Escape') tap(); }, true);
 function stepBack() {
   if (!$('sheet').hidden) $('scrim').onclick();
   else if (selecting) $('selCancel').onclick();
@@ -89,8 +117,9 @@ function stepBack() {
   else if (currentScreen !== 'gallery') show('gallery');
 }
 window.addEventListener('popstate', () => {
-  if (dropping) dropping = false;
-  else { backEntry = false; stepBack(); }
+  if (going) going = false;
+  // usually one step; more when an entry waited for a tap that never came
+  else for (let i = 0; i < 4 && depth() > entry().level; i++) stepBack();
   syncHistory();
 });
 
