@@ -132,8 +132,9 @@
     <div class="panel" id="panelAdjust" hidden>
       <label class="field"><span>Brightness <output id="brightOut">0</output></span>
         <input type="range" id="bright" min="-100" max="100" value="0"></label>
-      <label class="switch"><span>Dither <span class="hint">smoother shading with the four inks</span></span>
-        <input type="checkbox" id="dither"></label>
+      <div class="field"><span>Dither</span>
+        <div class="seg" id="dither"><button data-v="none">None</button><button data-v="mild">Mild</button><button data-v="normal">Normal</button><button data-v="strong">Strong</button></div>
+        <p class="hint">Smoother shading with the four inks: dots of ink mix into in-between colours.</p></div>
     </div>
     <div class="panel" id="panelText" hidden>
       <label class="field"><span>Text on the screen</span>

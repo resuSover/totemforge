@@ -3,7 +3,7 @@
 // Totem Forge app: the screens. Imaging, protocol, summon flow and storage live in core/,
 // the MIDI transports in platform/. Add ?proto to the address for the prototype controls
 // (a simulated base that answers like the real firmware).
-import { W, H, INK_NAMES, SHOW, render, paint } from './core/imaging.js';
+import { W, H, INK_NAMES, SHOW, DITHER, ditherStep, render, paint } from './core/imaging.js';
 import { packImage } from './core/protocol.js';
 import { Base } from './core/base.js';
 import { openStore } from './core/store.js';
@@ -28,7 +28,7 @@ const memoryStore = { async loadAll() { return []; }, async save() {}, async rem
 let store = memoryStore;
 // Backup reminder: sinceBackup counts portraits added since the last full backup; the banner shows
 // once it reaches remindAt (backupEvery, pushed further by "Later"); backupEvery 0 is never
-const settings = { sort: 'newest', midiExplained: false, backupEvery: 25, sinceBackup: 0, remindAt: 0, lastBackup: 0 };
+const settings = { sort: 'newest', midiExplained: false, backupEvery: 5, sinceBackup: 0, remindAt: 0, lastBackup: 0 };
 const persist = (p, withPicture = false) => store.save(p, withPicture ? p.blob : undefined).catch(storageFailed);
 const saveSettings = () => store.saveSettings(settings).catch(storageFailed);
 function storageFailed() { toast("Couldn't save. Is the device out of storage?"); }
@@ -497,7 +497,7 @@ function renderBanner() {
   if (due) $('backupText').textContent = `You've added ${plural(settings.sinceBackup, 'portrait')} since ${settings.lastBackup ? 'your last backup' : 'you started'}. Your gallery is only on this device.`;
 }
 $('backupNow').onclick = () => exportPortraits(portraits, true);
-$('backupLater').onclick = () => { settings.remindAt = settings.sinceBackup + (settings.backupEvery || 25); saveSettings(); renderBanner(); };
+$('backupLater').onclick = () => { settings.remindAt = settings.sinceBackup + (settings.backupEvery || 5); saveSettings(); renderBanner(); };
 
 // ---------- prototype controls (?proto) ----------
 const failNames = { none: 'Works', unplugged: 'Base unplugged while sending', display: "Totem's screen not reached",
@@ -693,7 +693,7 @@ function renderSettings() {
       <div class="rows">
         <div class="srow"><span class="k">Last backup</span><span class="v">${settings.lastBackup ? new Date(settings.lastBackup).toLocaleDateString() : 'Never'}</span></div>
         <div class="srow"><span class="k">Remind me after</span>
-          <div class="seg" id="setRemind"><button data-v="10">10 new</button><button data-v="25">25 new</button><button data-v="50">50 new</button><button data-v="0">Never</button></div></div></div>
+          <div class="seg" id="setRemind"><button data-v="5">5 new</button><button data-v="10">10 new</button><button data-v="25">25 new</button><button data-v="0">Never</button></div></div></div>
       <p class="hint">Your gallery is stored only on this device. A backup is a .tfc file with all your portraits: keep it somewhere safe, or open it on another device to move your gallery.</p>
       <div class="btnrow"><button class="secondary" id="setBackup" ${portraits.length ? '' : 'disabled'}>Back up now</button>
         <button class="secondary" id="setRestore">Restore a backup</button></div></div>
@@ -729,7 +729,7 @@ function openEditor(p, fresh) {
   if (!draft.overlay) draft.overlay = { text: '', bar: 'black', textColour: 'yellow', position: 'bottom', push: 0 };
   $('eTitle').textContent = fresh ? 'New portrait' : 'Edit portrait';
   $('zoom').value = Math.round(draft.crop.zoom * 100);
-  $('bright').value = draft.adjust.brightness; $('dither').checked = draft.adjust.dither;
+  $('bright').value = draft.adjust.brightness; syncDither();
   $('ovText').value = draft.overlay.text; $('push').value = draft.overlay.push;
   selectTab('Crop'); show('editor'); syncEditor();
   requestAnimationFrame(placeBezel);
@@ -774,7 +774,9 @@ $('zoom').oninput = e => { draft.crop.zoom = e.target.value / 100; syncEditor();
 $('rotate').onclick = () => { draft.rot = ((draft.rot || 0) + 90) % 360; draft.crop.x = draft.crop.y = 0; syncEditor(); };
 $('cropReset').onclick = () => { draft.crop = { zoom: 1, x: 0, y: 0 }; draft.rot = 0; $('zoom').value = 100; syncEditor(); };
 $('bright').oninput = e => { draft.adjust.brightness = +e.target.value; syncEditor(); };
-$('dither').onchange = e => { draft.adjust.dither = e.target.checked; syncEditor(); };
+// No highlighted step: the portrait's numbers match none of them (an older or newer app's steps)
+const syncDither = () => $('dither').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === ditherStep(draft.adjust.dither)));
+$('dither').querySelectorAll('button').forEach(b => b.onclick = () => { draft.adjust.dither = DITHER[b.dataset.v]; syncDither(); syncEditor(); });
 $('ovText').oninput = e => { draft.overlay.text = e.target.value; syncEditor(); };
 $('push').oninput = e => { draft.overlay.push = +e.target.value; syncEditor(); };
 $('posTop').onclick = () => { draft.overlay.position = 'top'; syncEditor(); };
@@ -820,7 +822,7 @@ async function openImage(f) {
   const keep = s === 1 && f.size <= 3e6 && /^image\/(jpeg|png)$/.test(f.type);
   const blob = keep ? f : await new Promise(r => c.toBlob(r, 'image/jpeg', 0.9));
   openEditor({ id: newId(), tags: [], collection: null, img: c, blob, rot: 0, crop: { zoom: 1, x: 0, y: 0 },
-               fill: 'colour', adjust: { brightness: 0, dither: true }, overlay: null, createdAt: 0, lastUsed: 0, thumb: null }, true);
+               fill: 'colour', adjust: { brightness: 0, dither: DITHER.normal }, overlay: null, createdAt: 0, lastUsed: 0, thumb: null }, true);
 }
 $('filePick').onchange = e => { const f = e.target.files[0]; e.target.value = ''; if (f) openImage(f); };
 // iPhone: the shell opens Photos or Files itself. One tap on a photo picks it (no menu first, no Add

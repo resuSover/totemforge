@@ -1,6 +1,6 @@
 // © 2026 Totem Forge. All rights reserved.
 // Renders a portrait for the 88 x 184 e-ink screen:
-// master → rotate → crop + fill → brightness → 4 inks (CIE Lab, weakened dither) → crisp text bar.
+// master → rotate → crop + fill → brightness → 4 inks (CIE Lab, weakened dither in steps) → crisp text bar.
 // A portrait: { img (master), rot, crop: {zoom, x, y}, fill: 'colour'|'extend', adjust: {brightness, dither}, overlay }
 
 export const W = 88, H = 184;
@@ -29,8 +29,24 @@ function nearest(r, g, b) {
   }
   return best;
 }
-// Weakened Floyd–Steinberg: half strength, small errors not spread, values clamped
-function quantize(rgb, dither) {
+// Dither steps: the share of each pixel's colour error passed on to its neighbours (strength), once
+// the error is at least threshold. A portrait keeps the numbers, so retuning a step doesn't change it.
+export const DITHER = {
+  none: false,
+  mild: { strength: 0.15, threshold: 24 },
+  normal: { strength: 0.28, threshold: 24 },
+  strong: { strength: 0.5, threshold: 24 },
+};
+// adjust.dither is false, { strength, threshold }, or true from before the steps (Strong)
+const ditherOf = d => d === true ? DITHER.strong : d || null;
+// The step a portrait's dither matches, or null for numbers that match none
+export function ditherStep(d) {
+  const v = ditherOf(d);
+  return Object.keys(DITHER).find(k => v ? DITHER[k] && DITHER[k].strength === v.strength && DITHER[k].threshold === v.threshold : !DITHER[k]) || null;
+}
+// Weakened Floyd–Steinberg: part of the error, small errors not spread, values clamped
+function quantize(rgb, d) {
+  const dither = ditherOf(d);
   const idx = new Uint8Array(W * H), clamp = v => Math.max(0, Math.min(255, v));
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
     const p = y * W + x, j = p * 3;
@@ -38,8 +54,8 @@ function quantize(rgb, dither) {
     const k = nearest(r, g, b); idx[p] = k;
     if (!dither) continue;
     let er = r - TARGET[k][0], eg = g - TARGET[k][1], eb = b - TARGET[k][2];
-    if (Math.max(Math.abs(er), Math.abs(eg), Math.abs(eb)) < 24) continue;
-    er *= .5; eg *= .5; eb *= .5;
+    if (Math.max(Math.abs(er), Math.abs(eg), Math.abs(eb)) < dither.threshold) continue;
+    er *= dither.strength; eg *= dither.strength; eb *= dither.strength;
     const spread = (dx, dy, f) => {
       const xx = x + dx, yy = y + dy;
       if (xx < 0 || xx >= W || yy >= H) return;

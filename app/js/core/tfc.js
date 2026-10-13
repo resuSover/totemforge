@@ -36,11 +36,14 @@ export async function readTfc(file) {
   return { version, name: m.name || null, items };
 }
 
+// false, or { strength, threshold }; true (files from before the dither steps) renders as Strong
+const dither = d => d && typeof d === 'object'
+  ? { strength: Math.min(1, Math.max(0, +d.strength || 0)), threshold: Math.max(0, +d.threshold || 0) } : d === true;
 function fromV2(p) {
   return {
     id: String(p.id), tags: (p.tags || []).map(String), collection: p.collection || null,
     rot: p.rot || 0, crop: { zoom: 1, x: 0, y: 0, ...p.crop }, fill: p.fill === 'extend' ? 'extend' : 'colour',
-    adjust: { brightness: 0, dither: false, ...p.adjust },
+    adjust: { brightness: 0, ...p.adjust, dither: dither(p.adjust?.dither) },
     overlay: p.overlay ? { text: String(p.overlay.text || ''), bar: ink(p.overlay.bar, 'black'), textColour: ink(p.overlay.textColour, 'yellow'),
                            position: p.overlay.position === 'top' ? 'top' : 'bottom', push: +p.overlay.push || 0 } : null,
     createdAt: p.createdAt || Date.now(), lastUsed: p.lastUsed || 0
