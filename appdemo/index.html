@@ -85,9 +85,8 @@
   .fw h2 { margin-top: 0; }
   .fw.attn { border-top-color: var(--caution); box-shadow: 0 0 0 2px var(--caution); }
   .fw button { background: var(--paper); }
-  .steps { padding-left: 1.25rem; margin: .75rem 0 0; }
-  .steps li { margin-bottom: .9rem; }
-  .steps p { margin: 0 0 .4rem; font-size: .92rem; }
+  .fwlink { margin: .9rem 0 .6rem; background: var(--paper); text-decoration: none; }
+  .fw.attn .fwlink { background: var(--ink); color: var(--paper); }
   .note { color: var(--ink-soft); font-size: .85rem; margin: 0; }
   @media (prefers-reduced-motion: reduce) { .primary:active { transform: none; } }
 </style>
@@ -120,18 +119,8 @@
   <section class="fw" aria-labelledby="fwTitle">
     <h2 id="fwTitle">Firmware update</h2>
     <p class="note" id="fwInfo">Connect to check whether your base needs an update.</p>
-    <ol class="steps">
-      <li>
-        <p>Restart the base in update mode. A drive named <strong>RPI-RP2</strong> appears.</p>
-        <button id="bootloader">Restart in update mode</button>
-      </li>
-      <li>
-        <p>Save the firmware onto <strong>RPI-RP2</strong>. The base installs it and restarts.</p>
-        <button id="saveFw">Save firmware</button>
-      </li>
-      <li><p>Click <strong>Connect</strong> to check the new version.</p></li>
-    </ol>
-    <p class="note">Don't unplug the base while saving. A warning that the drive wasn't ejected properly is normal.</p>
+    <a class="filebtn fwlink" id="fwLink" href="../updater/">Open the firmware updater</a>
+    <p class="note">It walks you through the update step by step. It takes about a minute.</p>
   </section>
 
   <details class="more">
@@ -145,14 +134,12 @@
 (() => {
   const $ = id => document.getElementById(id);
   const logEl = $('log');
-  const RPI_VID = 0x2E8A;
   const REFRESH_GUARD_MS = 20000;
   // Panel memory layout: 88-pixel rows (Source_BITS), 184 rows (Gate_BITS), portrait
   const W = 88, H = 184;
   // 2-bit codes the firmware's Color_get() expects for black, white, yellow, red
   const CODES = [3, 0, 1, 2];
-  const FIRMWARE_URL = 'firmware/totemforge-base.uf2';
-  const FIRMWARE_NAME = 'totemforge-base.uf2';
+  const FIRMWARE_URL = '../updater/firmware/totemforge-base.uf2'; // published with the firmware updater
 
   // SysEx framing, see docs/phone-app-protocol.md in the firmware repo
   const SYSEX_MFR_ID = 0x7D, SYSEX_TEXT = 0x01, SYSEX_IMAGE = 0x02, SYSEX_REPLY = 0x03;
@@ -162,7 +149,6 @@
 
   let transport = null;
   let busy = false, busyTimer = null, handshakeTimer = null;
-  let expectRestart = false; // set when we asked the base to restart into the bootloader
   let baseVersion = null;     // reported by the connected base
 
   // ---------- UI helpers ----------
@@ -182,7 +168,6 @@
     $('disconnect').disabled = !transport;
     $('send').disabled = !transport || busy;
     $('sendImg').disabled = !transport || busy || !source;
-    $('bootloader').disabled = busy;
   }
   function setBusy(on, label) {
     busy = on;
@@ -241,8 +226,8 @@
   }
 
   // ---------- Firmware version ----------
-  // The bundled .uf2, downloaded once: its blob for saving and its version, read from the file
-  // itself (the firmware's "VERSION:x.y.z" reply string), so replacing the file is all an update needs.
+  // The updater's .uf2, downloaded once for its version, read from the file itself
+  // (the firmware's "VERSION:x.y.z" reply string), so replacing the file is all a release needs.
   const firmware = (async () => {
     try {
       const res = await fetch(FIRMWARE_URL, { cache: 'no-store' });
@@ -257,7 +242,7 @@
       }
       blocks.sort((a, b) => a.addr - b.addr);
       const m = blocks.map(b => String.fromCharCode(...b.data)).join('').match(/VERSION:([0-9A-Za-z.+-]+)\0/);
-      return { blob: new Blob([buf], { type: 'application/octet-stream' }), version: m ? m[1] : null };
+      return { version: m ? m[1] : null };
     } catch { return null; }
   })();
 
@@ -284,7 +269,7 @@
     if (!transport || !baseVersion) return;
     if (latest && isOlder(baseVersion, latest)) {
       setStatus('Connected. Firmware ' + baseVersion + ' is out of date: update it below.', 'warn');
-      needsUpdate('Your base has firmware ' + baseVersion + '. Version ' + latest + ' is available: follow the steps below.');
+      needsUpdate('Your base has firmware ' + baseVersion + '. Version ' + latest + ' is available: update it with the firmware updater.');
     } else {
       setStatus('Connected to TotemForge base, firmware ' + baseVersion, 'on');
       document.querySelector('.fw').classList.remove('attn');
@@ -300,7 +285,7 @@
     const input = [...access.inputs.values()].find(isBase);
     const output = [...access.outputs.values()].find(isBase);
     if (!input || !output) {
-      const e = new Error('No base with firmware 2.0.0 or later found. If it\'s plugged in, update it below.');
+      const e = new Error('No base with firmware 2.0.0 or later found. If it\'s plugged in, it needs a firmware update.');
       e.name = 'NoBaseError'; // older firmware has no MIDI, only USB serial
       throw e;
     }
@@ -331,13 +316,6 @@
   function lost(e) {
     transport?.close();
     transport = null;
-    if (expectRestart) {
-      expectRestart = false;
-      clearTimeout(handshakeTimer);
-      setBusy(false);
-      log('The base disconnected to restart in update mode.');
-      return;
-    }
     log('Connection lost: ' + (e?.message || e), 'e');
     clearTimeout(handshakeTimer);
     setBusy(false);
@@ -348,7 +326,6 @@
     setStatus('Connecting…');
     try {
       if (!navigator.requestMIDIAccess) throw new Error('This browser has no Web MIDI. Use Chrome or Edge.');
-      expectRestart = false;
       baseVersion = null;
       transport = await connectMidi();
       refreshButtons();
@@ -361,7 +338,7 @@
       refreshButtons();
       if (e.name === 'NoBaseError') {
         setStatus('Your base needs a firmware update', 'warn');
-        needsUpdate('No base with firmware 2.0.0 or later was found. If yours is plugged in, follow these steps to update it.');
+        needsUpdate('No base with firmware 2.0.0 or later was found. If yours is plugged in, it has the original firmware: update it once with the firmware updater.');
         return;
       }
       setStatus('Connection failed', 'err');
@@ -385,85 +362,6 @@
     if (!transport || busy) return;
     try { setBusy(true, 'demo'); sendCommand('show demo'); }
     catch (e) { lost(e); }
-  });
-
-  // ---------- Firmware update ----------
-  // Firmware with MIDI restarts on the "bootloader" command. Older firmware only has USB serial,
-  // where opening the port at 1200 baud and dropping DTR restarts it into the bootloader.
-  async function restartViaSerial() {
-    if ('serial' in navigator) {
-      const port = await navigator.serial.requestPort({ filters: [{ usbVendorId: RPI_VID }] });
-      await port.open({ baudRate: 1200 });
-      try { await port.setSignals({ dataTerminalReady: false }); } catch {}
-      try { await port.close(); } catch {}
-    } else if ('usb' in navigator) {
-      const device = await navigator.usb.requestDevice({ filters: [{ vendorId: RPI_VID }] });
-      await device.open();
-      if (device.configuration === null) await device.selectConfiguration(1);
-      const comm = device.configuration.interfaces.find(i => i.alternates[0].interfaceClass === 0x02);
-      if (!comm) throw new Error('No USB serial interface found on this device.');
-      await device.claimInterface(comm.interfaceNumber);
-      const ctrl = request => ({ requestType: 'class', recipient: 'interface', request, value: 0, index: comm.interfaceNumber });
-      await device.controlTransferOut(ctrl(0x20), new Uint8Array([0xB0, 0x04, 0, 0, 0, 0, 8])); // 1200 baud, 8N1
-      try { await device.controlTransferOut(ctrl(0x22)); } catch {} // DTR off; the base may reset before answering
-      try { await device.close(); } catch {}
-    } else {
-      throw new Error('This browser can\'t restart the base. Use Chrome or Edge.');
-    }
-  }
-
-  $('bootloader').addEventListener('click', async () => {
-    try {
-      if (transport) {
-        expectRestart = true;
-        sendCommand('bootloader');
-      } else {
-        log('Pick your base in the list to restart it.');
-        await restartViaSerial();
-      }
-      log('The base is restarting. Wait for a drive named RPI-RP2, then do step 2.');
-      setStatus('Waiting for the RPI-RP2 drive…', 'on');
-    } catch (e) {
-      if (e.name === 'NotFoundError') { log('No device picked.'); return; }
-      setStatus('Could not restart the base', 'err');
-      log(e.message, 'e');
-    }
-  });
-
-  $('saveFw').addEventListener('click', async () => {
-    // Plain download, then the user copies the file onto the drive
-    const download = href => {
-      const a = document.createElement('a');
-      a.href = href;
-      a.download = FIRMWARE_NAME;
-      a.click();
-      log('Downloaded ' + FIRMWARE_NAME + '. Copy it from your downloads onto the RPI-RP2 drive (Files app on Android, Finder or File Explorer on a computer).');
-    };
-    if (!window.showSaveFilePicker) { download(FIRMWARE_URL); return; } // Android, Firefox, Safari
-    const fw = await firmware;
-    if (!fw) { download(FIRMWARE_URL); return; } // couldn't read it for the save dialog
-    let handle;
-    try {
-      handle = await window.showSaveFilePicker({
-        suggestedName: FIRMWARE_NAME,
-        types: [{ description: 'Firmware', accept: { 'application/octet-stream': ['.uf2'] } }]
-      });
-    } catch (e) {
-      if (e.name === 'SecurityError') download(FIRMWARE_URL); // dialog refused, e.g. click too long ago
-      else if (e.name !== 'AbortError') log(e.message, 'e');
-      return;
-    }
-    setStatus('Saving firmware… don\'t unplug the base', 'on');
-    try {
-      const w = await handle.createWritable();
-      await w.write(fw.blob);
-      await w.close();
-      log('Firmware saved. If you saved it on RPI-RP2, the base restarts by itself in a few seconds.');
-    } catch (e) {
-      // The base restarts as soon as it has the whole file, so the save often can't finish cleanly
-      log('The browser reported "' + e.message + '" while finishing the save. If the RPI-RP2 drive disappeared, the update worked.');
-    }
-    setStatus('Firmware saved. Click Connect once the base has restarted.', 'on');
   });
 
   // ---------- Image: crop, quantize, pack ----------
@@ -667,7 +565,7 @@
   loadLogo();
 
   if (location.protocol === 'file:') {
-    log('This page was opened as a local file. Firmware update needs it served over http(s), e.g. totemforge.nl/appdemo.', 'e');
+    log('This page was opened as a local file. It needs to be served over http(s), e.g. totemforge.nl/appdemo.', 'e');
   }
   if (!navigator.requestMIDIAccess) {
     setStatus('Browser not supported', 'err');

@@ -718,11 +718,11 @@ function firmwareSheet() {
     openSheet(`<h3>One-time update for your base</h3>
       <p>Your base has older firmware and needs a one-minute update before it can show images. The update page walks you through it.</p>
       <div class="actions"><button class="secondary" id="fwLater">Later</button>
-        <a class="primary" style="text-align:center;text-decoration:none" href="https://totemforge.nl/appdemo/" target="_blank" rel="noopener">Open the update page</a></div>`,
+        <a class="primary" style="text-align:center;text-decoration:none" href="https://totemforge.nl/updater/" target="_blank" rel="noopener">Open the update page</a></div>`,
       s => s.querySelector('#fwLater').onclick = closeSheet);
   } else {
     openSheet(`<h3>One-time update for your base</h3>
-      <p>Your base has older firmware. Update it once from a PC or Mac: open <strong>totemforge.nl/appdemo</strong> in Chrome or Edge, plug in the base and follow the steps. It takes about a minute.</p>
+      <p>Your base has older firmware. Update it once from a PC or Mac: open <strong>totemforge.nl/updater</strong> in Chrome or Edge, plug in the base and follow the steps. It takes about a minute.</p>
       <div class="actions"><button class="primary" id="fwOk">Got it</button></div>`, s => s.querySelector('#fwOk').onclick = closeSheet);
   }
 }
@@ -745,7 +745,7 @@ function renderSettings() {
         <button class="secondary" id="setRestore">Restore a backup</button></div></div>
     ${platform() === 'desktop' ? `<div class="group"><h3>Base firmware</h3>
       <div class="rows"><div class="srow"><span class="k">Firmware</span><span class="v">${escapeHtml(fw)}</span></div></div>
-      <a class="secondary" style="text-align:center;text-decoration:none" href="https://totemforge.nl/appdemo/" target="_blank" rel="noopener">Update firmware</a></div>` : ''}
+      <a class="secondary" style="text-align:center;text-decoration:none" href="https://totemforge.nl/updater/" target="_blank" rel="noopener">Update firmware</a></div>` : ''}
     <div class="group"><h3>About</h3>
       <div class="rows">
         <div class="srow"><span class="k">App version</span><span class="v">${escapeHtml(window.totemShell?.version || 'Web app')}</span></div>

@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<!-- © 2026 Totem Forge. All rights reserved. See https://totemforge.nl/terms.html -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Update your base · Totem Forge</title>
+<link rel="canonical" href="https://totemforge.nl/updater/">
+<meta name="description" content="Update the firmware of your Totem Forge base in about a minute, from Chrome or Edge on a PC or Mac.">
+<link rel="icon" type="image/png" href="../assets/logo_icon_32.png">
+<link href="../assets/fonts.css" rel="stylesheet">
+<style>
+  :root {
+    --night: #120a05;
+    --night-2: #1b0f08;
+    --panel: #1e1107;
+    --panel-2: #25160a;
+    --ember: #ff9d3d;
+    --gold: #f0c046;
+    --cream: #f3e7c9;
+    --cream-dim: #b9a482;
+    --cream-dimmer: #8a7659;
+    --red: #a32b14;
+    --red-hot: #c84a1d;
+    --red-deep: #6e1a0a;
+    --line: #3d2814;
+    --ok: #7fbf7a;
+    --danger: #e0806d;
+    color-scheme: dark;
+  }
+  [hidden] { display: none !important; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--night);
+    color: var(--cream);
+    font-family: "Alegreya Sans", system-ui, sans-serif;
+    font-size: 17px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  h1, h2, h3 { font-family: "Cinzel", serif; line-height: 1.15; text-wrap: balance; }
+  p { text-wrap: pretty; }
+  a { color: var(--ember); text-underline-offset: 3px; }
+  b, strong { color: var(--cream); font-weight: 700; }
+  :focus-visible { outline: 2px solid var(--ember); outline-offset: 3px; }
+  .wrap { max-width: 600px; margin: 0 auto; padding: 0 20px; }
+
+  /* ============ Page header ============ */
+  .pagehead { padding: 22px 0 4px; text-align: center; }
+  .pagehead .back {
+    display: inline-block; margin-bottom: 20px;
+    font-family: "Cinzel", serif; font-size: 13px; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--cream-dim); text-decoration: none;
+  }
+  .pagehead .back:hover { color: var(--ember); }
+  .pagehead img.logo { display: block; height: 44px; width: auto; margin: 0 auto 22px; }
+  .pagehead h1 { font-size: clamp(28px, 8vw, 40px); font-weight: 900; text-transform: uppercase; color: #fff; }
+  .pagehead h1 em { font-style: normal; color: var(--gold); }
+  .pagehead .lead { margin: 10px auto 0; max-width: 28em; color: var(--cream-dim); font-size: 16px; }
+
+  /* ============ Progress ============ */
+  .stepper { list-style: none; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 28px 0 18px; }
+  .stepper li {
+    position: relative; padding-top: 14px; text-align: center;
+    font-family: "Cinzel", serif; font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--cream-dimmer);
+  }
+  .stepper li::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 4px; border-radius: 2px; background: var(--line); }
+  .stepper li.done { color: var(--cream-dim); }
+  .stepper li.done::before { background: var(--ember); }
+  .stepper li.current { color: var(--gold); }
+  .stepper li.current::before { background: linear-gradient(90deg, var(--ember), var(--gold)); }
+
+  /* ============ Cards ============ */
+  .card {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 16px;
+    padding: 26px 22px 24px; box-shadow: 0 14px 34px rgba(0,0,0,0.45);
+  }
+  .card h2 { font-size: clamp(20px, 5.5vw, 24px); font-weight: 900; text-transform: uppercase; color: var(--cream); }
+  .card h2 + p, .card p + p, .card p + ul, .card ul + p { margin-top: 10px; }
+  .card p { color: var(--cream-dim); font-size: 16px; }
+  .card ul { list-style: none; display: grid; gap: 6px; }
+  .card ul li { position: relative; padding-left: 20px; color: var(--cream-dim); font-size: 15.5px; }
+  .card ul li::before {
+    content: ""; position: absolute; left: 2px; top: 9px; width: 7px; height: 7px;
+    transform: rotate(45deg); background: var(--ember); border-radius: 1px;
+  }
+  .card .badge {
+    display: inline-flex; align-items: center; justify-content: center; width: 54px; height: 54px; margin-bottom: 14px;
+    border-radius: 50%; font-size: 26px; font-weight: 900; color: var(--night);
+    background: linear-gradient(180deg, var(--gold), var(--ember)); box-shadow: 0 3px 0 #7a4a10, 0 6px 14px rgba(0,0,0,0.5);
+  }
+  .card .badge.ok { background: linear-gradient(180deg, #a6dca1, var(--ok)); box-shadow: 0 3px 0 #3c6b38, 0 6px 14px rgba(0,0,0,0.5); }
+  .card .badge.warn { background: linear-gradient(180deg, #f2a090, var(--danger)); box-shadow: 0 3px 0 #7a2f22, 0 6px 14px rgba(0,0,0,0.5); }
+  .versions { display: flex; align-items: center; gap: 12px; margin-top: 16px; flex-wrap: wrap; }
+  .versions .v { background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; padding: 8px 14px; }
+  .versions .v small { display: block; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cream-dimmer); }
+  .versions .v span { font-weight: 700; font-variant-numeric: tabular-nums; }
+  .versions .v.new span { color: var(--gold); }
+  .versions .arrow { color: var(--ember); font-size: 22px; }
+  .drive {
+    display: inline-block; padding: 0 7px; border-radius: 6px; background: var(--panel-2); border: 1px solid var(--line);
+    font: 700 0.9em/1.5 ui-monospace, Menlo, Consolas, monospace; color: var(--cream); white-space: nowrap;
+  }
+  .note {
+    margin-top: 16px; padding: 12px 14px; border-radius: 10px; background: var(--night-2);
+    border-left: 3px solid var(--gold); color: var(--cream-dim); font-size: 15px;
+  }
+  .card .msg { margin-top: 14px; padding: 10px 14px; border-radius: 10px; background: rgba(224, 128, 109, 0.12);
+               border: 1px solid rgba(224, 128, 109, 0.45); color: var(--cream); font-size: 15px; }
+  .card .msg:empty { display: none; }
+
+  /* ============ Buttons ============ */
+  .actions { display: grid; gap: 10px; margin-top: 22px; }
+  .btn {
+    display: block; width: 100%; text-align: center; text-decoration: none; cursor: pointer;
+    font-family: "Cinzel", serif; font-weight: 900; letter-spacing: 0.06em; text-transform: uppercase;
+    border-radius: 8px; transition: transform 0.12s ease, box-shadow 0.12s ease;
+  }
+  .btn-forge {
+    font-size: 17px; padding: 14px 20px; color: var(--gold); text-shadow: 0 2px 2px rgba(0,0,0,0.5);
+    background: linear-gradient(180deg, var(--red-hot) 0%, var(--red) 48%, var(--red-deep) 100%);
+    border: 2px solid #d8a437; box-shadow: 0 5px 0 #471107, 0 10px 24px rgba(0,0,0,0.6);
+  }
+  .btn-forge:hover:not(:disabled) { transform: translateY(-2px); }
+  .btn-forge:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 2px 0 #471107, 0 6px 12px rgba(0,0,0,0.5); }
+  .btn-plain {
+    font-size: 14px; padding: 11px 16px; color: var(--cream); background: transparent; border: 1.5px solid var(--line);
+  }
+  .btn-plain:hover:not(:disabled) { border-color: var(--ember); color: var(--ember); }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .linkish { border: 0; background: none; padding: 0; font: inherit; color: var(--ember); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+  .small { margin-top: 14px; font-size: 14.5px; color: var(--cream-dimmer); text-align: center; }
+  .card p.small { color: var(--cream-dimmer); font-size: 14.5px; }
+
+  /* ============ Working ============ */
+  .working { display: flex; align-items: center; gap: 16px; }
+  .spinner {
+    flex: none; width: 46px; height: 46px; border-radius: 50%;
+    border: 4px solid var(--line); border-top-color: var(--gold); border-right-color: var(--ember);
+    animation: spin 0.9s linear infinite;
+  }
+  .working h2 { margin: 0; }
+  .working p { margin-top: 4px !important; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) {
+    .spinner { animation-duration: 3s; }
+    .btn { transition: none; }
+  }
+
+  /* ============ Help and details ============ */
+  details.help { margin-top: 18px; border-top: 1px solid var(--line); padding-top: 14px; }
+  details.help summary { cursor: pointer; color: var(--cream-dim); font-size: 15px; }
+  details.help summary:hover { color: var(--ember); }
+  details.help[open] summary { margin-bottom: 10px; }
+  details.help .actions { margin-top: 12px; }
+
+  .faq { padding: 34px 0 10px; }
+  .faq h2 { font-size: 18px; font-weight: 900; text-transform: uppercase; color: var(--cream); margin-bottom: 8px; }
+  .faq details { border-bottom: 1px solid #251608; padding: 12px 0; }
+  .faq summary { cursor: pointer; font-weight: 700; color: var(--cream); }
+  .faq summary:hover { color: var(--ember); }
+  .faq details p { margin-top: 8px; color: var(--cream-dim); font-size: 15.5px; }
+  .tech { margin-top: 18px; }
+  .tech summary { cursor: pointer; color: var(--cream-dimmer); font-size: 14px; }
+  #log {
+    margin-top: 10px; padding: 12px; max-height: 14rem; overflow: auto; border-radius: 10px;
+    background: var(--night-2); border: 1px solid var(--line); color: var(--cream-dim);
+    font: 12.5px/1.5 ui-monospace, Menlo, Consolas, monospace; white-space: pre-wrap; word-break: break-word;
+  }
+  .tech .btn-plain { margin-top: 10px; width: auto; display: inline-block; }
+
+  footer { padding: 30px 0 40px; text-align: center; }
+  footer p { font-size: 13.5px; color: #7a6448; }
+  footer a { color: inherit; }
+</style>
+</head>
+<body>
+
+<main class="wrap">
+  <div class="pagehead">
+    <a class="back" href="../">&larr; Back to Totem Forge</a>
+    <img class="logo" src="../assets/logo-horizontal.png" alt="Totem Forge">
+    <h1>Update your <em>base</em></h1>
+    <p class="lead">Install the latest firmware on your Totem Forge base. It takes about a minute, and your portraits and totems are not affected.</p>
+  </div>
+
+  <ol class="stepper" id="stepper" aria-label="Progress">
+    <li>Check</li><li>Restart</li><li>Install</li><li>Done</li>
+  </ol>
+
+  <!-- Wrong browser or device -->
+  <section class="card" data-panel="unsupported" hidden>
+    <div class="badge warn">!</div>
+    <h2 id="unsTitle">Open this page in Chrome or Edge</h2>
+    <p id="unsText">Updating the base needs Google Chrome or Microsoft Edge on a PC or Mac. Other browsers can't talk to it.</p>
+    <div class="actions">
+      <button class="btn btn-plain" id="copyLink">Copy this page's link</button>
+    </div>
+    <p class="small">The address is <b>totemforge.nl/updater</b></p>
+  </section>
+
+  <!-- Firmware file didn't load -->
+  <section class="card" data-panel="offline" hidden>
+    <div class="badge warn">!</div>
+    <h2>Couldn't load the update</h2>
+    <p>The firmware file didn't download. Check your internet connection, then reload this page.</p>
+    <div class="actions"><button class="btn btn-forge" onclick="location.reload()">Reload</button></div>
+  </section>
+
+  <!-- 1. Check -->
+  <section class="card" data-panel="check" hidden>
+    <h2>Plug in your base</h2>
+    <p>Connect the base's USB-C cable to your computer, preferably straight into the computer rather than a hub. A totem doesn't need to be docked.</p>
+    <div class="actions">
+      <button class="btn btn-forge" id="checkBtn">Check my base</button>
+    </div>
+    <p class="small">Your browser asks to let this page use <b>MIDI devices</b>. Choose <b>Allow</b>: that's how it talks to the base.</p>
+  </section>
+
+  <section class="card" data-panel="checking" hidden>
+    <div class="working"><div class="spinner" aria-hidden="true"></div>
+      <div><h2>Looking for your base…</h2><p>This takes a few seconds.</p></div></div>
+  </section>
+
+  <section class="card" data-panel="uptodate" hidden>
+    <div class="badge ok">✓</div>
+    <h2>Your base is up to date</h2>
+    <p>It already has the latest firmware. There's nothing to do: you can close this page.</p>
+    <div class="versions"><div class="v"><small>Your base</small><span class="js-current"></span></div></div>
+    <details class="help">
+      <summary>Reinstall the firmware anyway</summary>
+      <p>Only needed if support asked you to, or if the base misbehaves.</p>
+      <div class="actions"><button class="btn btn-plain js-start">Reinstall</button></div>
+    </details>
+  </section>
+
+  <section class="card" data-panel="outdated" hidden>
+    <div class="badge">↑</div>
+    <h2>An update is ready</h2>
+    <p>Your base will restart, install the new firmware and restart again. Keep it plugged in until this page says it's done.</p>
+    <div class="versions">
+      <div class="v"><small>Your base</small><span class="js-current"></span></div>
+      <span class="arrow" aria-hidden="true">→</span>
+      <div class="v new"><small>New</small><span class="js-latest"></span></div>
+    </div>
+    <div class="actions"><button class="btn btn-forge js-start">Update now</button></div>
+  </section>
+
+  <section class="card" data-panel="nobase" hidden>
+    <h2>Your base needs the update</h2>
+    <p>No base with the new firmware was found. If your base is plugged in, it has the original firmware, which this page can't see yet. That's normal for bases from the first batch, and this update fixes it.</p>
+    <div class="actions">
+      <button class="btn btn-forge js-serial">It's plugged in: update it</button>
+      <button class="btn btn-plain js-check">I just plugged it in: check again</button>
+    </div>
+  </section>
+
+  <section class="card" data-panel="noanswer" hidden>
+    <div class="badge warn">!</div>
+    <h2>The base didn't answer</h2>
+    <p>It's connected but didn't reply. Unplug it, wait a few seconds, plug it back in and check again. If it still doesn't answer, update it anyway.</p>
+    <div class="actions">
+      <button class="btn btn-forge js-check">Check again</button>
+      <button class="btn btn-plain js-serial">Update it anyway</button>
+    </div>
+  </section>
+
+  <section class="card" data-panel="blocked" hidden>
+    <div class="badge warn">!</div>
+    <h2>Access to the base is blocked</h2>
+    <p>The browser isn't letting this page use MIDI devices. To allow it:</p>
+    <ul>
+      <li>Click the icon just left of the web address (a slider or a lock).</li>
+      <li>Set <b>MIDI devices</b> to <b>Allow</b>. If you don't see it, open <b>Site settings</b> and find it there.</li>
+      <li>Reload this page.</li>
+    </ul>
+    <div class="actions">
+      <button class="btn btn-forge" onclick="location.reload()">Reload</button>
+      <button class="btn btn-plain js-serial">Update without MIDI access</button>
+    </div>
+  </section>
+
+  <!-- 2. Restart -->
+  <section class="card" data-panel="serial" hidden>
+    <h2>Restart your base</h2>
+    <p>Click below. A small window opens with a list of devices: choose <b>TotemForge_Base</b> (or the only one listed) and click <b>Connect</b>.</p>
+    <div class="actions"><button class="btn btn-forge" id="serialBtn">Restart my base</button></div>
+    <p class="msg" id="serialMsg" role="alert"></p>
+  </section>
+
+  <section class="card" data-panel="restarting" hidden>
+    <div class="working"><div class="spinner" aria-hidden="true"></div>
+      <div><h2>Restarting your base…</h2>
+        <p>A drive named <span class="drive">RPI-RP2</span> appears on your computer. If a window opens for it, just leave it.</p></div></div>
+  </section>
+
+  <!-- 3. Install -->
+  <section class="card" data-panel="install" hidden>
+    <h2>Install the update</h2>
+    <p>Your base now shows up as a drive named <span class="drive">RPI-RP2</span>.</p>
+    <ul>
+      <li>Click <b>Install</b> below.</li>
+      <li>In the window that opens, click <span class="drive">RPI-RP2</span> in the sidebar (under <b>Locations</b> on a Mac, <b>This PC</b> on Windows), then click <b>Select</b>.</li>
+      <li>If the browser asks to let this site view or edit files, allow it.</li>
+    </ul>
+    <div class="actions"><button class="btn btn-forge" id="installBtn">Install</button></div>
+    <p class="msg" id="installMsg" role="alert"></p>
+    <details class="help">
+      <summary>No RPI-RP2 drive?</summary>
+      <p>Give it a few more seconds. If it still doesn't show up, restart the base once more. On Windows, look in File Explorer under <b>This PC</b>.</p>
+      <div class="actions"><button class="btn btn-plain js-serial">Restart the base again</button></div>
+    </details>
+    <details class="help">
+      <summary>Copy the file yourself instead</summary>
+      <p>Download the firmware, then drag <b>totemforge-base.uf2</b> from your Downloads onto the <span class="drive">RPI-RP2</span> drive. The drive disappears by itself once the update is in.</p>
+      <div class="actions"><button class="btn btn-plain" id="downloadBtn">Download the firmware</button></div>
+    </details>
+  </section>
+
+  <section class="card" data-panel="manual" hidden>
+    <h2>Copy the file to the drive</h2>
+    <p>Drag <b>totemforge-base.uf2</b> from your Downloads onto the <span class="drive">RPI-RP2</span> drive. The drive disappears by itself a few seconds later: that means the update is in.</p>
+    <div class="actions"><button class="btn btn-forge" id="copiedBtn">I've copied it</button></div>
+  </section>
+
+  <!-- 4. Done -->
+  <section class="card" data-panel="installing" hidden>
+    <div class="working"><div class="spinner" aria-hidden="true"></div>
+      <div><h2>Installing…</h2><p>Don't unplug the base. It restarts by itself when it's done.</p></div></div>
+    <p class="note">Your computer may warn that <span class="drive">RPI-RP2</span> wasn't ejected properly. That's normal: the base restarts as soon as it has the update. You can close that message.</p>
+  </section>
+
+  <section class="card" data-panel="done" hidden>
+    <div class="badge ok">✓</div>
+    <h2>All done!</h2>
+    <p>Your base has the latest firmware and is ready to summon portraits.</p>
+    <div class="versions"><div class="v new"><small>Your base</small><span class="js-current"></span></div></div>
+    <p class="note">If your computer warned that <span class="drive">RPI-RP2</span> wasn't ejected properly, you can ignore it.</p>
+    <div class="actions"><a class="btn btn-forge" href="../">Back to Totem Forge</a></div>
+    <p class="small">Use your base with the Totem Forge app, or the <a href="../appdemo/">webapp</a> on a PC or Mac.</p>
+  </section>
+
+  <section class="card" data-panel="unverified" hidden>
+    <div class="badge ok">✓</div>
+    <h2>Update sent</h2>
+    <p>Your base restarts by itself in a few seconds. Once the <span class="drive">RPI-RP2</span> drive has disappeared, the update is in.</p>
+    <p>This page can't confirm it without MIDI access. To check, allow MIDI devices (see above), reload and click <b>Check my base</b>.</p>
+    <div class="actions"><a class="btn btn-forge" href="../">Back to Totem Forge</a></div>
+  </section>
+
+  <section class="card" data-panel="notback" hidden>
+    <div class="badge warn">!</div>
+    <h2 id="notbackTitle">The base didn't come back</h2>
+    <p id="notbackText">The page didn't see your base restart with the new firmware.</p>
+    <ul>
+      <li>Is the <span class="drive">RPI-RP2</span> drive still there? Then the update didn't copy. Install it again.</li>
+      <li>Is the drive gone? Unplug the base, plug it back in and check again.</li>
+    </ul>
+    <div class="actions">
+      <button class="btn btn-forge" id="againBtn">Install again</button>
+      <button class="btn btn-plain js-check">Check my base</button>
+    </div>
+  </section>
+
+  <section class="faq" aria-label="Questions">
+    <h2>Questions</h2>
+    <details>
+      <summary>Why update?</summary>
+      <p>The first bases shipped with firmware 1.0, which works with the Android app. The update adds what the Totem Forge app on iPhone, iPad and computers needs to talk to the base, plus fixes. You only need to do it once.</p>
+    </details>
+    <details>
+      <summary>What do I need?</summary>
+      <p>A PC or Mac with Google Chrome or Microsoft Edge, and your base. Phones and tablets can't install the update.</p>
+    </details>
+    <details>
+      <summary>Is it safe? What if it goes wrong?</summary>
+      <p>Yes. Your portraits live in the app, and the totems keep their images. If the update is interrupted, for example because the cable came out, the base can't be damaged: plug it back in, run this page again and it picks up where it left off.</p>
+    </details>
+    <details>
+      <summary>Still stuck?</summary>
+      <p>Write to us at <a href="mailto:info@totemforge.nl">info@totemforge.nl</a>. Copy the technical details below into your email: they help us see what happened.</p>
+    </details>
+    <details class="tech">
+      <summary>Technical details</summary>
+      <div id="log" aria-live="polite"></div>
+      <button class="btn btn-plain" id="copyLog">Copy details</button>
+    </details>
+  </section>
+</main>
+
+<footer class="wrap">
+  <p>© 2026 Totem Forge, founded by P. Aseev. All rights reserved.<br>
+  The Netherlands · KvK: 42061826 · <a href="../terms.html">Terms of use</a> · <a href="../privacy.html">Privacy policy</a></p>
+</footer>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+  const FIRMWARE_URL = 'firmware/totemforge-base.uf2';
+  const FIRMWARE_NAME = 'totemforge-base.uf2';
+  const RPI_VID = 0x2E8A;
+  // SysEx framing, see docs/phone-app-protocol.md in the firmware repo (RP2040-Zero-MiniToo)
+  const MFR = 0x7D, TEXT = 0x01, REPLY = 0x03;
+  const ORIGINAL = 'older than 2.0.0'; // firmware 1.0 has no version command (and no MIDI)
+
+  // ---------- Log, kept for support ----------
+  const logEl = $('log');
+  function log(msg) {
+    const t = new Date().toTimeString().slice(0, 8);
+    logEl.textContent += `${t}  ${msg}\n`;
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+  $('copyLog').onclick = async () => {
+    try { await navigator.clipboard.writeText(logEl.textContent); $('copyLog').textContent = 'Copied'; }
+    catch { getSelection().selectAllChildren(logEl); }
+  };
+
+  // ---------- Panels ----------
+  const STEP_OF = {
+    check: 0, checking: 0, uptodate: 0, outdated: 0, nobase: 0, noanswer: 0, blocked: 0, offline: 0,
+    serial: 1, restarting: 1, install: 2, manual: 2, installing: 3, done: 4, unverified: 4, notback: 3
+  };
+  let current = null;
+  function show(name) {
+    current = name;
+    document.querySelectorAll('[data-panel]').forEach(p => p.hidden = p.dataset.panel !== name);
+    const step = STEP_OF[name];
+    const items = $('stepper').children;
+    $('stepper').hidden = name === 'unsupported';
+    for (let i = 0; i < items.length; i++) {
+      items[i].className = i < step ? 'done' : i === step ? 'current' : '';
+      if (i === step) items[i].setAttribute('aria-current', 'step'); else items[i].removeAttribute('aria-current');
+    }
+    const panel = document.querySelector(`[data-panel="${name}"]`);
+    const heading = panel && panel.querySelector('h2');
+    if (heading && document.activeElement && document.activeElement !== document.body) {
+      heading.tabIndex = -1; heading.focus({ preventScroll: true });
+    }
+    $('stepper').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    log('→ ' + name);
+  }
+  window.addEventListener('beforeunload', e => {
+    if (current === 'installing' || current === 'restarting') { e.preventDefault(); e.returnValue = ''; }
+  });
+
+  const pretty = v => v === ORIGINAL ? '1.0 (original)' : v.replace(/-dirty$/, '');
+  function fillVersions(have, latest) {
+    document.querySelectorAll('.js-current').forEach(el => el.textContent = have ? pretty(have) : '');
+    document.querySelectorAll('.js-latest').forEach(el => el.textContent = latest || '');
+  }
+
+  // [major, minor, patch]; anything unparseable (e.g. "older than 2.0.0") counts as older
+  function isOlder(a, b) {
+    const parse = v => (/^(\d+)\.(\d+)\.(\d+)/.exec(v || '') || []).slice(1).map(Number);
+    const x = parse(a), y = parse(b);
+    if (y.length < 3) return false;
+    if (x.length < 3) return true;
+    for (let i = 0; i < 3; i++) if (x[i] !== y[i]) return x[i] < y[i];
+    return false;
+  }
+
+  // ---------- The firmware file ----------
+  // Downloaded once: its blob for installing and its version, read from the file itself
+  // (the firmware's "VERSION:x.y.z" reply string), so replacing the file is all a release needs.
+  const firmware = (async () => {
+    try {
+      const res = await fetch(FIRMWARE_URL, { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const buf = new Uint8Array(await res.arrayBuffer());
+      const dv = new DataView(buf.buffer);
+      const blocks = [];
+      for (let off = 0; off + 512 <= buf.length; off += 512) {
+        if (dv.getUint32(off, true) !== 0x0A324655 || dv.getUint32(off + 4, true) !== 0x9E5D5157) continue;
+        blocks.push({ addr: dv.getUint32(off + 12, true), data: buf.subarray(off + 32, off + 32 + dv.getUint32(off + 16, true)) });
+      }
+      if (!blocks.length) throw new Error('not a UF2 file');
+      blocks.sort((a, b) => a.addr - b.addr);
+      const m = blocks.map(b => String.fromCharCode(...b.data)).join('').match(/VERSION:([0-9A-Za-z.+-]+)\0/);
+      const version = m ? m[1] : null;
+      log(`Firmware file: ${buf.length} bytes, version ${version || 'unknown'}`);
+      return { blob: new Blob([buf], { type: 'application/octet-stream' }), version };
+    } catch (e) {
+      log('Firmware file failed to load: ' + e.message);
+      return null;
+    }
+  })();
+
+  // ---------- Talking to the base over Web MIDI (firmware 2.0.0 and later) ----------
+  let access = null;
+  const listeners = new Set();
+  const isBase = p => p.state === 'connected' && (/totemforge/i.test(p.name || '') || /totemforge/i.test(p.manufacturer || ''));
+
+  async function getAccess() {
+    if (!access) {
+      access = await navigator.requestMIDIAccess({ sysex: true });
+      access.onstatechange = e => log(`MIDI ${e.port.type} "${e.port.name}" ${e.port.state}`);
+    }
+    return access;
+  }
+
+  // The base's MIDI ports, opened, or null if none is connected
+  async function openBase() {
+    const input = [...access.inputs.values()].find(isBase);
+    const output = [...access.outputs.values()].find(isBase);
+    if (!input || !output) return null;
+    input.onmidimessage = e => {
+      const d = e.data;
+      if (d.length < 4 || d[0] !== 0xF0 || d[1] !== MFR || d[2] !== REPLY) return;
+      const end = d[d.length - 1] === 0xF7 ? d.length - 1 : d.length;
+      const line = String.fromCharCode(...d.subarray(3, end)).trim();
+      log('← ' + line);
+      listeners.forEach(fn => fn(line));
+    };
+    await output.open();
+    return { input, output };
+  }
+
+  function send(base, cmd) {
+    log('→ ' + cmd);
+    base.output.send([0xF0, MFR, TEXT, ...Array.from(cmd, c => c.charCodeAt(0) & 0x7F), 0xF7]);
+  }
+
+  // The first reply line that `match` accepts, or null after `ms`
+  function waitLine(match, ms) {
+    return new Promise(resolve => {
+      const fn = l => { if (match(l)) finish(l); };
+      const timer = setTimeout(() => finish(null), ms);
+      function finish(l) { clearTimeout(timer); listeners.delete(fn); resolve(l); }
+      listeners.add(fn);
+    });
+  }
+
+  // Handshake, then the version; null if the base doesn't answer
+  async function askVersion(base) {
+    send(base, 'connect');
+    if (!await waitLine(l => l.startsWith('CONNECTED:'), 2500)) return null;
+    send(base, 'version');
+    const v = await waitLine(l => l.startsWith('VERSION:') || l.startsWith("ERROR: Unknown command: 'version'"), 2000);
+    if (!v) return null;
+    return v.startsWith('VERSION:') ? v.slice(8) : ORIGINAL;
+  }
+
+  // ---------- 1. Check ----------
+  let haveVersion = null;
+
+  async function check() {
+    show('checking');
+    const fw = await firmware;
+    if (!fw) return show('offline');
+    try {
+      await getAccess();
+    } catch (e) {
+      log(`MIDI access: ${e.name}: ${e.message}`);
+      return show('blocked');
+    }
+    let base = await openBase();
+    if (!base) { await sleep(800); base = await openBase(); } // a base plugged in just now may still be starting
+    if (!base) { log('No base on MIDI'); return show('nobase'); }
+    log(`Base on MIDI port "${base.input.name}"`);
+    haveVersion = await askVersion(base);
+    if (!haveVersion) return show('noanswer');
+    fillVersions(haveVersion, fw.version);
+    show(isOlder(haveVersion, fw.version) ? 'outdated' : 'uptodate');
+  }
+
+  // ---------- 2. Restart into the bootloader ----------
+  // Firmware 2.0 and later restarts on the "bootloader" command
+  async function restartViaMidi() {
+    const base = await openBase();
+    if (!base) return show('serial');
+    show('restarting');
+    const gone = new Promise(resolve => {
+      const poll = setInterval(() => { if (base.input.state === 'disconnected') { clearInterval(poll); resolve(true); } }, 200);
+      setTimeout(() => { clearInterval(poll); resolve(false); }, 5000);
+    });
+    send(base, 'bootloader');
+    if (!await gone) {
+      log('The base did not restart on the bootloader command');
+      $('serialMsg').textContent = "The base didn't restart by itself. Let's do it another way.";
+      return show('serial');
+    }
+    await waitForDrive();
+  }
+
+  // Any firmware also restarts into the bootloader when its USB serial port is opened at
+  // 1200 baud and closed again. That's the only way for firmware 1.0, which has no MIDI.
+  async function restartViaSerial() {
+    if ('serial' in navigator) {
+      const port = await navigator.serial.requestPort({ filters: [{ usbVendorId: RPI_VID }] });
+      log('Serial port picked: ' + JSON.stringify(port.getInfo()));
+      await port.open({ baudRate: 1200 });
+      try { await port.setSignals({ dataTerminalReady: false }); } catch {}
+      try { await port.close(); } catch {}
+    } else if ('usb' in navigator) {
+      const device = await navigator.usb.requestDevice({ filters: [{ vendorId: RPI_VID }] });
+      log('USB device picked: ' + device.productName);
+      await device.open();
+      if (device.configuration === null) await device.selectConfiguration(1);
+      const comm = device.configuration.interfaces.find(i => i.alternates[0].interfaceClass === 0x02);
+      if (!comm) throw new Error('No USB serial interface found on this device.');
+      await device.claimInterface(comm.interfaceNumber);
+      const ctrl = request => ({ requestType: 'class', recipient: 'interface', request, value: 0, index: comm.interfaceNumber });
+      await device.controlTransferOut(ctrl(0x20), new Uint8Array([0xB0, 0x04, 0, 0, 0, 0, 8])); // 1200 baud, 8N1
+      try { await device.controlTransferOut(ctrl(0x22)); } catch {} // DTR off; the base may reset before answering
+      try { await device.close(); } catch {}
+    } else {
+      throw new Error('This browser cannot restart the base.');
+    }
+  }
+
+  $('serialBtn').onclick = async () => {
+    $('serialMsg').textContent = '';
+    try {
+      await restartViaSerial();
+    } catch (e) {
+      log(`Restart: ${e.name}: ${e.message}`);
+      $('serialMsg').textContent = e.name === 'NotFoundError'
+        ? "No base was chosen. If the list was empty, unplug the base, plug it back in and try again."
+        : e.name === 'NetworkError' || e.name === 'InvalidStateError'
+          ? "Another program is using the base. Close other Totem Forge pages and apps, then try again."
+          : "The base couldn't be restarted: " + e.message;
+      return;
+    }
+    show('restarting');
+    await waitForDrive();
+  };
+
+  // The drive takes a few seconds to mount after the base restarts
+  async function waitForDrive() {
+    await sleep(4000);
+    show('install');
+  }
+
+  function startUpdate() {
+    $('serialMsg').textContent = '';
+    $('installMsg').textContent = '';
+    if (access && haveVersion && haveVersion !== ORIGINAL) restartViaMidi();
+    else show('serial');
+  }
+  document.querySelectorAll('.js-start').forEach(b => b.onclick = startUpdate);
+  document.querySelectorAll('.js-serial').forEach(b => b.onclick = () => { $('serialMsg').textContent = ''; show('serial'); });
+  document.querySelectorAll('.js-check').forEach(b => b.onclick = check);
+  $('checkBtn').onclick = check;
+
+  // ---------- 3. Install ----------
+  // The UF2 bootloader's drive holds INFO_UF2.TXT with "Board-ID: RPI-RP2"
+  async function isBootDrive(dir) {
+    try {
+      const info = await (await dir.getFileHandle('INFO_UF2.TXT')).getFile();
+      return /RPI-RP2/.test(await info.text());
+    } catch {
+      return dir.name === 'RPI-RP2';
+    }
+  }
+
+  async function writeFirmware(fileHandle) {
+    const fw = await firmware;
+    let writer;
+    try {
+      writer = await fileHandle.createWritable();
+    } catch (e) {
+      log(`Open for writing: ${e.name}: ${e.message}`);
+      show('install');
+      $('installMsg').textContent = "The browser couldn't write to the drive. Try again, and allow editing files when it asks.";
+      return;
+    }
+    show('installing');
+    try {
+      await writer.write(fw.blob);
+      await writer.close();
+      log('Firmware written');
+    } catch (e) {
+      // The base restarts as soon as it has the whole file, so the save often can't finish cleanly
+      log(`Finishing the write: ${e.name}: ${e.message} (expected when the base restarts first)`);
+    }
+    await verify();
+  }
+
+  $('installBtn').onclick = async () => {
+    $('installMsg').textContent = '';
+    if (!window.showDirectoryPicker) return saveFile();
+    let dir;
+    try {
+      dir = await window.showDirectoryPicker({ id: 'rpi-rp2', mode: 'readwrite' });
+    } catch (e) {
+      log(`Drive picker: ${e.name}: ${e.message}`);
+      if (e.name === 'AbortError') return;
+      $('installMsg').textContent = "The browser didn't open that drive. Try again, or copy the file yourself (see below).";
+      return;
+    }
+    log(`Picked "${dir.name}"`);
+    if (!await isBootDrive(dir)) {
+      $('installMsg').textContent = `"${dir.name}" isn't the update drive. Click Install again and choose the drive named RPI-RP2.`;
+      return;
+    }
+    const file = await dir.getFileHandle(FIRMWARE_NAME, { create: true });
+    await writeFirmware(file);
+  };
+
+  // Without a folder picker (or by choice): a save dialog, else a plain download to copy over by hand
+  async function saveFile() {
+    if (window.showSaveFilePicker) {
+      try {
+        const handle = await window.showSaveFilePicker({
+          suggestedName: FIRMWARE_NAME, types: [{ description: 'Firmware', accept: { 'application/octet-stream': ['.uf2'] } }]
+        });
+        return writeFirmware(handle);
+      } catch (e) {
+        log(`Save dialog: ${e.name}: ${e.message}`);
+        if (e.name === 'AbortError') return;
+      }
+    }
+    download();
+  }
+  async function download() {
+    const fw = await firmware;
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(fw.blob);
+    a.download = FIRMWARE_NAME;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 60000);
+    log('Firmware downloaded');
+    show('manual');
+  }
+  $('downloadBtn').onclick = download;
+  $('copiedBtn').onclick = () => { show('installing'); verify(); };
+  $('againBtn').onclick = () => { $('installMsg').textContent = ''; show('install'); };
+
+  // ---------- 4. Confirm the base came back with the new firmware ----------
+  async function verify() {
+    const fw = await firmware;
+    if (!access) { await sleep(5000); return show('unverified'); }
+    const deadline = Date.now() + 45000;
+    await sleep(2000);
+    while (Date.now() < deadline) {
+      const base = await openBase();
+      const v = base && await askVersion(base);
+      if (v) {
+        haveVersion = v;
+        fillVersions(v, fw.version);
+        if (!isOlder(v, fw.version)) return show('done');
+        $('notbackTitle').textContent = 'The update didn\'t take';
+        $('notbackText').textContent = `Your base restarted but still has firmware ${pretty(v)}.`;
+        return show('notback');
+      }
+      await sleep(1000);
+    }
+    $('notbackTitle').textContent = 'The base didn\'t come back';
+    $('notbackText').textContent = 'The page didn\'t see your base restart with the new firmware.';
+    show('notback');
+  }
+
+  // ---------- Start ----------
+  $('copyLink').onclick = async () => {
+    try { await navigator.clipboard.writeText('https://totemforge.nl/updater/'); $('copyLink').textContent = 'Link copied'; }
+    catch { $('copyLink').textContent = 'totemforge.nl/updater'; }
+  };
+
+  const ua = navigator.userAgent;
+  log('Browser: ' + ua);
+  const ios = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const mobile = ios || /Android|Mobi/i.test(ua);
+  const chromium = 'serial' in navigator || 'usb' in navigator;
+  if (mobile) {
+    $('unsTitle').textContent = 'Open this page on a computer';
+    $('unsText').textContent = "Phones and tablets can't update the base. Use a PC or Mac with Google Chrome or Microsoft Edge, and plug the base into it.";
+    show('unsupported');
+  } else if (!navigator.requestMIDIAccess || !chromium) {
+    show('unsupported');
+  } else if (!window.isSecureContext) {
+    $('unsTitle').textContent = 'Open this page from totemforge.nl';
+    $('unsText').textContent = 'The browser only allows updating from a secure (https) address. Go to totemforge.nl/updater.';
+    show('unsupported');
+  } else {
+    show('check');
+    // A base already allowed earlier is found without asking: check straight away
+    navigator.permissions?.query({ name: 'midi', sysex: true })
+      .then(p => { if (p.state === 'granted' && current === 'check') check(); })
+      .catch(() => {});
+  }
+})();
+</script>
+</body>
+</html>
