@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Update your base · Totem Forge</title>
 <link rel="canonical" href="https://totemforge.nl/updater/">
-<meta name="description" content="Update the firmware of your Totem Forge base in about a minute, from Chrome or Edge on a PC or Mac.">
+<meta name="description" content="Update the firmware of your Totem Forge base in about a minute, in Google Chrome on a PC or Mac.">
 <link rel="icon" type="image/png" href="../assets/logo_icon_32.png">
 <link href="../assets/fonts.css" rel="stylesheet">
 <style>
@@ -183,7 +183,7 @@
     <a class="back" href="../">&larr; Back to Totem Forge</a>
     <img class="logo" src="../assets/logo-horizontal.png" alt="Totem Forge">
     <h1>Update your <em>base</em></h1>
-    <p class="lead">Install the latest firmware on your Totem Forge base. It takes about a minute, and your portraits and totems are not affected.</p>
+    <p class="lead">About a minute, in Google Chrome on a PC or Mac. Your portraits and totems stay as they are.</p>
   </div>
 
   <ol class="stepper" id="stepper" aria-label="Progress">
@@ -193,8 +193,8 @@
   <!-- Wrong browser or device -->
   <section class="card" data-panel="unsupported" hidden>
     <div class="badge warn">!</div>
-    <h2 id="unsTitle">Open this page in Chrome or Edge</h2>
-    <p id="unsText">Updating the base needs Google Chrome or Microsoft Edge on a PC or Mac. Other browsers can't talk to it.</p>
+    <h2 id="unsTitle">Open this page in Chrome</h2>
+    <p id="unsText">Updating the base only works in Google Chrome on a PC or Mac.</p>
     <div class="actions">
       <button class="btn btn-plain" id="copyLink">Copy this page's link</button>
     </div>
@@ -205,33 +205,33 @@
   <section class="card" data-panel="offline" hidden>
     <div class="badge warn">!</div>
     <h2>Couldn't load the update</h2>
-    <p>The firmware file didn't download. Check your internet connection, then reload this page.</p>
+    <p>The firmware didn't download. Check your internet connection and reload.</p>
     <div class="actions"><button class="btn btn-forge" onclick="location.reload()">Reload</button></div>
   </section>
 
   <!-- 1. Check -->
   <section class="card" data-panel="check" hidden>
     <h2>Plug in your base</h2>
-    <p>Connect the base's USB-C cable to your computer, preferably straight into the computer rather than a hub. A totem doesn't need to be docked.</p>
+    <p>Connect it to your computer with its USB-C cable, directly rather than through a hub. No totem needed.</p>
     <div class="actions">
       <button class="btn btn-forge" id="checkBtn">Check my base</button>
     </div>
-    <p class="small">Your browser asks to let this page use <b>MIDI devices</b>. Choose <b>Allow</b>: that's how it talks to the base.</p>
+    <p class="small">Chrome asks to use <b>MIDI devices</b>: choose <b>Allow</b>.</p>
   </section>
 
   <section class="card" data-panel="checking" hidden>
     <div class="working"><div class="spinner" aria-hidden="true"></div>
-      <div><h2>Looking for your base…</h2><p>This takes a few seconds.</p></div></div>
+      <div><h2>Looking for your base…</h2></div></div>
   </section>
 
   <section class="card" data-panel="uptodate" hidden>
     <div class="badge ok">✓</div>
     <h2>Your base is up to date</h2>
-    <p>It already has the latest firmware. There's nothing to do: you can close this page.</p>
+    <p>It already has the latest firmware. You can close this page.</p>
     <div class="versions"><div class="v"><small>Your base</small><span class="js-current"></span></div></div>
     <details class="help">
       <summary>Reinstall the firmware anyway</summary>
-      <p>Only needed if support asked you to, or if the base misbehaves.</p>
+      <p>Only if support asks, or the base misbehaves.</p>
       <div class="actions"><button class="btn btn-plain js-start">Reinstall</button></div>
     </details>
   </section>
@@ -239,7 +239,7 @@
   <section class="card" data-panel="outdated" hidden>
     <div class="badge">↑</div>
     <h2>An update is ready</h2>
-    <p>Your base will restart, install the new firmware and restart again. Keep it plugged in until this page says it's done.</p>
+    <p>Keep the base plugged in until this page says it's done.</p>
     <div class="versions">
       <div class="v"><small>Your base</small><span class="js-current"></span></div>
       <span class="arrow" aria-hidden="true">→</span>
@@ -250,7 +250,7 @@
 
   <section class="card" data-panel="nobase" hidden>
     <h2>Your base needs the update</h2>
-    <p>No base with the new firmware was found. If your base is plugged in, it has the original firmware, which this page can't see yet. That's normal for bases from the first batch, and this update fixes it.</p>
+    <p>Bases from the first batch have firmware this page can't see yet. If yours is plugged in, update it.</p>
     <div class="actions">
       <button class="btn btn-forge js-serial">It's plugged in: update it</button>
       <button class="btn btn-plain js-check">I just plugged it in: check again</button>
@@ -260,7 +260,7 @@
   <section class="card" data-panel="noanswer" hidden>
     <div class="badge warn">!</div>
     <h2>The base didn't answer</h2>
-    <p>It's connected but didn't reply. Unplug it, wait a few seconds, plug it back in and check again. If it still doesn't answer, update it anyway.</p>
+    <p>Unplug it, wait a few seconds, plug it back in and check again. Still nothing? Update it anyway.</p>
     <div class="actions">
       <button class="btn btn-forge js-check">Check again</button>
       <button class="btn btn-plain js-serial">Update it anyway</button>
@@ -270,10 +270,9 @@
   <section class="card" data-panel="blocked" hidden>
     <div class="badge warn">!</div>
     <h2>Access to the base is blocked</h2>
-    <p>The browser isn't letting this page use MIDI devices. To allow it:</p>
     <ul>
-      <li>Click the icon just left of the web address (a slider or a lock).</li>
-      <li>Set <b>MIDI devices</b> to <b>Allow</b>. If you don't see it, open <b>Site settings</b> and find it there.</li>
+      <li>Click the icon left of the web address.</li>
+      <li>Set <b>MIDI devices</b> to <b>Allow</b> (or find it under <b>Site settings</b>).</li>
       <li>Reload this page.</li>
     </ul>
     <div class="actions">
@@ -285,7 +284,7 @@
   <!-- 2. Restart -->
   <section class="card" data-panel="serial" hidden>
     <h2>Restart your base</h2>
-    <p>Click below. A small window opens with a list of devices: choose <b>TotemForge_Base</b> (or the only one listed) and click <b>Connect</b>.</p>
+    <p>Click below, choose <b>TotemForge_Base</b> (or the only device listed) and click <b>Connect</b>.</p>
     <div class="actions"><button class="btn btn-forge" id="serialBtn">Restart my base</button></div>
     <p class="msg" id="serialMsg" role="alert"></p>
   </section>
@@ -293,70 +292,68 @@
   <section class="card" data-panel="restarting" hidden>
     <div class="working"><div class="spinner" aria-hidden="true"></div>
       <div><h2>Restarting your base…</h2>
-        <p>A drive named <span class="drive">RPI-RP2</span> appears on your computer. If a window opens for it, just leave it.</p></div></div>
+        <p>A drive named <span class="drive">RPI-RP2</span> appears. If a window opens for it, leave it.</p></div></div>
   </section>
 
   <!-- 3. Install -->
   <section class="card" data-panel="install" hidden>
     <h2>Install the update</h2>
-    <p>Your base now shows up as a drive named <span class="drive">RPI-RP2</span>.</p>
     <ul>
-      <li>Click <b>Install</b> below.</li>
-      <li>In the window that opens, click <span class="drive">RPI-RP2</span> in the sidebar (under <b>Locations</b> on a Mac, <b>This PC</b> on Windows), then click <b>Select</b>.</li>
-      <li>If the browser asks to let this site view or edit files, allow it.</li>
+      <li>Click <b>Install</b>.</li>
+      <li>Choose <span class="drive">RPI-RP2</span> in the sidebar (Mac: <b>Locations</b>, Windows: <b>This PC</b>) and click <b>Select</b>.</li>
+      <li>If Chrome asks to view or edit files, allow it.</li>
     </ul>
     <div class="actions"><button class="btn btn-forge" id="installBtn">Install</button></div>
     <p class="msg" id="installMsg" role="alert"></p>
     <details class="help">
       <summary>No RPI-RP2 drive?</summary>
-      <p>Give it a few more seconds. If it still doesn't show up, restart the base once more. On Windows, look in File Explorer under <b>This PC</b>.</p>
+      <p>Wait a few seconds. Still nothing? Restart the base again. On Windows, look in File Explorer under <b>This PC</b>.</p>
       <div class="actions"><button class="btn btn-plain js-serial">Restart the base again</button></div>
     </details>
     <details class="help">
       <summary>Copy the file yourself instead</summary>
-      <p>Download the firmware, then drag <b>totemforge-base.uf2</b> from your Downloads onto the <span class="drive">RPI-RP2</span> drive. The drive disappears by itself once the update is in.</p>
+      <p>Download the firmware and drag <b>totemforge-base.uf2</b> onto the <span class="drive">RPI-RP2</span> drive. When the drive disappears, the update is in.</p>
       <div class="actions"><button class="btn btn-plain" id="downloadBtn">Download the firmware</button></div>
     </details>
   </section>
 
   <section class="card" data-panel="manual" hidden>
     <h2>Copy the file to the drive</h2>
-    <p>Drag <b>totemforge-base.uf2</b> from your Downloads onto the <span class="drive">RPI-RP2</span> drive. The drive disappears by itself a few seconds later: that means the update is in.</p>
+    <p>Drag <b>totemforge-base.uf2</b> from your Downloads onto the <span class="drive">RPI-RP2</span> drive. When the drive disappears, the update is in.</p>
     <div class="actions"><button class="btn btn-forge" id="copiedBtn">I've copied it</button></div>
   </section>
 
   <!-- 4. Done -->
   <section class="card" data-panel="installing" hidden>
     <div class="working"><div class="spinner" aria-hidden="true"></div>
-      <div><h2>Installing…</h2><p>Don't unplug the base. It restarts by itself when it's done.</p></div></div>
-    <p class="note">Your computer may warn that <span class="drive">RPI-RP2</span> wasn't ejected properly. That's normal: the base restarts as soon as it has the update. You can close that message.</p>
+      <div><h2>Installing…</h2><p>Don't unplug the base. It restarts by itself.</p></div></div>
+    <p class="note">A warning that <span class="drive">RPI-RP2</span> wasn't ejected properly is normal: close it.</p>
   </section>
 
   <section class="card" data-panel="done" hidden>
     <div class="badge ok">✓</div>
     <h2>All done!</h2>
-    <p>Your base has the latest firmware and is ready to summon portraits.</p>
+    <p>Your base is ready to summon portraits.</p>
     <div class="versions"><div class="v new"><small>Your base</small><span class="js-current"></span></div></div>
-    <p class="note">If your computer warned that <span class="drive">RPI-RP2</span> wasn't ejected properly, you can ignore it.</p>
-    <div class="actions"><a class="btn btn-forge" href="../">Back to Totem Forge</a></div>
-    <p class="small">Use your base with the Totem Forge app, or the <a href="../appdemo/">webapp</a> on a PC or Mac.</p>
+        <div class="actions"><a class="btn btn-forge" href="../">Back to Totem Forge</a></div>
+    <p class="small">Use it with the Totem Forge app, or the <a href="../app/">web app</a> on a PC or Mac.</p>
   </section>
 
   <section class="card" data-panel="unverified" hidden>
     <div class="badge ok">✓</div>
     <h2>Update sent</h2>
-    <p>Your base restarts by itself in a few seconds. Once the <span class="drive">RPI-RP2</span> drive has disappeared, the update is in.</p>
-    <p>This page can't confirm it without MIDI access. To check, allow MIDI devices (see above), reload and click <b>Check my base</b>.</p>
+    <p>When the <span class="drive">RPI-RP2</span> drive disappears, the update is in.</p>
+    <p>To confirm it, allow MIDI devices, reload and click <b>Check my base</b>.</p>
     <div class="actions"><a class="btn btn-forge" href="../">Back to Totem Forge</a></div>
   </section>
 
   <section class="card" data-panel="notback" hidden>
     <div class="badge warn">!</div>
     <h2 id="notbackTitle">The base didn't come back</h2>
-    <p id="notbackText">The page didn't see your base restart with the new firmware.</p>
+    <p id="notbackText">Your base didn't restart with the new firmware.</p>
     <ul>
-      <li>Is the <span class="drive">RPI-RP2</span> drive still there? Then the update didn't copy. Install it again.</li>
-      <li>Is the drive gone? Unplug the base, plug it back in and check again.</li>
+      <li><span class="drive">RPI-RP2</span> drive still there? The update didn't copy: install again.</li>
+      <li>Drive gone? Unplug the base, plug it back in and check again.</li>
     </ul>
     <div class="actions">
       <button class="btn btn-forge" id="againBtn">Install again</button>
@@ -368,19 +365,19 @@
     <h2>Questions</h2>
     <details>
       <summary>Why update?</summary>
-      <p>The first bases shipped with firmware 1.0, which works with the Android app. The update adds what the Totem Forge app on iPhone, iPad and computers needs to talk to the base, plus fixes. You only need to do it once.</p>
+      <p>Bases from the first batch have firmware 1.0, made for the old Android app. The update lets the new Totem Forge app talk to the base. You only do it once.</p>
     </details>
     <details>
       <summary>What do I need?</summary>
-      <p>A PC or Mac with Google Chrome or Microsoft Edge, and your base. Phones and tablets can't install the update.</p>
+      <p>A PC or Mac with Google Chrome, and your base. Phones and tablets can't do the update.</p>
     </details>
     <details>
       <summary>Is it safe? What if it goes wrong?</summary>
-      <p>Yes. Your portraits live in the app, and the totems keep their images. If the update is interrupted, for example because the cable came out, the base can't be damaged: plug it back in, run this page again and it picks up where it left off.</p>
+      <p>Yes. Your portraits are in the app and the totems keep their images. If the update is interrupted, nothing breaks: plug the base back in and run this page again.</p>
     </details>
     <details>
       <summary>Still stuck?</summary>
-      <p>Write to us at <a href="mailto:info@totemforge.nl">info@totemforge.nl</a>. Copy the technical details below into your email: they help us see what happened.</p>
+      <p>Email <a href="mailto:info@totemforge.nl">info@totemforge.nl</a> and paste the technical details below.</p>
     </details>
     <details class="tech">
       <summary>Technical details</summary>
@@ -580,7 +577,7 @@
     send(base, 'bootloader');
     if (!await gone) {
       log('The base did not restart on the bootloader command');
-      $('serialMsg').textContent = "The base didn't restart by itself. Let's do it another way.";
+      $('serialMsg').textContent = "The base didn't restart by itself. Restart it here instead.";
       return show('serial');
     }
     await waitForDrive();
@@ -619,9 +616,9 @@
     } catch (e) {
       log(`Restart: ${e.name}: ${e.message}`);
       $('serialMsg').textContent = e.name === 'NotFoundError'
-        ? "No base was chosen. If the list was empty, unplug the base, plug it back in and try again."
+        ? "No base chosen. If the list was empty, replug the base and try again."
         : e.name === 'NetworkError' || e.name === 'InvalidStateError'
-          ? "Another program is using the base. Close other Totem Forge pages and apps, then try again."
+          ? "Another program is using the base. Close other Totem Forge pages and apps and try again."
           : "The base couldn't be restarted: " + e.message;
       return;
     }
@@ -665,7 +662,7 @@
     } catch (e) {
       log(`Open for writing: ${e.name}: ${e.message}`);
       show('install');
-      $('installMsg').textContent = "The browser couldn't write to the drive. Try again, and allow editing files when it asks.";
+      $('installMsg').textContent = "Chrome couldn't write to the drive. Try again and allow editing files.";
       return;
     }
     show('installing');
@@ -689,12 +686,12 @@
     } catch (e) {
       log(`Drive picker: ${e.name}: ${e.message}`);
       if (e.name === 'AbortError') return;
-      $('installMsg').textContent = "The browser didn't open that drive. Try again, or copy the file yourself (see below).";
+      $('installMsg').textContent = "Chrome didn't open that drive. Try again, or copy the file yourself (below).";
       return;
     }
     log(`Picked "${dir.name}"`);
     if (!await isBootDrive(dir)) {
-      $('installMsg').textContent = `"${dir.name}" isn't the update drive. Click Install again and choose the drive named RPI-RP2.`;
+      $('installMsg').textContent = `"${dir.name}" isn't the update drive. Click Install and choose RPI-RP2.`;
       return;
     }
     const file = await dir.getFileHandle(FIRMWARE_NAME, { create: true });
@@ -750,7 +747,7 @@
       await sleep(1000);
     }
     $('notbackTitle').textContent = 'The base didn\'t come back';
-    $('notbackText').textContent = 'The page didn\'t see your base restart with the new firmware.';
+    $('notbackText').textContent = 'Your base didn\'t restart with the new firmware.';
     show('notback');
   }
 
@@ -767,13 +764,13 @@
   const chromium = 'serial' in navigator || 'usb' in navigator;
   if (mobile) {
     $('unsTitle').textContent = 'Open this page on a computer';
-    $('unsText').textContent = "Phones and tablets can't update the base. Use a PC or Mac with Google Chrome or Microsoft Edge, and plug the base into it.";
+    $('unsText').textContent = "Phones and tablets can't update the base. Use Google Chrome on a PC or Mac.";
     show('unsupported');
   } else if (!navigator.requestMIDIAccess || !chromium) {
     show('unsupported');
   } else if (!window.isSecureContext) {
     $('unsTitle').textContent = 'Open this page from totemforge.nl';
-    $('unsText').textContent = 'The browser only allows updating from a secure (https) address. Go to totemforge.nl/updater.';
+    $('unsText').textContent = 'Updating needs the secure address: go to totemforge.nl/updater.';
     show('unsupported');
   } else {
     show('check');
