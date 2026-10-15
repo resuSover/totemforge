@@ -24,7 +24,7 @@ export async function readTfc(file) {
     for (const p of m.portraits) {
       const bytes = files.get(p.source);
       if (!bytes) continue;
-      items.push({ record: fromV2(p), blob: new Blob([bytes], { type: p.source.endsWith('.png') ? 'image/png' : 'image/jpeg' }) });
+      items.push({ record: cleanRecord(p), blob: new Blob([bytes], { type: p.source.endsWith('.png') ? 'image/png' : 'image/jpeg' }) });
     }
   } else {
     for (const p of m.images || []) {
@@ -40,7 +40,8 @@ export async function readTfc(file) {
 const NO_DITHER = { strength: 0, threshold: 24 };
 const dither = d => d && typeof d === 'object'
   ? { strength: Math.min(1, Math.max(0, +d.strength || 0)), threshold: Math.min(255, Math.max(0, +d.threshold || 0)) } : { ...NO_DITHER };
-function fromV2(p) {
+// A portrait's settings from a file, checked and completed (also used for the portraits folder)
+export function cleanRecord(p) {
   return {
     id: String(p.id), tags: (p.tags || []).map(String), collection: p.collection || null,
     rot: p.rot || 0, crop: { zoom: 1, x: 0, y: 0, ...p.crop }, fill: p.fill === 'extend' ? 'extend' : 'colour',

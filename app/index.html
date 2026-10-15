@@ -40,6 +40,7 @@
       <p><strong>Back up your gallery?</strong> <span id="backupText"></span></p>
       <div class="actions"><button class="primary" id="backupNow">Back up now</button><button class="secondary" id="backupLater">Later</button></div>
     </div>
+    <div class="banner" id="folderBanner" hidden></div>
     <div class="tools">
       <div class="searchbox">
         <input class="search" id="search" type="text" placeholder="Search tags and text" aria-label="Search tags and text"
@@ -61,6 +62,7 @@
           <li>Open a portrait and tap <strong>Summon</strong>.</li>
         </ol>
         <button class="primary" id="addFreePack">Add the free Classic Fantasy pack (48 portraits)</button>
+        <button class="secondary" id="restoreFolder" hidden>Restore from your portraits folder</button>
       </div>
     </div>
     <button class="fab" id="fab" aria-label="Add">+</button>
@@ -120,22 +122,22 @@
       </div>
     </div>
     <div class="tabs" role="tablist">
-      <button role="tab" id="tabCrop" aria-selected="true">Crop</button>
-      <button role="tab" id="tabAdjust" aria-selected="false">Adjust</button>
+      <button role="tab" id="tabAdjust" aria-selected="true">Adjust</button>
+      <button role="tab" id="tabCrop" aria-selected="false">Crop</button>
       <button role="tab" id="tabText" aria-selected="false">Text</button>
     </div>
-    <div class="panel" id="panelCrop">
-      <label class="field"><span>Zoom <output id="zoomOut">100 %</output></span>
-        <input type="range" id="zoom" min="40" max="400" value="100"></label>
-      <p class="hint">Drag the picture to move it, pinch or scroll to zoom. You can move past the edges: the gap is filled so the important part can sit in the middle of the screen.</p>
-      <div class="btnrow"><button class="secondary" id="rotate">Rotate 90°</button><button class="secondary" id="cropReset">Reset crop</button></div>
-    </div>
-    <div class="panel" id="panelAdjust" hidden>
+    <div class="panel" id="panelAdjust">
       <label class="field"><span>Brightness <output id="brightOut">0</output></span>
         <input type="range" id="bright" min="-100" max="100" value="0"></label>
       <div class="field"><span>Dither</span>
         <div class="seg" id="dither"><button data-v="none">None</button><button data-v="mild">Mild</button><button data-v="normal">Normal</button><button data-v="strong">Strong</button></div>
         <p class="hint">Smoother shading with the four inks: dots of ink mix into in-between colours.</p></div>
+    </div>
+    <div class="panel" id="panelCrop" hidden>
+      <label class="field"><span>Zoom <output id="zoomOut">100 %</output></span>
+        <input type="range" id="zoom" min="40" max="400" value="100"></label>
+      <p class="hint">Drag the picture to move it, pinch or scroll to zoom. You can move past the edges: the gap is filled so the important part can sit in the middle of the screen.</p>
+      <div class="btnrow"><button class="secondary" id="rotate">Rotate 90°</button><button class="secondary" id="cropReset">Reset crop</button></div>
     </div>
     <div class="panel" id="panelText" hidden>
       <label class="field"><span>Text on the screen</span>

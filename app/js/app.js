@@ -12,6 +12,8 @@ import { pickTransport } from './platform/transport.js';
 import { fakeBaseTransport } from './platform/fakebase.js';
 import { iosFiles, hasSaveDialog, pickSaveFile, writeHandle, download, shareOnIos } from './platform/files.js';
 import { installRoute, chromeLink } from './platform/install.js';
+import { readGallery, writePortrait, removePortraits } from './core/gallerydir.js';
+import { folderSupported, handleDir, permission, folderExists, chooseFolder } from './platform/folder.js';
 
 const $ = id => document.getElementById(id);
 const escapeHtml = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -34,8 +36,10 @@ const settings = { sort: 'newest', midiExplained: false, backupEvery: 5, sinceBa
 let saving = 0;
 const persist = (p, withPicture = false) => {
   saving++;
-  return store.save(p, withPicture ? p.blob : undefined).catch(storageFailed).finally(() => saving--);
+  return Promise.all([store.save(p, withPicture ? p.blob : undefined).catch(storageFailed), folderSave(p, withPicture)])
+    .finally(() => saving--);
 };
+const removeStored = ids => { store.remove(ids).catch(storageFailed); folderRemove(ids); };
 window.addEventListener('beforeunload', e => { if (saving) { e.preventDefault(); e.returnValue = ''; } });
 const saveSettings = () => store.saveSettings(settings).catch(storageFailed);
 function storageFailed() { toast("Couldn't save. Is the device out of storage?"); }
@@ -297,7 +301,7 @@ $('selAll').onclick = () => { visible().forEach(p => selected.add(p.id)); syncSe
 $('selDelete').onclick = () => {
   const removed = portraits.filter(p => selected.has(p.id));
   portraits = portraits.filter(p => !selected.has(p.id));
-  store.remove(removed.map(p => p.id)).catch(storageFailed);
+  removeStored(removed.map(p => p.id));
   selecting = false; selected.clear(); syncSelect();
   toast(`Deleted ${removed.length} portrait${removed.length > 1 ? 's' : ''}`, () => {
     portraits = [...removed, ...portraits]; removed.forEach(p => persist(p, true)); renderGallery();
@@ -423,6 +427,160 @@ function renderInstall() {
   };
 }
 
+// ---------- portraits folder (PC/Mac) ----------
+// Chrome and Edge on a computer save the portraits as files in a folder the user chooses, so clearing
+// the browser's data can't lose them. It's asked for before the first own portrait is saved (the free
+// pack needs none). The browser keeps a working copy; the folder is the master: on start (and on
+// Check the folder) the gallery follows it (core/gallerydir.js has the format and the rules).
+// state: off (phones, the iOS shell, other browsers), none (not chosen yet), ready, ask (the browser
+// wants an OK again, e.g. after a restart), lost (moved, renamed or deleted). Changes that can't be
+// written yet wait (kept with the gallery) and are written once the folder is back.
+const folder = { handle: null, dir: null, name: '', state: 'off', waiting: { save: [], remove: [] } };
+const saveWaiting = () => store.saveValue?.('folderWaiting', folder.waiting).catch(() => {});
+async function folderStart() {
+  if (platform() !== 'desktop' || iosFiles() || !folderSupported() || !store.loadValue) return;
+  folder.state = 'none';
+  folder.waiting = (await store.loadValue('folderWaiting')) || { save: [], remove: [] };
+  const handle = await store.loadValue('folder');
+  if (handle) { setFolder(handle); await checkFolderState(false); }
+  renderFolder();
+}
+function setFolder(handle) { folder.handle = handle; folder.dir = handleDir(handle); folder.name = handle.name; }
+// Brings the folder state up to date; when ready, writes what waited and follows the folder
+async function checkFolderState(ask) {
+  if (!folder.handle) return null;
+  let result = null;
+  try {
+    if (await permission(folder.handle, ask) !== 'granted') folder.state = 'ask';
+    else if (!(await folderExists(folder.handle))) folder.state = 'lost';
+    else { folder.state = 'ready'; await writeWaiting(); result = await followFolder(); }
+  } catch { folder.state = 'lost'; }
+  renderFolder();
+  return result;
+}
+function waitFor(kind, ids) {
+  const other = kind === 'save' ? 'remove' : 'save';
+  folder.waiting[other] = folder.waiting[other].filter(id => !ids.includes(id));
+  folder.waiting[kind] = [...new Set([...folder.waiting[kind], ...ids])];
+  saveWaiting(); renderFolder();
+}
+async function folderSave(p, withPicture) {
+  if (folder.state === 'off' || folder.state === 'none') return;
+  if (folder.state !== 'ready') return waitFor('save', [p.id]);
+  try { await writePortrait(folder.dir, p, withPicture); }
+  catch { waitFor('save', [p.id]); checkFolderState(false); }
+}
+async function folderRemove(ids) {
+  if (folder.state === 'off' || folder.state === 'none') return;
+  if (folder.state !== 'ready') return waitFor('remove', ids);
+  try { await removePortraits(folder.dir, ids); }
+  catch { waitFor('remove', ids); checkFolderState(false); }
+}
+async function writeWaiting() {
+  const { save, remove } = folder.waiting;
+  if (!save.length && !remove.length) return;
+  if (remove.length) await removePortraits(folder.dir, remove);
+  for (const id of save) { const p = portraits.find(x => x.id === id); if (p) await writePortrait(folder.dir, p, true); }
+  folder.waiting = { save: [], remove: [] }; saveWaiting();
+}
+// The folder is the master: the gallery (and the browser's copy) follow it
+async function followFolder() {
+  const r = await readGallery(folder.dir, new Map(portraits.map(p => [p.id, p])),
+    { keep: new Set(folder.waiting.save), defaults: { adjust: { brightness: 0, dither: DITHER.normal } } });
+  for (const { record, blob } of r.added) {
+    try { const p = { ...record, blob, img: await createImageBitmap(blob), thumb: null }; updateThumb(p); portraits.push(p); store.save(p, blob).catch(storageFailed); }
+    catch { r.unreadable.push(record.picture); }
+  }
+  for (const { record, blob } of r.updated) {
+    const i = portraits.findIndex(p => p.id === record.id);
+    if (i < 0) continue;
+    const p = { ...portraits[i], ...record };
+    if (blob) { try { p.blob = blob; p.img = await createImageBitmap(blob); } catch { continue; } }
+    updateThumb(p); portraits[i] = p;
+    if (current && current.id === p.id) current = p;
+    store.save(p, blob || undefined).catch(storageFailed);
+  }
+  if (r.removed.length) {
+    const gone = new Set(r.removed);
+    portraits = portraits.filter(p => !gone.has(p.id));
+    store.remove(r.removed).catch(storageFailed);
+    if (current && gone.has(current.id) && currentScreen === 'portrait') show('gallery');
+  }
+  if (r.added.length || r.updated.length || r.removed.length) {
+    renderGallery();
+    if (currentScreen === 'portrait' && current) openPortrait(current);
+  }
+  return r;
+}
+// A newly chosen folder: what waited and the gallery's portraits it doesn't have go in, then the
+// folder's own come in
+async function useFolder(handle) {
+  setFolder(handle); folder.state = 'ready';
+  await store.saveValue('folder', handle);
+  await writeWaiting();
+  const there = new Set((await folder.dir.list()).map(e => e.name.replace(/\.[^.]+$/, '')));
+  for (const p of portraits) if (!there.has(p.id)) await writePortrait(folder.dir, p, true);
+  const r = await followFolder();
+  renderFolder();
+  if (currentScreen === 'settings') renderSettings();
+  return r;
+}
+// Choose (or change, or find again) the folder; restoring: only one that already has portraits
+async function pickFolder(restoring) {
+  try {
+    const handle = await chooseFolder(restoring);
+    if (!handle) return false;
+    const r = await useFolder(handle);
+    toast(restoring || r.added.length ? `${plural(r.added.length, 'portrait')} brought in from “${handle.name}”` : `Portraits are saved in “${handle.name}”`);
+    return true;
+  } catch (e) { toast(e.message || "Couldn't use that folder."); return false; }
+}
+async function checkFolder() {
+  const r = await checkFolderState(true);
+  if (!r) return toast(folder.state === 'ask' ? 'The browser didn’t allow access to the folder.' : 'Your portraits folder wasn’t found.');
+  const changes = [r.added.length && `${r.added.length} added`, r.updated.length && `${r.updated.length} changed`,
+    r.removed.length && `${r.removed.length} removed`, r.unreadable.length && `${r.unreadable.length} couldn't be read`].filter(Boolean);
+  toast(changes.length ? `From the folder: ${changes.join(', ')}` : 'The gallery matches the folder');
+}
+// Before the first own portrait is saved (folder.state 'none'): choose the folder; resolves false
+// when cancelled. Callers check the state first, so a chosen folder adds no wait
+function requireFolder() {
+  if (folder.state !== 'none') return Promise.resolve(true);
+  return new Promise(resolve => {
+    const cancel = () => { closeSheet(); $('scrim').onclick = closeSheet; toast('Not saved: portraits are kept in a folder you choose.'); resolve(false); };
+    openSheet(`<h3>Choose where portraits are saved</h3>
+      <p>Your portraits are kept as files in a folder on this computer, so they stay safe even if the browser's data is cleared.</p>
+      <p class="hint">Make a new folder, for example “Totem Forge” in Documents, OneDrive, iCloud Drive or Dropbox, and choose it. The browser won't allow Documents itself.</p>
+      <div class="actions"><button class="secondary" id="rfCancel">Cancel</button><button class="primary" id="rfGo">Choose a folder</button></div>`, s => {
+      s.querySelector('#rfCancel').onclick = cancel;
+      s.querySelector('#rfGo').onclick = async () => {
+        let handle;
+        try { handle = await chooseFolder(false); } catch (e) { return toast(e.message); }
+        if (!handle) return;
+        closeSheet(); $('scrim').onclick = closeSheet;
+        await useFolder(handle);
+        resolve(true);
+      };
+    });
+    $('scrim').onclick = cancel;
+  });
+}
+function renderFolder() {
+  const bar = $('folderBanner'), waiting = folder.waiting.save.length + folder.waiting.remove.length;
+  const more = waiting ? ` ${plural(waiting, 'change')} ${waiting === 1 ? 'is' : 'are'} waiting to be saved.` : '';
+  bar.hidden = !['ask', 'lost'].includes(folder.state) || selecting;
+  if (!bar.hidden) {
+    bar.innerHTML = folder.state === 'ask'
+      ? `<p><strong>Reconnect your portraits folder.</strong> The browser needs your OK again to save to “${escapeHtml(folder.name)}”.${more}</p>
+         <div class="actions"><button class="primary" id="fbGo">Allow access</button></div>`
+      : `<p><strong>Your portraits folder wasn't found.</strong> “${escapeHtml(folder.name)}” may have been moved, renamed or deleted.${more}</p>
+         <div class="actions"><button class="primary" id="fbGo">Choose it again</button></div>`;
+    $('fbGo').onclick = folder.state === 'ask' ? checkFolder : () => pickFolder(false);
+  }
+  $('restoreFolder').hidden = !(folder.state === 'none' && !portraits.length);
+}
+$('restoreFolder').onclick = () => pickFolder(true);
+
 // ---------- help and feedback ----------
 const DISCORD = 'https://discord.gg/fgyvRsuTGd', EMAIL = 'info@totemforge.nl';
 // "iPhone · iOS 18.2" from the iOS shell; in a browser the system and browser from its user agent
@@ -470,6 +628,7 @@ function previewImport(items, title) {
     s.querySelector('#ipCancel').onclick = closeSheet;
     s.querySelector('#ipGo').onclick = async () => {
       const replace = s.querySelector('input[name="dup"]:checked')?.value === 'replace';
+      if (folder.state === 'none' && !(await requireFolder())) return;
       closeSheet();
       const added = await addItems(items, id => !have.has(id) || replace);
       toast(!added ? 'Nothing new to add' : replace && dup ? `Added ${fresh} and replaced ${dup}` : `Added ${plural(added, 'portrait')}`);
@@ -547,7 +706,8 @@ function countNew() { settings.sinceBackup++; saveSettings(); }
 function renderBanner() {
   const due = settings.backupEvery > 0 && portraits.length > 0 && settings.sinceBackup >= (settings.remindAt || settings.backupEvery);
   $('backupBanner').hidden = !due || selecting;
-  if (due) $('backupText').textContent = `You've added ${plural(settings.sinceBackup, 'portrait')} since ${settings.lastBackup ? 'your last backup' : 'you started'}. Your gallery is only on this device.`;
+  if (due) $('backupText').textContent = `You've added ${plural(settings.sinceBackup, 'portrait')} since ${settings.lastBackup ? 'your last backup' : 'you started'}.${folder.state === 'ready' ? '' : ' Your gallery is only on this device.'}`;
+  renderFolder();
 }
 $('backupNow').onclick = () => exportPortraits(portraits, true);
 $('backupLater').onclick = () => { settings.remindAt = settings.sinceBackup + (settings.backupEvery || 5); saveSettings(); renderBanner(); };
@@ -576,7 +736,7 @@ $('protoBtn').onclick = () => openSheet(`
     s.querySelector('#pcOld').onchange = e => { sim.firmware = e.target.checked ? '1.0' : '2.0'; base.ready = false; renderSettings(); };
     s.querySelector('#pcFail').onchange = e => sim.fail = e.target.value;
     s.querySelector('#pcFast').onchange = e => sim.fast = e.target.checked;
-    s.querySelector('#pcEmpty').onclick = () => { store.remove(portraits.map(p => p.id)); portraits = []; closeSheet(); show('gallery'); };
+    s.querySelector('#pcEmpty').onclick = () => { removeStored(portraits.map(p => p.id)); portraits = []; closeSheet(); show('gallery'); };
   });
 
 // ---------- portrait ----------
@@ -627,16 +787,17 @@ $('pMenu').onclick = () => {
     <button class="item" data-a="dup"><span class="ico">⧉</span><span>Duplicate${txt.trim() ? `<small>The copy says “${escapeHtml(nextText(txt).replace(/\n/g, ' '))}”</small>` : ''}</span></button>
     <button class="item" data-a="export"><span class="ico">⬆</span><span>Export<small>Share as a .tfc file</small></span></button>
     <button class="item" data-a="delete" style="color:var(--danger)"><span class="ico">🗑</span><span>Delete</span></button>`,
-  s => s.querySelectorAll('.item').forEach(b => b.onclick = () => {
+  s => s.querySelectorAll('.item').forEach(b => b.onclick = async () => {
     closeSheet();
     if (b.dataset.a === 'export') return exportPortraits([current], portraits.length === 1);
     if (b.dataset.a === 'dup') {
+      if (folder.state === 'none' && !(await requireFolder())) return;
       const copy = clone(current); copy.id = newId(); copy.createdAt = Date.now(); copy.lastUsed = 0;
       if (copy.overlay) copy.overlay.text = nextText(copy.overlay.text);
       updateThumb(copy); portraits.push(copy); persist(copy, true); countNew(); return openPortrait(copy);
     }
     const p = current, i = portraits.indexOf(p);
-    portraits.splice(i, 1); store.remove([p.id]).catch(storageFailed); show('gallery');
+    portraits.splice(i, 1); removeStored([p.id]); show('gallery');
     toast('Deleted the portrait', () => { portraits.splice(i, 0, p); persist(p, true); renderGallery(); });
   }));
 };
@@ -748,9 +909,15 @@ function renderSettings() {
         <div class="srow"><span class="k">Last backup</span><span class="v">${settings.lastBackup ? new Date(settings.lastBackup).toLocaleDateString() : 'Never'}</span></div>
         <div class="srow"><span class="k">Remind me after</span>
           <div class="seg" id="setRemind"><button data-v="5">5 new</button><button data-v="10">10 new</button><button data-v="25">25 new</button><button data-v="0">Never</button></div></div></div>
-      <p class="hint">Your gallery is stored only on this device. A backup is a .tfc file with all your portraits: keep it somewhere safe, or open it on another device to move your gallery.</p>
+      <p class="hint">${folder.state === 'ready' ? '' : 'Your gallery is stored only on this device. '}A backup is a .tfc file with all your portraits: keep it somewhere safe, or open it on another device to move your gallery.</p>
       <div class="btnrow"><button class="secondary" id="setBackup" ${portraits.length ? '' : 'disabled'}>Back up now</button>
         <button class="secondary" id="setRestore">Restore a backup</button></div></div>
+    ${folder.state !== 'off' ? `<div class="group"><h3>Portraits folder</h3>
+      <div class="rows"><div class="srow"><span class="k">Folder</span><span class="v">${folder.handle ? escapeHtml(folder.name)
+        + ({ ask: ' (needs your OK)', lost: ' (not found)' }[folder.state] || '') : 'Not chosen yet'}</span></div></div>
+      <p class="hint">Your portraits are saved as files in this folder, so they stay safe even if the browser's data is cleared. In OneDrive, iCloud Drive or Dropbox they're also kept online.</p>
+      <div class="btnrow"><button class="secondary" id="setFolder">${folder.handle ? 'Change folder' : 'Choose a folder'}</button>
+        ${folder.handle ? '<button class="secondary" id="setFolderCheck">Check the folder</button>' : ''}</div></div>` : ''}
     ${platform() === 'desktop' ? `<div class="group"><h3>Base firmware</h3>
       <div class="rows"><div class="srow"><span class="k">Firmware</span><span class="v">${escapeHtml(fw)}</span></div></div>
       <a class="secondary" style="text-align:center;text-decoration:none" href="https://totemforge.nl/updater/" target="_blank" rel="noopener">Update firmware</a>
@@ -768,6 +935,8 @@ function renderSettings() {
     b.onclick = () => { settings.backupEvery = +b.dataset.v; settings.remindAt = 0; saveSettings(); renderSettings(); renderBanner(); };
   });
   $('setBackup').onclick = () => exportPortraits(portraits, true);
+  if ($('setFolder')) $('setFolder').onclick = () => pickFolder(false);
+  if ($('setFolderCheck')) $('setFolderCheck').onclick = checkFolder;
   $('setRestore').onclick = () => iosFiles() ? pickIosPack() : $('packPick').click();
   $('setHelp').onclick = helpSheet;
   body.querySelectorAll('#setSort button').forEach(b => {
@@ -786,7 +955,7 @@ function openEditor(p, fresh) {
   $('zoom').value = Math.round(draft.crop.zoom * 100);
   $('bright').value = draft.adjust.brightness; syncDither();
   $('ovText').value = draft.overlay.text; $('push').value = draft.overlay.push;
-  selectTab('Crop'); show('editor'); syncEditor();
+  selectTab('Adjust'); show('editor'); syncEditor();
   requestAnimationFrame(placeBezel);
 }
 function syncEditor() {
@@ -820,9 +989,9 @@ function placeBezel() {   // the case hides ~5 px around the edge
     width: (r.width - 10 * k) + 'px', height: (r.height - 10 * k) + 'px' });
 }
 function selectTab(name) {
-  ['Crop', 'Adjust', 'Text'].forEach(t => { $('tab' + t).setAttribute('aria-selected', t === name); $('panel' + t).hidden = t !== name; });
+  ['Adjust', 'Crop', 'Text'].forEach(t => { $('tab' + t).setAttribute('aria-selected', t === name); $('panel' + t).hidden = t !== name; });
 }
-['Crop', 'Adjust', 'Text'].forEach(t => $('tab' + t).onclick = () => selectTab(t));
+['Adjust', 'Crop', 'Text'].forEach(t => $('tab' + t).onclick = () => selectTab(t));
 $('fillExtend').onclick = () => { draft.fill = 'extend'; syncEditor(); };
 $('fillColour').onclick = () => { draft.fill = 'colour'; syncEditor(); };
 $('zoom').oninput = e => { draft.crop.zoom = e.target.value / 100; syncEditor(); };
@@ -858,7 +1027,8 @@ canvasEl.addEventListener('wheel', e => { e.preventDefault(); zoomBy(e.deltaY < 
 function zoomBy(f) { draft.crop.zoom = Math.max(.4, Math.min(4, draft.crop.zoom * f)); $('zoom').value = Math.round(draft.crop.zoom * 100); syncEditor(); }
 
 $('eCancel').onclick = () => { isNew || !current ? show('gallery') : openPortrait(current); };
-$('eSave').onclick = () => {
+$('eSave').onclick = async () => {
+  if (isNew && folder.state === 'none' && !(await requireFolder())) return;
   if (!draft.overlay.text.trim()) draft.overlay.text = '';
   updateThumb(draft);
   if (isNew) { draft.createdAt = Date.now(); portraits.push(draft); persist(draft, true); countNew(); }
@@ -950,6 +1120,7 @@ window.addEventListener('drop', e => {
   } catch { toast("Couldn't load your gallery."); }
   show('gallery');
   renderInstall();
+  folderStart().catch(() => {});
   // Offline use and installing (not in the iOS shell, which has the files built in)
   if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(() => {});
   takeShared();

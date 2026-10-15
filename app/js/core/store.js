@@ -7,7 +7,7 @@
 // settings changes don't rewrite the picture.
 
 const DB = 'totemforge', VERSION = 1;
-const FIELDS = ['id', 'tags', 'collection', 'rot', 'crop', 'fill', 'adjust', 'overlay', 'createdAt', 'lastUsed'];
+const FIELDS = ['id', 'tags', 'collection', 'rot', 'crop', 'fill', 'adjust', 'overlay', 'createdAt', 'lastUsed', 'picture'];
 
 function openDb() {
   return new Promise((resolve, reject) => {
@@ -49,9 +49,12 @@ export async function openStore() {
       for (const id of ids) { tx.objectStore('portraits').delete(id); tx.objectStore('masters').delete(id); }
       return done(tx);
     },
-    async loadSettings() { return (await request(db.transaction('settings').objectStore('settings').get('app'))) || null; },
-    async saveSettings(s) {
-      const tx = db.transaction('settings', 'readwrite'); tx.objectStore('settings').put(structuredClone(s), 'app'); return done(tx);
+    async loadSettings() { return this.loadValue('app'); },
+    saveSettings(s) { return this.saveValue('app', s); },
+    /** Other values kept with the gallery (the portraits folder's handle, changes waiting for it) */
+    async loadValue(key) { return (await request(db.transaction('settings').objectStore('settings').get(key))) ?? null; },
+    async saveValue(key, value) {
+      const tx = db.transaction('settings', 'readwrite'); tx.objectStore('settings').put(value, key); return done(tx);
     }
   };
 }

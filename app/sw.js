@@ -28,6 +28,7 @@ const FILES = [
   'index.html',
   'js/app.js',
   'js/core/base.js',
+  'js/core/gallerydir.js',
   'js/core/imaging.js',
   'js/core/protocol.js',
   'js/core/store.js',
@@ -35,6 +36,7 @@ const FILES = [
   'js/core/zip.js',
   'js/platform/fakebase.js',
   'js/platform/files.js',
+  'js/platform/folder.js',
   'js/platform/install.js',
   'js/platform/transport.js',
   'manifest.webmanifest'
