@@ -63,6 +63,10 @@
   .banner strong { color: var(--fg); }
   .banner .actions { display: flex; gap: 8px; }
   .banner .actions > * { flex: 1; white-space: nowrap; }
+  .banner .actions { flex-wrap: wrap; }
+  .banner .actions .wide { flex-basis: 100%; }
+  .banner a.primary { text-align: center; text-decoration: none; }
+  .scroll > .banner { margin: 0 0 14px; }
   .scroll { flex: 1; overflow-y: auto; padding: 4px 16px 96px; min-height: 0; }
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 14px 10px; }
   .card { border: 0; background: none; padding: 0; display: block; position: relative;

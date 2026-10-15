@@ -33,6 +33,7 @@ const FILES = [
   'js/core/zip.js',
   'js/platform/fakebase.js',
   'js/platform/files.js',
+  'js/platform/install.js',
   'js/platform/transport.js',
   'manifest.webmanifest'
 ];

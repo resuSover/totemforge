@@ -11,6 +11,7 @@ import { readTfc, writeTfc } from './core/tfc.js';
 import { pickTransport } from './platform/transport.js';
 import { fakeBaseTransport } from './platform/fakebase.js';
 import { iosFiles, hasSaveDialog, pickSaveFile, writeHandle, download, shareOnIos } from './platform/files.js';
+import { installRoute, chromeLink } from './platform/install.js';
 
 const $ = id => document.getElementById(id);
 const escapeHtml = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -28,7 +29,7 @@ const memoryStore = { async loadAll() { return []; }, async save() {}, async rem
 let store = memoryStore;
 // Backup reminder: sinceBackup counts portraits added since the last full backup; the banner shows
 // once it reaches remindAt (backupEvery, pushed further by "Later"); backupEvery 0 is never
-const settings = { sort: 'newest', midiExplained: false, backupEvery: 5, sinceBackup: 0, remindAt: 0, lastBackup: 0 };
+const settings = { sort: 'newest', midiExplained: false, backupEvery: 5, sinceBackup: 0, remindAt: 0, lastBackup: 0, installLater: 0 };
 const persist = (p, withPicture = false) => store.save(p, withPicture ? p.blob : undefined).catch(storageFailed);
 const saveSettings = () => store.saveSettings(settings).catch(storageFailed);
 function storageFailed() { toast("Couldn't save. Is the device out of storage?"); }
@@ -363,13 +364,58 @@ $('fab').onclick = () => openSheet(`
 $('menuBtn').onclick = () => openSheet(`
     <button class="item" data-a="select"><span class="ico">☑</span><span>Select portraits</span></button>
     <button class="item" data-a="settings"><span class="ico">⚙</span><span>Settings<small>Order, backup, firmware, about</small></span></button>
-    <button class="item" data-a="help"><span class="ico">?</span><span>Help & feedback<small>Quick start, Discord, email</small></span></button>`,
+    <button class="item" data-a="help"><span class="ico">?</span><span>Help & feedback<small>Quick start, Discord, email</small></span></button>
+    ${installRoute(navigator.userAgent, runsInstalled()) && !installedApp ? `<button class="item" data-a="install"><span class="ico">⤓</span><span>Install app<small>On this phone, from Chrome</small></span></button>` : ''}`,
   s => s.querySelectorAll('button.item').forEach(b => b.onclick = () => {
     closeSheet();
     if (b.dataset.a === 'select') { selecting = true; syncSelect(); }
     else if (b.dataset.a === 'help') helpSheet();
+    else if (b.dataset.a === 'install') { settings.installLater = 0; saveSettings(); renderInstall(); $('galleryScroll').scrollTop = 0; }
     else { renderSettings(); show('settings'); }
   }));
+
+// ---------- installing on Android ----------
+// A card at the top of the gallery: in Chrome an Install button (Chrome's own dialog), or where to
+// find Install in Chrome's menu until Chrome offers it; in other browsers a link that opens the page
+// in Chrome. "Not now" hides it for two weeks; the menu brings it back.
+const runsInstalled = () => matchMedia('(display-mode: standalone)').matches || platform() === 'iphone';
+const INSTALL_WHY = 'It opens full screen like any app, keeps your gallery safer, and other apps can share photos straight to it.';
+let installPrompt = null, installedApp = false;
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installPrompt = e; renderInstall(); });
+window.addEventListener('appinstalled', () => { installPrompt = null; installedApp = true; renderInstall(); });
+// Chrome tells an open page when the app is already installed (manifest: related_applications)
+navigator.getInstalledRelatedApps?.().then(apps => { if (apps.length) { installedApp = true; renderInstall(); } }).catch(() => {});
+function renderInstall() {
+  const card = $('installCard'), route = installRoute(navigator.userAgent, runsInstalled());
+  card.hidden = !route || Date.now() - settings.installLater < 14 * 864e5;
+  if (card.hidden) return;
+  const later = '<button class="secondary" id="instLater">Not now</button>';
+  if (installedApp) card.innerHTML = `<p><strong>Totem Forge is installed on this phone.</strong> Open it from your home screen or app list.</p>
+    <div class="actions"><button class="secondary" id="instLater">OK</button></div>`;
+  else if (route === 'chrome') card.innerHTML = `<p><strong>Install Totem Forge from Chrome.</strong> ${INSTALL_WHY}</p>
+    <p>This browser can't install it: open this page in Chrome and tap <strong>Install</strong> there.</p>
+    <div class="actions"><a class="primary wide" id="instChrome" href="${escapeHtml(chromeLink(location.href))}">Open in Chrome</a>
+      <button class="secondary" id="instCopy">Copy link</button>${later}</div>`;
+  else if (installPrompt) card.innerHTML = `<p><strong>Install Totem Forge on this phone.</strong> ${INSTALL_WHY}</p>
+    <div class="actions"><button class="primary" id="instGo">Install</button>${later}</div>`;
+  else card.innerHTML = `<p><strong>Install Totem Forge on this phone.</strong> ${INSTALL_WHY}</p>
+    <p>In Chrome's menu <strong>⋮</strong> (top right), tap <strong>Install app</strong> or <strong>Add to Home screen</strong>.
+      Opened from another app, like Discord? Tap <strong>⋮</strong> → <strong>Open in Chrome</strong> first.</p>
+    <div class="actions">${later}</div>`;
+  card.querySelector('#instLater').onclick = () => { settings.installLater = Date.now(); saveSettings(); renderInstall(); };
+  const go = card.querySelector('#instGo');
+  if (go) go.onclick = async () => {
+    const asked = installPrompt; installPrompt = null;
+    await asked.prompt();
+    // Installed: appinstalled follows. Declined: Chrome's dialog can't be shown again, so the menu way
+    if ((await asked.userChoice).outcome !== 'accepted') renderInstall();
+  };
+  const copy = card.querySelector('#instCopy');
+  if (copy) copy.onclick = async () => {
+    try { await navigator.clipboard.writeText(location.origin + location.pathname); toast('Link copied: paste it into Chrome.'); }
+    catch { toast(`Open ${location.host}${location.pathname} in Chrome.`); }
+  };
+}
 
 // ---------- help and feedback ----------
 const DISCORD = 'https://discord.gg/fgyvRsuTGd', EMAIL = 'info@totemforge.nl';
@@ -894,6 +940,7 @@ window.addEventListener('drop', e => {
     portraits.forEach(updateThumb);
   } catch { toast("Couldn't load your gallery."); }
   show('gallery');
+  renderInstall();
   // Offline use and installing (not in the iOS shell, which has the files built in)
   if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(() => {});
   takeShared();
