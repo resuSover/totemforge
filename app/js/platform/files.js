@@ -41,7 +41,7 @@ export async function shareOnIos(blob, name) {
   return !!(await native.postMessage({ op: 'share', name }));
 }
 
-const base64 = blob => new Promise((resolve, reject) => {
+export const base64 = blob => new Promise((resolve, reject) => {
   const r = new FileReader();
   r.onload = () => resolve(r.result.slice(r.result.indexOf(',') + 1));
   r.onerror = () => reject(r.error);

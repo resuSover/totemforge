@@ -38,6 +38,7 @@ const FILES = [
   'js/platform/files.js',
   'js/platform/folder.js',
   'js/platform/install.js',
+  'js/platform/iosstore.js',
   'js/platform/transport.js',
   'manifest.webmanifest'
 ];

@@ -1,7 +1,7 @@
 // © 2026 Totem Forge. All rights reserved.
-// Gallery storage. IndexedDB in browsers, on Android and (for now) inside the iOS shell.
-// For the App Store build the iOS shell gets a file-based version of this same interface,
-// because iOS may clear web storage when the phone runs very low on space.
+// Gallery storage in the browser (IndexedDB): the gallery itself on Android, the working copy next
+// to the portraits folder on PC/Mac (platform/folder.js). The iOS shell keeps the gallery in files
+// instead (platform/iosstore.js, same interface), as iOS may clear web storage when very low on space.
 //
 // Stored per portrait: its settings (record) and its master picture (Blob), kept separately so
 // settings changes don't rewrite the picture.

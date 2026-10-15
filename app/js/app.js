@@ -7,6 +7,7 @@ import { W, H, INK_NAMES, SHOW, DITHER, ditherStep, render, paint } from './core
 import { packImage } from './core/protocol.js';
 import { Base } from './core/base.js';
 import { openStore } from './core/store.js';
+import { openIosStore } from './platform/iosstore.js';
 import { readTfc, writeTfc } from './core/tfc.js';
 import { pickTransport } from './platform/transport.js';
 import { fakeBaseTransport } from './platform/fakebase.js';
@@ -1106,7 +1107,7 @@ window.addEventListener('drop', e => {
 
 // ---------- start ----------
 (async () => {
-  try { store = await openStore(); }
+  try { store = iosFiles() ? await openIosStore() : await openStore(); }   // the iOS shell keeps the gallery in files
   catch { toast("This browser can't keep your gallery; it will be gone when you close the app."); }
   // Ask to keep the gallery even when the device runs low on space (Chrome grants it to installed apps)
   navigator.storage?.persist?.().catch(() => {});
