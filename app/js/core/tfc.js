@@ -36,9 +36,10 @@ export async function readTfc(file) {
   return { version, name: m.name || null, items };
 }
 
-// false, or { strength, threshold }; true (files from before the dither steps) renders as Strong
+// { strength, threshold }, kept within range; anything else is no dither
+const NO_DITHER = { strength: 0, threshold: 24 };
 const dither = d => d && typeof d === 'object'
-  ? { strength: Math.min(1, Math.max(0, +d.strength || 0)), threshold: Math.max(0, +d.threshold || 0) } : d === true;
+  ? { strength: Math.min(1, Math.max(0, +d.strength || 0)), threshold: Math.min(255, Math.max(0, +d.threshold || 0)) } : { ...NO_DITHER };
 function fromV2(p) {
   return {
     id: String(p.id), tags: (p.tags || []).map(String), collection: p.collection || null,
@@ -59,7 +60,7 @@ function fromV1(p) {
   return {
     id: String(p.id), tags: tags.filter(t => !t.startsWith('pack:') && t !== 'other'),
     collection: pack ? titleCase(pack.slice(5).trim()) : null,
-    rot: 0, crop: { zoom: 1, x: 0, y: 0 }, fill: 'colour', adjust: { brightness: 0, dither: false },
+    rot: 0, crop: { zoom: 1, x: 0, y: 0 }, fill: 'colour', adjust: { brightness: 0, dither: { ...NO_DITHER } },
     overlay: p.overlayEnabled && text.trim() ? {
       text, bar: ink(p.overlayBgColor, 'black'), textColour: ink(p.overlayTextColor, 'yellow'),
       position: p.overlayPosition === 'top' ? 'top' : 'bottom', push: +p.overlayPush || 0

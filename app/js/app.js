@@ -30,7 +30,13 @@ let store = memoryStore;
 // Backup reminder: sinceBackup counts portraits added since the last full backup; the banner shows
 // once it reaches remindAt (backupEvery, pushed further by "Later"); backupEvery 0 is never
 const settings = { sort: 'newest', midiExplained: false, backupEvery: 5, sinceBackup: 0, remindAt: 0, lastBackup: 0, installLater: 0 };
-const persist = (p, withPicture = false) => store.save(p, withPicture ? p.blob : undefined).catch(storageFailed);
+// While saves are under way, leaving the page asks first (closing it then would lose them)
+let saving = 0;
+const persist = (p, withPicture = false) => {
+  saving++;
+  return store.save(p, withPicture ? p.blob : undefined).catch(storageFailed).finally(() => saving--);
+};
+window.addEventListener('beforeunload', e => { if (saving) { e.preventDefault(); e.returnValue = ''; } });
 const saveSettings = () => store.saveSettings(settings).catch(storageFailed);
 function storageFailed() { toast("Couldn't save. Is the device out of storage?"); }
 
@@ -472,17 +478,18 @@ function previewImport(items, title) {
 }
 // New portraits go to the top of the gallery, in the file's order
 async function addItems(items, take) {
-  const now = Date.now(), list = [];
+  const now = Date.now(), list = [], saves = [];
   for (const [i, { record, blob }] of items.entries()) {
     if (!take(record.id)) continue;
     let img;
     try { img = await createImageBitmap(blob); } catch { continue; }
     const p = { ...record, blob, img, createdAt: now - i, thumb: null };
-    updateThumb(p); list.push(p); persist(p, true);
+    updateThumb(p); list.push(p); saves.push(persist(p, true));
   }
   const ids = new Set(list.map(p => p.id));
   portraits = [...list, ...portraits.filter(p => !ids.has(p.id))];
   setQuery(''); $('galleryScroll').scrollTop = 0; show('gallery');
+  await Promise.all(saves);           // the message that follows means they're all saved
   return list.length;
 }
 $('addFreePack').onclick = async () => {

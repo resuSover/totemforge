@@ -30,23 +30,22 @@ function nearest(r, g, b) {
   return best;
 }
 // Dither steps: the share of each pixel's colour error passed on to its neighbours (strength), once
-// the error is at least threshold. A portrait keeps the numbers, so retuning a step doesn't change it.
+// the error is at least threshold; strength 0 is no dither. A portrait keeps its own numbers
+// (adjust.dither), so retuning a step later doesn't change it.
 export const DITHER = {
-  none: false,
+  none: { strength: 0, threshold: 24 },
   mild: { strength: 0.15, threshold: 24 },
   normal: { strength: 0.28, threshold: 24 },
   strong: { strength: 0.5, threshold: 24 },
 };
-// adjust.dither is false, { strength, threshold }, or true from before the steps (Strong)
-const ditherOf = d => d === true ? DITHER.strong : d || null;
-// The step a portrait's dither matches, or null for numbers that match none
+// The step a portrait's dither matches (any strength 0 is None), or null for numbers that match none
 export function ditherStep(d) {
-  const v = ditherOf(d);
-  return Object.keys(DITHER).find(k => v ? DITHER[k] && DITHER[k].strength === v.strength && DITHER[k].threshold === v.threshold : !DITHER[k]) || null;
+  if (!(d?.strength > 0)) return 'none';
+  return Object.keys(DITHER).find(k => DITHER[k].strength === d.strength && DITHER[k].threshold === d.threshold) || null;
 }
 // Weakened Floyd–Steinberg: part of the error, small errors not spread, values clamped
 function quantize(rgb, d) {
-  const dither = ditherOf(d);
+  const dither = d?.strength > 0 ? d : null;
   const idx = new Uint8Array(W * H), clamp = v => Math.max(0, Math.min(255, v));
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
     const p = y * W + x, j = p * 3;

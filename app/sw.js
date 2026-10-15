@@ -1,7 +1,9 @@
 // © 2026 Totem Forge. All rights reserved.
 // Service worker: the app works offline once opened, and Android's "Share to Totem Forge" lands here.
 // Online, every file comes from the network (so updates show up straight away) and a copy is kept;
-// offline, or when the network takes longer than 4 s, the kept copy is used.
+// offline, or when the network takes longer than 4 s, the kept copy is used. "From the network"
+// skips the browser's own cache: the website lets browsers reuse files for 10 minutes, and right
+// after a publish that could mix new and old files.
 const CACHE = 'totemforge-app';
 const SHARED = 'totemforge-shared';
 // Everything the app needs offline; tests/run.py checks this list against the web folder
@@ -56,7 +58,7 @@ self.addEventListener('fetch', e => {
 async function networkFirst(request) {
   const cache = await caches.open(CACHE);
   let response = null;
-  try { response = await withTimeout(fetch(request), 4000); } catch {}
+  try { response = await withTimeout(fetch(fresh(request)), 4000); } catch {}
   if (response && response.ok) {
     if (response.type === 'basic' && !new URL(request.url).search) cache.put(request, response.clone());
     return response;
@@ -65,6 +67,11 @@ async function networkFirst(request) {
       || (request.mode === 'navigate' && await cache.match('./'))
       || response || Response.error();
 }
+// The same request, but checked with the website even if the browser has a copy ("no-cache"); a
+// page load can't be given options, so it's asked again by its address
+const fresh = request => request.mode === 'navigate'
+  ? new Request(request.url, { cache: 'no-cache', credentials: request.credentials })
+  : new Request(request, { cache: 'no-cache' });
 const withTimeout = (promise, ms) => new Promise((resolve, reject) => {
   const timer = setTimeout(() => reject(new Error('timeout')), ms);
   promise.then(v => { clearTimeout(timer); resolve(v); }, e => { clearTimeout(timer); reject(e); });
