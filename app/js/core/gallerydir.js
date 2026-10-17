@@ -24,17 +24,27 @@ const settingsOf = p => ({ ...cleanRecord(p), picture: pictureName(p) });
 export const isGallery = async dir => (await dir.list()).some(e => e.name === MARKER);
 export const markGallery = dir => dir.write(MARKER, json({ app: 'Totem Forge', format: 1 }));
 
-/** Writes a portrait's settings, and its picture too when withPicture. */
-export async function writePortrait(dir, p, withPicture) {
+// One change at a time per folder: a deletion lists the folder and then removes files, so the same
+// portrait saved again meanwhile (Undo, restoring right after deleting) would be deleted with it
+const queues = new WeakMap();
+function inTurn(dir, task) {
+  const run = (queues.get(dir) || Promise.resolve()).catch(() => {}).then(task);
+  queues.set(dir, run);
+  return run;
+}
+async function write(dir, p, withPicture) {
   if (withPicture) await dir.write(pictureName(p), p.blob);
   await dir.write(`${p.id}.json`, json(settingsOf(p)));
 }
 
+/** Writes a portrait's settings, and its picture too when withPicture. */
+export const writePortrait = (dir, p, withPicture) => inTurn(dir, () => write(dir, p, withPicture));
+
 /** Removes the portraits' pictures and settings. */
-export async function removePortraits(dir, ids) {
+export const removePortraits = (dir, ids) => inTurn(dir, async () => {
   const gone = new Set(ids);
   for (const { name } of await dir.list()) if (name !== MARKER && gone.has(stem(name))) await dir.remove(name);
-}
+});
 
 /**
  * Reads the folder and compares it with the app's portraits (a Map of id → portrait).
@@ -43,7 +53,8 @@ export async function removePortraits(dir, ids) {
  * changes not yet written); repaired: .json files written again; unreadable: pictures that couldn't
  * be read (a cloud file not downloaded yet). `defaults` fill in a picture copied in by hand.
  */
-export async function readGallery(dir, known = new Map(), { keep = new Set(), defaults = {} } = {}) {
+export const readGallery = (dir, known, options) => inTurn(dir, () => read(dir, known, options));
+async function read(dir, known = new Map(), { keep = new Set(), defaults = {} } = {}) {
   const pictures = new Map(), settings = new Map();
   for (const e of await dir.list()) {
     if (e.name.startsWith('.') || e.name === MARKER) continue;
@@ -57,7 +68,7 @@ export async function readGallery(dir, known = new Map(), { keep = new Set(), de
       if (settings.has(id)) { try { saved = JSON.parse(await (await dir.read(settings.get(id).name)).text()); } catch { saved = null; } }
       const p = known.get(id);
       if (p) {
-        if (!saved) { await writePortrait(dir, { ...p, picture: pic.name }, false); out.repaired++; continue; }
+        if (!saved) { await write(dir, { ...p, picture: pic.name }, false); out.repaired++; continue; }
         const record = settingsOf({ ...saved, id, picture: pic.name });
         const blob = p.blob && pic.size != null && pic.size !== p.blob.size ? await dir.read(pic.name) : null;
         if (blob || JSON.stringify(record) !== JSON.stringify(settingsOf({ ...p, picture: p.picture || pic.name }))) out.updated.push({ record, blob });

@@ -8,14 +8,17 @@ export const W = 88, H = 184;
 export const INK = { black: 0, white: 1, yellow: 2, red: 3 };
 export const INK_NAMES = ['black', 'white', 'yellow', 'red'];
 const TARGET = [[0, 0, 0], [255, 255, 255], [242, 197, 0], [200, 16, 46]];   // conversion targets
-// How the inks look on the totem's e-ink screen (matched by eye next to a totem, prototype/totem-look.html):
-// paper-like white, deep black, darker yellow and red. Only for showing; the conversion uses TARGET.
-export const SHOW = [[0x0d, 0x0d, 0x0c], [0xb9, 0xb1, 0x9d], [0xc0, 0x7b, 0x1b], [0x6e, 0x19, 0x11]];
+// How the inks look on the totem's e-ink screen in a well-lit room (matched by eye next to a totem,
+// prototype/totem-look.html): paper-like white, deep black, warm yellow and red. Only for showing; the
+// conversion uses TARGET. In a dimmer room every ink darkens by about the same factor: the portrait
+// view can show that ("As on the totem", app.js)
+export const SHOW = [[0x0d, 0x0d, 0x0c], [0xe2, 0xda, 0xc5], [0xdd, 0x91, 0x03], [0x83, 0x1d, 0x16]];
 // The colours in files (the pictures in .tfc files): the old Android app's, which it reads back as
 // inks by the nearest pure colour; the muted SHOW colours would read back wrong there
 export const FILE_INKS = [[0, 0, 0], [243, 243, 243], [253, 206, 104], [183, 7, 7]];
-// The totem's frame hides the screen's edge: 4 pixels at the sides, 6 at the top and bottom
-export const FRAME = { side: 4, end: 6 };
+// The totem's frame hides the screen's edge: 3 pixels at the sides, 6 at the top and bottom
+export const FRAME = { side: 3, end: 6 };
+export const VIS_W = W - 2 * FRAME.side, VIS_H = H - 2 * FRAME.end;   // what it leaves visible: 82 x 172
 
 function toLab(r, g, b) {
   const lin = v => { v /= 255; return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
@@ -174,11 +177,14 @@ export function paint(canvas, idx, colours = SHOW) {
   ctx.putImageData(img, 0, 0);
 }
 
-/** paint(), then the edge the totem's frame hides in translucent grey: previews as they look on a totem. */
-export function paintPreview(canvas, idx) {
-  paint(canvas, idx);
-  const ctx = canvas.getContext('2d'), { side, end } = FRAME;
-  ctx.fillStyle = 'rgba(68, 68, 68, .8)';
-  ctx.fillRect(0, 0, W, end); ctx.fillRect(0, H - end, W, end);
-  ctx.fillRect(0, end, side, H - 2 * end); ctx.fillRect(W - side, end, side, H - 2 * end);
+/** Draws only the part the totem's frame leaves visible (VIS_W x VIS_H), as the previews show it. */
+export function paintVisible(canvas, idx) {
+  const { side, end } = FRAME;
+  canvas.width = VIS_W; canvas.height = VIS_H;
+  const ctx = canvas.getContext('2d'), img = ctx.createImageData(VIS_W, VIS_H);
+  for (let y = 0; y < VIS_H; y++) for (let x = 0; x < VIS_W; x++) {
+    const c = SHOW[idx[(y + end) * W + x + side]];
+    img.data.set([c[0], c[1], c[2], 255], (y * VIS_W + x) * 4);
+  }
+  ctx.putImageData(img, 0, 0);
 }

@@ -13,8 +13,10 @@ export function handleDir(h) {
     async list() {
       const out = [];
       for await (const [name, e] of h.entries()) {
-        if (e.kind !== 'file') continue;
-        const f = await e.getFile();
+        // Chrome saves through a temporary name.crswap file next to it, which can vanish meanwhile
+        if (e.kind !== 'file' || name.endsWith('.crswap')) continue;
+        let f;
+        try { f = await e.getFile(); } catch { continue; }       // gone since it was listed
         out.push({ name, size: f.size, lastModified: f.lastModified });
       }
       return out;
@@ -37,7 +39,11 @@ export async function permission(h, ask = false) {
   if (state !== 'granted' && ask) state = await h.requestPermission(opts);
   return state;
 }
-const hasMarker = async h => { try { await h.getFileHandle(MARKER); return true; } catch { return false; } };
+// false only when the marker isn't there; other errors (no permission) are thrown
+const hasMarker = async h => {
+  try { await h.getFileHandle(MARKER); return true; }
+  catch (e) { if (e.name === 'NotFoundError' || e.name === 'TypeMismatchError') return false; throw e; }
+};
 
 /** Still there (moved, renamed or deleted folders aren't)? */
 export const folderExists = h => hasMarker(h);

@@ -3,7 +3,7 @@
 // Totem Forge app: the screens. Imaging, protocol, summon flow and storage live in core/,
 // the MIDI transports in platform/. Add ?proto to the address for the prototype controls
 // (a simulated base that answers like the real firmware).
-import { W, H, INK_NAMES, SHOW, FILE_INKS, FRAME, DITHER, ditherStep, render, paint, paintPreview } from './core/imaging.js';
+import { W, H, INK_NAMES, SHOW, FILE_INKS, FRAME, DITHER, ditherStep, render, paint, paintVisible } from './core/imaging.js';
 import { packImage } from './core/protocol.js';
 import { Base } from './core/base.js';
 import { openStore } from './core/store.js';
@@ -32,7 +32,8 @@ const memoryStore = { async loadAll() { return []; }, async save() {}, async rem
 let store = memoryStore;
 // Backup reminder: sinceBackup counts portraits added since the last full backup; the banner shows
 // once it reaches remindAt (backupEvery, pushed further by "Later"); backupEvery 0 is never
-const settings = { sort: 'newest', midiExplained: false, backupEvery: 5, sinceBackup: 0, remindAt: 0, lastBackup: 0, installLater: 0 };
+const settings = { sort: 'newest', midiExplained: false, backupEvery: 5, sinceBackup: 0, remindAt: 0, lastBackup: 0, installLater: 0,
+                   indoors: false };
 // While saves are under way, leaving the page asks first (closing it then would lose them)
 let saving = 0;
 const persist = (p, withPicture = false) => {
@@ -50,7 +51,7 @@ function storageFailed() { toast("Couldn't save. Is the device out of storage?")
 let portraits = [];
 const label = p => (p.overlay && p.overlay.text.trim() ? p.overlay.text.trim().replace(/\s*\n\s*/g, ' ') : p.tags[0]) || 'Portrait';
 const clone = p => ({ ...p, tags: [...p.tags], crop: { ...p.crop }, adjust: { ...p.adjust }, overlay: p.overlay ? { ...p.overlay } : null });
-function updateThumb(p) { const c = document.createElement('canvas'); c.width = W; c.height = H; paintPreview(c, render(p).idx); p.thumb = c.toDataURL(); }
+function updateThumb(p) { const c = document.createElement('canvas'); paintVisible(c, render(p).idx); p.thumb = c.toDataURL(); }
 const newId = () => crypto.randomUUID ? crypto.randomUUID() : 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2);
 function renderPng(p) {
   const c = document.createElement('canvas'); c.width = W; c.height = H; paint(c, render(p).idx, FILE_INKS);   // the old app's colours
@@ -447,15 +448,24 @@ async function folderStart() {
   renderFolder();
 }
 function setFolder(handle) { folder.handle = handle; folder.dir = handleDir(handle); folder.name = handle.name; }
-// Brings the folder state up to date; when ready, writes what waited and follows the folder
+// Brings the folder state up to date; when ready, writes what waited and follows the folder. Checks
+// can overlap (start, a failed save, Check the folder): only the latest one's result counts
+let checks = 0;
 async function checkFolderState(ask) {
   if (!folder.handle) return null;
-  let result = null;
+  const n = ++checks;
+  let state = folder.state, result = null;
   try {
-    if (await permission(folder.handle, ask) !== 'granted') folder.state = 'ask';
-    else if (!(await folderExists(folder.handle))) folder.state = 'lost';
-    else { folder.state = 'ready'; await writeWaiting(); result = await followFolder(); }
-  } catch { folder.state = 'lost'; }
+    if (await permission(folder.handle, ask) !== 'granted') state = 'ask';
+    else if (!(await folderExists(folder.handle))) state = 'lost';
+    else if (n === checks) { folder.state = state = 'ready'; await writeWaiting(); result = await followFolder(); }
+  } catch (e) {
+    // only a missing folder is "not found"; no permission asks again; anything else (a file that
+    // vanished meanwhile) leaves the state as it was
+    state = e.name === 'NotFoundError' ? 'lost' : ['NotAllowedError', 'SecurityError'].includes(e.name) ? 'ask' : state;
+  }
+  if (n !== checks) return result;
+  folder.state = state;
   renderFolder();
   return result;
 }
@@ -538,7 +548,8 @@ async function pickFolder(restoring) {
 }
 async function checkFolder() {
   const r = await checkFolderState(true);
-  if (!r) return toast(folder.state === 'ask' ? 'The browser didn’t allow access to the folder.' : 'Your portraits folder wasn’t found.');
+  if (!r) return toast(folder.state === 'ask' ? 'The browser didn’t allow access to the folder.'
+    : folder.state === 'lost' ? 'Your portraits folder wasn’t found.' : 'Couldn’t read the folder just now. Try again.');
   const changes = [r.added.length && `${r.added.length} added`, r.updated.length && `${r.updated.length} changed`,
     r.removed.length && `${r.removed.length} removed`, r.unreadable.length && `${r.unreadable.length} couldn't be read`].filter(Boolean);
   toast(changes.length ? `From the folder: ${changes.join(', ')}` : 'The gallery matches the folder');
@@ -744,11 +755,22 @@ $('protoBtn').onclick = () => openSheet(`
 function openPortrait(p) {
   current = p; show('portrait');
   $('pTitle').textContent = label(p);
-  paintPreview($('pCanvas'), render(p).idx);
+  paintVisible($('pCanvas'), render(p).idx);
   $('pMeta').textContent = p.collection || '';
+  syncTotemView();
   if (!summon.run || summon.for !== p.id) $('notice').hidden = true;
   syncSummon(); renderTags();
 }
+// Daylight or Indoors: the previews use the inks' colours in daylight, so the app looks bright; the
+// portrait view can show the portrait as the totem looks indoors. E-ink only reflects the light it gets,
+// so every ink is a little darker there (80 %, matched by eye next to a totem)
+function syncTotemView() {
+  $('lightDay').setAttribute('aria-checked', !settings.indoors);
+  $('lightIn').setAttribute('aria-checked', !!settings.indoors);
+  $('pWindow').classList.toggle('dimmed', !!settings.indoors);
+}
+$('lightDay').onclick = () => { settings.indoors = false; saveSettings(); syncTotemView(); };
+$('lightIn').onclick = () => { settings.indoors = true; saveSettings(); syncTotemView(); };
 function renderTags() {
   const row = $('pTags'); row.innerHTML = '';
   current.tags.forEach(t => {
@@ -961,7 +983,7 @@ function openEditor(p, fresh) {
 }
 function syncEditor() {
   const { idx, gap } = render(draft);
-  paint($('eCanvas'), idx);
+  paint($('eCanvas'), idx);   // the whole picture: the dashed guide marks what the frame leaves visible
   $('fillmode').hidden = !gap;
   $('fillExtend').setAttribute('aria-pressed', draft.fill === 'extend');
   $('fillColour').setAttribute('aria-pressed', draft.fill === 'colour');

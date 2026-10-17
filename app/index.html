@@ -87,7 +87,13 @@
       <button class="icon-btn" id="pMenu" aria-label="More">⋯</button>
     </div>
     <div class="detail">
-      <canvas class="big" id="pCanvas" width="88" height="184" aria-label="How the portrait will look on the totem"></canvas>
+      <div class="pv-row">
+        <div class="light-choice" role="radiogroup" aria-label="Show the portrait as the totem looks in">
+          <button role="radio" id="lightDay" aria-checked="true" title="As the totem looks in daylight or a bright room">☀ Daylight</button>
+          <button role="radio" id="lightIn" aria-checked="false" title="As the totem looks indoors: a little darker">☾ Indoors</button>
+        </div>
+        <div class="window pv" id="pWindow"><canvas class="big" id="pCanvas" width="82" height="172" aria-label="How the portrait will look on the totem"></canvas></div>
+      </div>
       <div class="meta" id="pMeta"></div>
       <button class="summon" id="summon">Summon</button>
       <div class="progress" id="progress" hidden>
@@ -111,7 +117,7 @@
       <button class="text-btn" id="eSave">Save</button>
     </div>
     <div class="stage" id="stage">
-      <canvas class="crop" id="eCanvas" width="88" height="184" aria-label="Crop: drag to move, pinch or scroll to zoom"></canvas>
+      <div class="window ed"><canvas class="crop" id="eCanvas" width="88" height="184" aria-label="Crop: drag to move, pinch or scroll to zoom"></canvas></div>
       <div class="bezel" id="bezel"></div>
     </div>
     <div class="fillmode" id="fillmode" hidden>
