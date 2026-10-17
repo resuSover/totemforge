@@ -8,7 +8,9 @@ export const W = 88, H = 184;
 export const INK = { black: 0, white: 1, yellow: 2, red: 3 };
 export const INK_NAMES = ['black', 'white', 'yellow', 'red'];
 const TARGET = [[0, 0, 0], [255, 255, 255], [242, 197, 0], [200, 16, 46]];   // conversion targets
-export const SHOW = [[0, 0, 0], [243, 243, 243], [253, 206, 104], [183, 7, 7]]; // measured look of the real screen
+// How the inks look on the totem's e-ink screen (matched by eye next to a totem, prototype/totem-look.html):
+// paper-like white, deep black, darker yellow and red. Only for showing; the conversion uses TARGET.
+export const SHOW = [[0x0d, 0x0d, 0x0c], [0xb9, 0xb1, 0x9d], [0xc0, 0x7b, 0x1b], [0x6e, 0x19, 0x11]];
 
 function toLab(r, g, b) {
   const lin = v => { v /= 255; return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };

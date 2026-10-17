@@ -72,7 +72,7 @@
   .card { border: 0; background: none; padding: 0; display: block; position: relative;
           user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
   .card .thumb { width: 100%; aspect-ratio: 88 / 184; border-radius: 6px; background: var(--screen);
-                 box-shadow: 0 0 0 1px var(--line); image-rendering: pixelated; display: block; }
+                 box-shadow: 0 0 0 1px var(--line); image-rendering: auto; display: block; }
   .card.open .thumb { box-shadow: 0 0 0 3px var(--gold); }
   .card .tick { position: absolute; top: 6px; right: 6px; width: 22px; height: 22px; border-radius: 50%;
                 border: 2px solid #fff; background: rgba(0,0,0,.35); display: none; }
@@ -96,7 +96,7 @@
   .detail { flex: 1; overflow-y: auto; padding: 4px 16px calc(24px + env(safe-area-inset-bottom, 0px));
             display: flex; flex-direction: column; align-items: center; gap: 16px; min-height: 0; }
   .detail > * { max-width: 420px; }
-  .big { width: min(56vw, 200px); aspect-ratio: 88 / 184; image-rendering: pixelated; border-radius: 8px;
+  .big { width: 88px; aspect-ratio: 88 / 184; image-rendering: auto; border-radius: 6px;   /* one point per screen pixel, chosen next to a totem: the dithering reads as shading */
          background: var(--screen); box-shadow: 0 0 0 1px var(--line), 0 10px 30px rgba(0,0,0,.35); display: block; }
   .meta { color: var(--fg-faint); font-size: .85rem; text-align: center; }
   .summon { width: 100%; font: 900 1.15rem var(--display); letter-spacing: .08em; text-transform: uppercase; color: var(--gold);
