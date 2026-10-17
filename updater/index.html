@@ -312,14 +312,14 @@
     </details>
     <details class="help">
       <summary>Copy the file yourself instead</summary>
-      <p>Download the firmware and drag <b>totemforge-base.uf2</b> onto the <span class="drive">RPI-RP2</span> drive. When the drive disappears, the update is in.</p>
+      <p>Download the firmware and drag <b class="js-filename">totemforge-base.uf2</b> onto the <span class="drive">RPI-RP2</span> drive. When the drive disappears, the update is in.</p>
       <div class="actions"><button class="btn btn-plain" id="downloadBtn">Download the firmware</button></div>
     </details>
   </section>
 
   <section class="card" data-panel="manual" hidden>
     <h2>Copy the file to the drive</h2>
-    <p>Drag <b>totemforge-base.uf2</b> from your Downloads onto the <span class="drive">RPI-RP2</span> drive. When the drive disappears, the update is in.</p>
+    <p>Drag <b class="js-filename">totemforge-base.uf2</b> from your Downloads onto the <span class="drive">RPI-RP2</span> drive. When the drive disappears, the update is in.</p>
     <div class="actions"><button class="btn btn-forge" id="copiedBtn">I've copied it</button></div>
   </section>
 
@@ -463,6 +463,7 @@
   // ---------- The firmware file ----------
   // Downloaded once: its blob for installing and its version, read from the file itself
   // (the firmware's "VERSION:x.y.z" reply string), so replacing the file is all a release needs.
+  // Saved as totemforge-base-x.y.z.uf2, so a new download can't be mixed up with an older one.
   const firmware = (async () => {
     try {
       const res = await fetch(FIRMWARE_URL, { cache: 'no-store' });
@@ -478,8 +479,10 @@
       blocks.sort((a, b) => a.addr - b.addr);
       const m = blocks.map(b => String.fromCharCode(...b.data)).join('').match(/VERSION:([0-9A-Za-z.+-]+)\0/);
       const version = m ? m[1] : null;
+      const name = version ? `totemforge-base-${version}.uf2` : FIRMWARE_NAME;
+      document.querySelectorAll('.js-filename').forEach(el => el.textContent = name);
       log(`Firmware file: ${buf.length} bytes, version ${version || 'unknown'}`);
-      return { blob: new Blob([buf], { type: 'application/octet-stream' }), version };
+      return { blob: new Blob([buf], { type: 'application/octet-stream' }), version, name };
     } catch (e) {
       log('Firmware file failed to load: ' + e.message);
       return null;
@@ -694,7 +697,7 @@
       $('installMsg').textContent = `"${dir.name}" isn't the update drive. Click Install and choose RPI-RP2.`;
       return;
     }
-    const file = await dir.getFileHandle(FIRMWARE_NAME, { create: true });
+    const file = await dir.getFileHandle((await firmware).name, { create: true });
     await writeFirmware(file);
   };
 
@@ -703,7 +706,7 @@
     if (window.showSaveFilePicker) {
       try {
         const handle = await window.showSaveFilePicker({
-          suggestedName: FIRMWARE_NAME, types: [{ description: 'Firmware', accept: { 'application/octet-stream': ['.uf2'] } }]
+          suggestedName: (await firmware).name, types: [{ description: 'Firmware', accept: { 'application/octet-stream': ['.uf2'] } }]
         });
         return writeFirmware(handle);
       } catch (e) {
@@ -717,7 +720,7 @@
     const fw = await firmware;
     const a = document.createElement('a');
     a.href = URL.createObjectURL(fw.blob);
-    a.download = FIRMWARE_NAME;
+    a.download = fw.name;
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 60000);
     log('Firmware downloaded');
