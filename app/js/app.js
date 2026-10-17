@@ -3,7 +3,7 @@
 // Totem Forge app: the screens. Imaging, protocol, summon flow and storage live in core/,
 // the MIDI transports in platform/. Add ?proto to the address for the prototype controls
 // (a simulated base that answers like the real firmware).
-import { W, H, INK_NAMES, SHOW, DITHER, ditherStep, render, paint } from './core/imaging.js';
+import { W, H, INK_NAMES, SHOW, FILE_INKS, FRAME, DITHER, ditherStep, render, paint, paintPreview } from './core/imaging.js';
 import { packImage } from './core/protocol.js';
 import { Base } from './core/base.js';
 import { openStore } from './core/store.js';
@@ -50,10 +50,10 @@ function storageFailed() { toast("Couldn't save. Is the device out of storage?")
 let portraits = [];
 const label = p => (p.overlay && p.overlay.text.trim() ? p.overlay.text.trim().replace(/\s*\n\s*/g, ' ') : p.tags[0]) || 'Portrait';
 const clone = p => ({ ...p, tags: [...p.tags], crop: { ...p.crop }, adjust: { ...p.adjust }, overlay: p.overlay ? { ...p.overlay } : null });
-function updateThumb(p) { const c = document.createElement('canvas'); c.width = W; c.height = H; paint(c, render(p).idx); p.thumb = c.toDataURL(); }
+function updateThumb(p) { const c = document.createElement('canvas'); c.width = W; c.height = H; paintPreview(c, render(p).idx); p.thumb = c.toDataURL(); }
 const newId = () => crypto.randomUUID ? crypto.randomUUID() : 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2);
 function renderPng(p) {
-  const c = document.createElement('canvas'); c.width = W; c.height = H; paint(c, render(p).idx);
+  const c = document.createElement('canvas'); c.width = W; c.height = H; paint(c, render(p).idx, FILE_INKS);   // the old app's colours
   return new Promise(r => c.toBlob(r, 'image/png'));
 }
 const loadFreePack = async () => readTfc(await (await fetch('data/classic-fantasy.tfc')).blob());
@@ -744,7 +744,7 @@ $('protoBtn').onclick = () => openSheet(`
 function openPortrait(p) {
   current = p; show('portrait');
   $('pTitle').textContent = label(p);
-  paint($('pCanvas'), render(p).idx);
+  paintPreview($('pCanvas'), render(p).idx);
   $('pMeta').textContent = p.collection || '';
   if (!summon.run || summon.for !== p.id) $('notice').hidden = true;
   syncSummon(); renderTags();
@@ -983,11 +983,11 @@ function swatches(id, key) {
     box.appendChild(b);
   });
 }
-function placeBezel() {   // the case hides ~5 px around the edge
+function placeBezel() {   // what the totem's frame leaves visible (FRAME)
   const c = $('eCanvas'); if (!c.clientWidth) return;
   const k = c.clientWidth / W, r = c.getBoundingClientRect(), s = $('stage').getBoundingClientRect();
-  Object.assign($('bezel').style, { left: (r.left - s.left + 5 * k) + 'px', top: (r.top - s.top + 5 * k) + 'px',
-    width: (r.width - 10 * k) + 'px', height: (r.height - 10 * k) + 'px' });
+  Object.assign($('bezel').style, { left: (r.left - s.left + FRAME.side * k) + 'px', top: (r.top - s.top + FRAME.end * k) + 'px',
+    width: (r.width - 2 * FRAME.side * k) + 'px', height: (r.height - 2 * FRAME.end * k) + 'px' });
 }
 function selectTab(name) {
   ['Adjust', 'Crop', 'Text'].forEach(t => { $('tab' + t).setAttribute('aria-selected', t === name); $('panel' + t).hidden = t !== name; });
