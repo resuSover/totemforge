@@ -249,12 +249,13 @@
   </section>
 
   <section class="card" data-panel="nobase" hidden>
-    <h2>Your base needs the update</h2>
-    <p>Bases from the first batch have firmware this page can't see yet. If yours is plugged in, update it.</p>
+    <h2>Find your base</h2>
+    <p>Chrome doesn't see a base yet. Bases from the first batch show up once you pick them: click <b>Find my base</b>, choose <b>TotemForge_Base</b> and click <b>Connect</b>.</p>
     <div class="actions">
-      <button class="btn btn-forge js-serial">It's plugged in: update it</button>
+      <button class="btn btn-forge" id="findBtn">Find my base</button>
       <button class="btn btn-plain js-check">I just plugged it in: check again</button>
     </div>
+    <p class="msg" id="findMsg" role="alert"></p>
   </section>
 
   <section class="card" data-panel="noanswer" hidden>
@@ -335,8 +336,8 @@
     <h2>All done!</h2>
     <p>Your base is ready to summon portraits.</p>
     <div class="versions"><div class="v new"><small>Your base</small><span class="js-current"></span></div></div>
-        <div class="actions"><a class="btn btn-forge" href="../">Back to Totem Forge</a></div>
-    <p class="small">Use it with the Totem Forge app, or the <a href="../app/">web app</a> on a PC or Mac.</p>
+    <div class="actions"><a class="btn btn-forge" href="../app/">Open the web app</a></div>
+    <p class="small">On a phone, use the Totem Forge app. Or go <a href="../">back to totemforge.nl</a>.</p>
   </section>
 
   <section class="card" data-panel="unverified" hidden>
@@ -344,7 +345,7 @@
     <h2>Update sent</h2>
     <p>When the <span class="drive">RPI-RP2</span> drive disappears, the update is in.</p>
     <p>To confirm it, allow MIDI devices, reload and click <b>Check my base</b>.</p>
-    <div class="actions"><a class="btn btn-forge" href="../">Back to Totem Forge</a></div>
+    <div class="actions"><a class="btn btn-forge" href="../app/">Open the web app</a></div>
   </section>
 
   <section class="card" data-panel="notback" hidden>
@@ -546,6 +547,21 @@
 
   // ---------- 1. Check ----------
   let haveVersion = null;
+  // A base without MIDI has firmware 1.0, which only has USB serial. Chrome lists a serial port without
+  // asking once this page may use it (picked before); otherwise the user picks it once (Find my base).
+  // The port is then also how the base is restarted, so it isn't asked for again.
+  let serialPort = null;
+  async function knownSerialBase() {
+    try { return (await navigator.serial.getPorts()).find(p => p.getInfo().usbVendorId === RPI_VID) || null; }
+    catch { return null; }
+  }
+  async function foundOriginal(port) {
+    log('Base on USB serial only: firmware 1.0 ' + JSON.stringify(port.getInfo()));
+    serialPort = port;
+    haveVersion = ORIGINAL;
+    fillVersions(haveVersion, (await firmware).version);
+    show('outdated');
+  }
 
   async function check() {
     show('checking');
@@ -559,7 +575,11 @@
     }
     let base = await openBase();
     if (!base) { await sleep(800); base = await openBase(); } // a base plugged in just now may still be starting
-    if (!base) { log('No base on MIDI'); return show('nobase'); }
+    if (!base) {
+      log('No base on MIDI');
+      const port = 'serial' in navigator && await knownSerialBase();
+      return port ? foundOriginal(port) : show('nobase');
+    }
     log(`Base on MIDI port "${base.input.name}"`);
     haveVersion = await askVersion(base);
     if (!haveVersion) return show('noanswer');
@@ -590,8 +610,9 @@
   // 1200 baud and closed again. That's the only way for firmware 1.0, which has no MIDI.
   async function restartViaSerial() {
     if ('serial' in navigator) {
-      const port = await navigator.serial.requestPort({ filters: [{ usbVendorId: RPI_VID }] });
-      log('Serial port picked: ' + JSON.stringify(port.getInfo()));
+      const port = serialPort || await navigator.serial.requestPort({ filters: [{ usbVendorId: RPI_VID }] });
+      serialPort = null;                                     // after the restart it's a different device
+      log('Serial port: ' + JSON.stringify(port.getInfo()));
       await port.open({ baudRate: 1200 });
       try { await port.setSignals({ dataTerminalReady: false }); } catch {}
       try { await port.close(); } catch {}
@@ -612,7 +633,7 @@
     }
   }
 
-  $('serialBtn').onclick = async () => {
+  async function restartSerial() {
     $('serialMsg').textContent = '';
     try {
       await restartViaSerial();
@@ -623,10 +644,22 @@
         : e.name === 'NetworkError' || e.name === 'InvalidStateError'
           ? "Another program is using the base. Close other Totem Forge pages and apps and try again."
           : "The base couldn't be restarted: " + e.message;
-      return;
+      return show('serial');
     }
     show('restarting');
     await waitForDrive();
+  }
+  $('serialBtn').onclick = restartSerial;
+
+  $('findBtn').onclick = async () => {
+    $('findMsg').textContent = '';
+    if (!('serial' in navigator)) return show('serial');
+    try {
+      await foundOriginal(await navigator.serial.requestPort({ filters: [{ usbVendorId: RPI_VID }] }));
+    } catch (e) {
+      log(`Find: ${e.name}: ${e.message}`);
+      $('findMsg').textContent = "No base chosen. If the list was empty, plug the base straight into the computer (not through a hub) and try again.";
+    }
   };
 
   // The drive takes a few seconds to mount after the base restarts
@@ -639,6 +672,7 @@
     $('serialMsg').textContent = '';
     $('installMsg').textContent = '';
     if (access && haveVersion && haveVersion !== ORIGINAL) restartViaMidi();
+    else if (serialPort) restartSerial();                    // the port picked to find the base
     else show('serial');
   }
   document.querySelectorAll('.js-start').forEach(b => b.onclick = startUpdate);
