@@ -102,7 +102,7 @@
   .pagehead h1 em { font-style: normal; color: var(--gold); }
 
   /* ============ Steps ============ */
-  .guide { padding: 40px 0 20px; }
+  .guide { padding: 40px 22px 20px; }
   .step { padding: 26px 0; display: flex; gap: 18px; align-items: flex-start; }
   .step + .step { border-top: 1px solid #251608; }
   .step .num {
@@ -180,6 +180,9 @@
     font-size: 15px;
     padding: 11px 24px;
   }
+  .step .body .app-links { display: flex; flex-wrap: wrap; gap: 14px; margin: 14px 0 16px; }
+  .step .body .app-links .btn-forge { flex: 1 1 170px; margin-top: 0; padding: 9px 12px 10px; }
+  .app-links small { display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.04em; color: var(--cream); }
   .step-video { margin-top: 16px; }
   .step-video video {
     display: block;
@@ -248,9 +251,13 @@
       <div class="num">2</div>
       <div class="body">
         <h2>Install the app</h2>
-        <p>Download the free Totem Forge companion app for <b>Android</b> from Google Play.</p>
-        <a class="btn-forge" href="https://play.google.com/store/apps/details?id=com.minitoo.android&amp;utm_source=emea_Med" target="_blank" rel="noopener">GET IT ON GOOGLE PLAY</a>
-        <p>On a <b>PC or Mac</b>? Use the <a href="app/">web app</a> in Chrome or Edge instead: nothing to install.</p>
+        <p>The Totem Forge companion app is free. Pick the one for your device:</p>
+        <div class="app-links">
+          <a class="btn-forge" href="https://play.google.com/store/apps/details?id=com.minitoo.android&amp;utm_source=emea_Med" target="_blank" rel="noopener"><small>Android</small>Google Play</a>
+          <a class="btn-forge" href="https://apps.apple.com/app/totem-forge-companion/id6825669366" target="_blank" rel="noopener"><small>iPhone 15 or later</small>App Store</a>
+          <a class="btn-forge" href="app/"><small>PC or Mac</small>Web app</a>
+        </div>
+        <p><b>iPhone:</b> the app needs a USB-C port, so an iPhone 15 or later. <b>PC or Mac:</b> the web app runs in Chrome or Edge, with nothing to install.</p>
       </div>
     </article>
 
@@ -258,12 +265,14 @@
       <div class="num">3</div>
       <div class="body">
         <h2>Add art to your gallery</h2>
+        <p><b>On Android:</b></p>
         <ul>
           <li><b>Download</b> our free <a href="packs/totem_Classic-Fantasy-48.tfc.zip">Classic Fantasy Monsters and NPCs</a> pack (48 portraits) and import it with <b>Import Archive</b>.</li>
           <li><b>Share</b> any image from your browser or other apps straight to the Totem Forge app.</li>
           <li>Or tap <b>"+"</b> and press <b>Import Images</b> to get it from your phone's gallery. Crop it and add tags and text afterwards.</li>
           <li>Or tap <b>"+"</b> and press <b>Import Art Packs</b> for our hand-crafted packs: ready to use, with images, tags, and text already done.</li>
         </ul>
+        <p><b>On iPhone, PC or Mac:</b> tap <b>Add the free Classic Fantasy pack</b> (48 portraits) in your empty gallery. For your own art, tap <b>"+"</b> and choose <b>Photo or image</b>, then crop it and add tags and text.</p>
       </div>
     </article>
 
@@ -274,10 +283,11 @@
         <ol>
           <li>Place a totem on the dock base by firmly pressing on it (check connector position first).</li>
           <li>Connect the base to your phone with its built-in USB-C cable.</li>
-          <li>The app opens automatically. Pick a portrait from your gallery or a curated art pack, and transfer it to the totem.</li>
+          <li>On Android the app opens automatically; on iPhone, open it yourself. Pick a portrait from your gallery or a curated art pack, and transfer it to the totem.</li>
           <li>Lift the totem off the base and set it on the table.</li>
         </ol>
-        <p><b>Using the web app?</b> Plug the base into your computer, open the <a href="app/">web app</a>, open a portrait and click <b>Summon</b>. If it asks for a firmware update, run the <a href="updater/">firmware updater</a> once in Google Chrome: about a minute.</p>
+        <p><b>Using the web app?</b> Plug the base into your computer, open the <a href="app/">web app</a>, open a portrait and click <b>Summon</b>.</p>
+        <p><b>Asked for a firmware update?</b> Bases from the first batch need it once. Run the <a href="updater/">firmware updater</a> in Google Chrome on a PC or Mac: about a minute.</p>
         <p>The e-ink screen holds the portrait <b>without any power</b>, so it stays visible all session, no phone required nearby.</p>
         <div class="step-video">
           <video src="assets/totem-demo.mp4" muted loop playsinline preload="metadata" aria-label="Demo: docking a totem, summoning character art onto it, and playing with it on the table"></video>

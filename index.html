@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Totem Forge: Interactive Miniature Tokens for D&amp;D &amp; Pathfinder</title>
 <link rel="canonical" href="https://totemforge.nl/">
-<meta name="description" content="Totem Forge is an interactive tabletop token with an always-on e-ink screen. One mini becomes every character. Swap art from the Android app in seconds.">
+<meta name="description" content="Totem Forge is an interactive tabletop token with an always-on e-ink screen. One mini becomes every character. Swap art from your phone or computer in seconds.">
 <link rel="icon" type="image/png" href="assets/logo_icon_32.png">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Totem Forge">
@@ -42,7 +42,7 @@
     {
       "@type": "Question",
       "name": "Do I need the app to play?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Only to change what's on the screen: dock the totem on its base and connect to your phone via USB. During play the totem is fully standalone, and the portrait stays on without a phone nearby." }
+      "acceptedAnswer": { "@type": "Answer", "text": "Only to change what's on the screen: dock the totem on its base and connect it to your phone or computer via USB. During play the totem is fully standalone, and the portrait stays on without a phone nearby." }
     },
     {
       "@type": "Question",
@@ -275,6 +275,9 @@
     border-radius: 1px;
   }
   .feature-cta { margin-top: 20px; font-size: 15px; padding: 11px 24px; }
+  .app-links { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 20px; }
+  .app-links .btn-forge { flex: 1 1 170px; font-size: 15px; padding: 9px 12px 10px; }
+  .app-links small { display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.04em; color: var(--cream); }
   .feature .copy p.alt-app { font-size: 15px; }
   .alt-app a, .faq .a a, .specgrid dd a { color: var(--gold); font-weight: 700; }
 
@@ -506,30 +509,6 @@
   }
   .buybar .btn-forge { font-size: 15px; padding: 11px 22px; flex-shrink: 0; }
 
-  /* ============ Event announcement bar ============ */
-  .eventbar {
-    background: linear-gradient(180deg, var(--panel-2), var(--night-2));
-    border-bottom: 1px solid var(--line);
-    color: var(--cream-dim);
-    text-align: center;
-    font-size: 13.5px;
-    line-height: 1.45;
-    padding: 9px 20px;
-  }
-  .eventbar p { margin: 0; text-wrap: pretty; }
-  .eventbar p + p { margin-top: 3px; }
-  .eventbar b {
-    font-family: "Cinzel", serif;
-    font-weight: 700;
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
-    color: var(--gold);
-  }
-  .eventbar .disc,
-  .eventbar .booth { color: var(--ember); font-weight: 700; }
-  .eventbar a { color: var(--cream); text-decoration: underline; text-underline-offset: 3px; }
-  .eventbar a:hover { color: var(--ember); }
-
   /* ============ Launch (Main Quest Con 2026) ============ */
   .launch { padding: 58px 0 12px; }
   .launch .head { text-align: center; }
@@ -571,12 +550,6 @@
 </head>
 <body>
 
-<!-- Event bar: launch result from Main Quest Con 2026 (12–13 Sept) -->
-<div class="eventbar">
-  <p><span class="disc">SOLD OUT</span> on both days at <b>Main Quest Con 2026</b></p>
-  <p>Thank you, adventurers! <a href="#launch">See the launch</a> · Next batch on Etsy</p>
-</div>
-
 <main>
   <!-- ============ Hero ============ -->
   <section class="hero" data-screen-label="Hero">
@@ -614,7 +587,7 @@
       <li>SWAP ART <b>IN SECONDS</b></li>
       <li><b>1-inch</b> grid base</li>
       <li>LED <b>LIGHT &amp; STATUS FX</b></li>
-      <li><b>ANDROID</b> app</li>
+      <li><b>ANDROID &amp; IPHONE</b> app</li>
       <li><b>WEBAPP</b> for PC/Mac</li>
     </ul>
   </div>
@@ -706,18 +679,22 @@
 
       <article class="feature flip">
         <div class="inner">          <div class="copy">
-            <span class="kicker">ANDROID APP</span>
+            <span class="kicker">COMPANION APP</span>
             <h3><em>ORGANIZE</em> YOUR ART</h3>
             <div class="media tall">
               <img src="assets/app-phone.webp" alt="The Totem Forge app gallery full of character portraits" loading="lazy">
             </div>
             <ul class="micro">
-              <li>Free companion app for Android</li>
+              <li>Free on Android, iPhone, PC and Mac</li>
               <li>Organise a whole cast by tag and campaign</li>
               <li>Use your own art, or curated packs tuned for e-ink</li>
             </ul>
-            <a class="btn-forge feature-cta" href="https://play.google.com/store/apps/details?id=com.minitoo.android&amp;utm_source=emea_Med" target="_blank" rel="noopener">GET IT ON GOOGLE PLAY</a>
-            <p class="alt-app">On a PC or Mac? Use the <a href="app/">web app</a> in Chrome or Edge: nothing to install.</p>
+            <div class="app-links">
+              <a class="btn-forge" href="https://play.google.com/store/apps/details?id=com.minitoo.android&amp;utm_source=emea_Med" target="_blank" rel="noopener"><small>Android</small>Google Play</a>
+              <a class="btn-forge" href="https://apps.apple.com/app/totem-forge-companion/id6825669366" target="_blank" rel="noopener"><small>iPhone 15 or later</small>App Store</a>
+              <a class="btn-forge" href="app/"><small>PC or Mac</small>Web app</a>
+            </div>
+            <p class="alt-app">The iPhone app needs the USB-C port of an iPhone 15 or later. The web app runs in Chrome or Edge: nothing to install.</p>
           </div>
         </div>
       </article>
@@ -770,7 +747,7 @@
           <dt>Art transfer</dt><dd>Via the dock base over USB-C</dd>
           <dt>Lighting</dt><dd>Internal LED with colour status effects</dd>
           <dt>Battery</dt><dd>Powers light effects only</dd>
-          <dt>App</dt><dd>Free <b style="color: var(--gold); font-weight: 800;">Android app</b>, and a <a href="app/">web app</a> for PC/Mac</dd>
+          <dt>App</dt><dd>Free <b style="color: var(--gold); font-weight: 800;">apps for Android and iPhone 15+</b>, and a <a href="app/">web app</a> for PC/Mac</dd>
           <dt>Body</dt><dd>Hand-painted, high-resolution 3D-printed</dd>
           <dt>In the box</dt><dd>Totems, dock base with built-in USB-C cable, NFC-tag for the manual</dd>
         </dl>
@@ -868,11 +845,11 @@
         </details>
         <details>
           <summary>Do I need the app to play?</summary>
-          <div class="a">Only to change what's on the screen: dock the totem on its base and connect to your phone via USB. During play the totem is fully standalone, and the portrait stays on without a phone nearby.</div>
+          <div class="a">Only to change what's on the screen: dock the totem on its base and connect it to your phone or computer via USB. During play the totem is fully standalone, and the portrait stays on without a phone nearby.</div>
         </details>
         <details>
           <summary>Which devices does the app run on?</summary>
-          <div class="a">The app is free for Android on Google Play. On a PC or Mac, the <a href="app/">web app</a> runs in Chrome or Edge with the base plugged in over USB; bases from the first batch need a one-time <a href="updater/">firmware update</a> for it. iPhone isn't supported yet.</div>
+          <div class="a">The app is free for Android on <a href="https://play.google.com/store/apps/details?id=com.minitoo.android&amp;utm_source=emea_Med" target="_blank" rel="noopener">Google Play</a> and for iPhone on the <a href="https://apps.apple.com/app/totem-forge-companion/id6825669366" target="_blank" rel="noopener">App Store</a>. The iPhone app needs a USB-C port, so an iPhone 15 or later. On a PC or Mac, the <a href="app/">web app</a> runs in Chrome or Edge with the base plugged in over USB. To use the iPhone app or the web app, bases from the first batch need a one-time <a href="updater/">firmware update</a>, done on a PC or Mac.</div>
         </details>
         <details>
           <summary>How do I update my base?</summary>
