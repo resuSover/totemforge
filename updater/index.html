@@ -613,9 +613,23 @@
       const port = serialPort || await navigator.serial.requestPort({ filters: [{ usbVendorId: RPI_VID }] });
       serialPort = null;                                     // after the restart it's a different device
       log('Serial port: ' + JSON.stringify(port.getInfo()));
-      await port.open({ baudRate: 1200 });
-      try { await port.setSignals({ dataTerminalReady: false }); } catch {}
-      try { await port.close(); } catch {}
+      // On Windows the base restarts while Chrome is still opening the port, so open() fails although
+      // the restart worked (and File Explorer opens the drive). Then the base leaving USB decides.
+      const gone = new Promise(resolve => {
+        const done = v => { port.removeEventListener('disconnect', onGone); clearTimeout(timer); resolve(v); };
+        const onGone = () => done(true);
+        const timer = setTimeout(() => done(false), 3000);
+        port.addEventListener('disconnect', onGone);
+      });
+      try {
+        await port.open({ baudRate: 1200 });
+        try { await port.setSignals({ dataTerminalReady: false }); } catch {}
+        try { await port.close(); } catch {}
+      } catch (e) {
+        log(`Open at 1200 baud: ${e.name}: ${e.message}`);
+        if (!await gone) throw e;
+        log('The base left USB, so it restarted');
+      }
     } else if ('usb' in navigator) {
       const device = await navigator.usb.requestDevice({ filters: [{ vendorId: RPI_VID }] });
       log('USB device picked: ' + device.productName);
