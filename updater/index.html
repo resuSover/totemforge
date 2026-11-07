@@ -493,7 +493,9 @@
   // ---------- Talking to the base over Web MIDI (firmware 2.0.0 and later) ----------
   let access = null;
   const listeners = new Set();
-  const isBase = p => p.state === 'connected' && (/totemforge/i.test(p.name || '') || /totemforge/i.test(p.manufacturer || ''));
+  // macOS names the base's MIDI port after the device ("TotemForge_Base"); Windows after its MIDI interface,
+  // "PicoMIDI" up to firmware 2.0.1. askVersion's handshake then tells a base from other Pico MIDI devices.
+  const isBase = p => p.state === 'connected' && /totemforge|picomidi/i.test(`${p.name} ${p.manufacturer}`);
 
   async function getAccess() {
     if (!access) {

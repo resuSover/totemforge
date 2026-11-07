@@ -3,7 +3,8 @@
 // Each one: { kind, permission(), open(), send(bytes), onLine(fn), onGone(fn) }
 import { replyLine } from '../core/protocol.js';
 
-const isBase = port => /totemforge/i.test(port.name || '') || /totemforge/i.test(port.manufacturer || '');
+// The base's MIDI port: "TotemForge_Base" on macOS; on Windows "PicoMIDI" (its MIDI interface) up to firmware 2.0.1
+const isBase = port => /totemforge|picomidi/i.test(`${port.name} ${port.manufacturer}`);
 
 export function webMidiTransport() {
   let access = null, input = null, output = null, lineFn = () => {}, goneFn = () => {};
