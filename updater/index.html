@@ -44,6 +44,7 @@
   a { color: var(--ember); text-underline-offset: 3px; }
   b, strong { color: var(--cream); font-weight: 700; }
   :focus-visible { outline: 2px solid var(--ember); outline-offset: 3px; }
+  h2[tabindex="-1"]:focus { outline: none; }  /* focused by show() for screen readers, not clickable */
   .wrap { max-width: 600px; margin: 0 auto; padding: 0 20px; }
 
   /* ============ Page header ============ */
@@ -79,9 +80,23 @@
   }
   .card h2 { font-size: clamp(20px, 5.5vw, 24px); font-weight: 900; text-transform: uppercase; color: var(--cream); }
   .card h2 + p, .card p + p, .card p + ul, .card ul + p { margin-top: 10px; }
-  .card p { color: var(--cream-dim); font-size: 16px; }
+  .card p { color: var(--cream-dim); font-size: 17px; }
   .card ul { list-style: none; display: grid; gap: 6px; }
-  .card ul li { position: relative; padding-left: 20px; color: var(--cream-dim); font-size: 15.5px; }
+  .card ul li { position: relative; padding-left: 20px; color: var(--cream-dim); font-size: 16.5px; }
+  /* Numbered steps: what to do now, so brighter and larger than the explanations around them */
+  .card ol.steps { list-style: none; counter-reset: step; display: grid; gap: 12px; margin-top: 16px; }
+  #copyIntro:empty { display: none; }
+  .card ol.steps li { counter-increment: step; position: relative; padding-left: 40px; min-height: 28px; color: var(--cream); font-size: 17.5px; }
+  .card ol.steps li::before {
+    content: counter(step); position: absolute; left: 0; top: -1px; width: 28px; height: 28px; border-radius: 50%;
+    border: 1.5px solid var(--ember); color: var(--gold); text-align: center;
+    font: 700 14px/25px "Cinzel", serif;
+  }
+  .card ol.steps .actions { margin-top: 12px; }
+  .card ol.steps + .actions { margin-top: 20px; }
+  /* Text for one operating system only (the page sets on-mac or on-windows on <html>) */
+  .os-mac, .os-win { display: none; }
+  html.on-mac .os-mac, html.on-windows .os-win { display: inline; }
   .card ul li::before {
     content: ""; position: absolute; left: 2px; top: 9px; width: 7px; height: 7px;
     transform: rotate(45deg); background: var(--ember); border-radius: 1px;
@@ -151,7 +166,7 @@
 
   /* ============ Help and details ============ */
   details.help { margin-top: 18px; border-top: 1px solid var(--line); padding-top: 14px; }
-  details.help summary { cursor: pointer; color: var(--cream-dim); font-size: 15px; }
+  details.help summary { cursor: pointer; color: var(--cream-dim); font-size: 16px; }
   details.help summary:hover { color: var(--ember); }
   details.help[open] summary { margin-bottom: 10px; }
   details.help .actions { margin-top: 12px; }
@@ -299,29 +314,30 @@
   <!-- 3. Install -->
   <section class="card" data-panel="install" hidden>
     <h2>Install the update</h2>
-    <ul>
-      <li>Click <b>Install</b>.</li>
-      <li>Choose <span class="drive">RPI-RP2</span> in the sidebar (Mac: <b>Locations</b>, Windows: <b>This PC</b>) and click <b>Select</b>.</li>
-      <li>If Chrome asks to view or edit files, allow it.</li>
-    </ul>
+    <ol class="steps">
+      <li>Click <b>Install</b>, then find the <span class="drive">RPI-RP2</span> drive<span class="os-win"> under <b>This PC</b></span><span class="os-mac"> under <b>Locations</b></span>.</li>
+      <li>Click <b>Save</b>.</li>
+    </ol>
     <div class="actions"><button class="btn btn-forge" id="installBtn">Install</button></div>
     <p class="msg" id="installMsg" role="alert"></p>
     <details class="help">
       <summary>No RPI-RP2 drive?</summary>
-      <p>Wait a few seconds. Still nothing? Restart the base again. On Windows, look in File Explorer under <b>This PC</b>.</p>
+      <p>Wait a few seconds. Still nothing? Restart the base again.<span class="os-win"> Or look in File Explorer under <b>This PC</b>.</span></p>
       <div class="actions"><button class="btn btn-plain js-serial">Restart the base again</button></div>
     </details>
-    <details class="help">
-      <summary>Copy the file yourself instead</summary>
-      <p>Download the firmware and drag <b class="js-filename">totemforge-base.uf2</b> onto the <span class="drive">RPI-RP2</span> drive. When the drive disappears, the update is in.</p>
-      <div class="actions"><button class="btn btn-plain" id="downloadBtn">Download the firmware</button></div>
-    </details>
+    <p class="small"><button class="linkish js-copy">Copy the file yourself instead</button></p>
   </section>
 
-  <section class="card" data-panel="manual" hidden>
-    <h2>Copy the file to the drive</h2>
-    <p>Drag <b class="js-filename">totemforge-base.uf2</b> from your Downloads onto the <span class="drive">RPI-RP2</span> drive. When the drive disappears, the update is in.</p>
-    <div class="actions"><button class="btn btn-forge" id="copiedBtn">I've copied it</button></div>
+  <!-- 3b. Copy by hand: when the save window fails (Edge refuses it on some PCs) or by choice -->
+  <section class="card" data-panel="copy" hidden>
+    <h2>Copy the file yourself</h2>
+    <p id="copyIntro"></p>
+    <ol class="steps">
+      <li>Download the firmware.
+        <div class="actions"><button class="btn btn-forge" id="downloadBtn">Download</button></div></li>
+      <li>Drag <b class="js-filename">totemforge-base.uf2</b> from your Downloads onto the <span class="drive">RPI-RP2</span> drive.</li>
+    </ol>
+    <p class="small"><button class="linkish" id="copiedBtn">I've copied it</button> · <button class="linkish" id="againBtn2">Try the save window again</button></p>
   </section>
 
   <!-- 4. Done -->
@@ -352,8 +368,8 @@
     <div class="badge warn">!</div>
     <h2 id="notbackTitle">The base didn't come back</h2>
     <p id="notbackText">Your base didn't restart with the new firmware.</p>
-    <ul>
-      <li><span class="drive">RPI-RP2</span> drive still there? The update didn't copy: install again.</li>
+    <ul id="notbackTips">
+      <li><span class="drive">RPI-RP2</span> drive still there? The file didn't reach it: install again and save it on <span class="drive">RPI-RP2</span>.</li>
       <li>Drive gone? Unplug the base, plug it back in and check again.</li>
     </ul>
     <div class="actions">
@@ -420,7 +436,7 @@
   // ---------- Panels ----------
   const STEP_OF = {
     check: 0, checking: 0, uptodate: 0, outdated: 0, nobase: 0, noanswer: 0, blocked: 0, offline: 0,
-    serial: 1, restarting: 1, install: 2, manual: 2, installing: 3, done: 4, unverified: 4, notback: 3
+    serial: 1, restarting: 1, install: 2, copy: 2, installing: 3, done: 4, unverified: 4, notback: 3
   };
   let current = null;
   function show(name) {
@@ -697,16 +713,10 @@
   $('checkBtn').onclick = check;
 
   // ---------- 3. Install ----------
-  // The UF2 bootloader's drive holds INFO_UF2.TXT with "Board-ID: RPI-RP2"
-  async function isBootDrive(dir) {
-    try {
-      const info = await (await dir.getFileHandle('INFO_UF2.TXT')).getFile();
-      return /RPI-RP2/.test(await info.text());
-    } catch {
-      return dir.name === 'RPI-RP2';
-    }
-  }
-
+  // The firmware is saved onto RPI-RP2 through a save window: the page may write that one file and nothing
+  // else on the drive, and there's no "edit files" prompt. Edge on some Windows PCs refuses every save from a
+  // page (even into Downloads), so copying by hand (3b) is the fallback. The page can't see where the file
+  // went: the base coming back with the new firmware confirms it.
   async function writeFirmware(fileHandle) {
     const fw = await firmware;
     let writer;
@@ -714,9 +724,7 @@
       writer = await fileHandle.createWritable();
     } catch (e) {
       log(`Open for writing: ${e.name}: ${e.message}`);
-      show('install');
-      $('installMsg').textContent = "Chrome couldn't write to the drive. Try again and allow editing files.";
-      return;
+      return showCopy("The browser couldn't save the file, but there's another way that always works:");
     }
     show('installing');
     try {
@@ -727,44 +735,51 @@
       // The base restarts as soon as it has the whole file, so the save often can't finish cleanly
       log(`Finishing the write: ${e.name}: ${e.message} (expected when the base restarts first)`);
     }
-    await verify();
+    await verify(fileHandle);
   }
 
   $('installBtn').onclick = async () => {
     $('installMsg').textContent = '';
-    if (!window.showDirectoryPicker) return saveFile();
-    let dir;
+    if (!window.showSaveFilePicker) return showCopy('');      // no save window in this browser
+    const fw = await firmware;
+    let handle;
     try {
-      dir = await window.showDirectoryPicker({ id: 'rpi-rp2', mode: 'readwrite' });
+      handle = await window.showSaveFilePicker({
+        id: 'rpi-rp2', suggestedName: fw.name,
+        types: [{ description: 'Firmware', accept: { 'application/octet-stream': ['.uf2'] } }]
+      });
     } catch (e) {
-      log(`Drive picker: ${e.name}: ${e.message}`);
-      if (e.name === 'AbortError') return;
-      $('installMsg').textContent = "Chrome didn't open that drive. Try again, or copy the file yourself (below).";
-      return;
+      // A closed window and a refused save look the same here ("The user aborted a request"): Edge refuses
+      // every save from a page on some PCs. So copying the file by hand comes next either way.
+      log(`Save window: ${e.name}: ${e.message}`);
+      return showCopy("The file wasn't saved, but there's another way that always works:");
     }
-    log(`Picked "${dir.name}"`);
-    if (!await isBootDrive(dir)) {
-      $('installMsg').textContent = `"${dir.name}" isn't the update drive. Click Install and choose RPI-RP2.`;
-      return;
-    }
-    const file = await dir.getFileHandle((await firmware).name, { create: true });
-    await writeFirmware(file);
+    log(`Saving as "${handle.name}"`);
+    await writeFirmware(handle);
   };
 
-  // Without a folder picker (or by choice): a save dialog, else a plain download to copy over by hand
-  async function saveFile() {
-    if (window.showSaveFilePicker) {
-      try {
-        const handle = await window.showSaveFilePicker({
-          suggestedName: (await firmware).name, types: [{ description: 'Firmware', accept: { 'application/octet-stream': ['.uf2'] } }]
-        });
-        return writeFirmware(handle);
-      } catch (e) {
-        log(`Save dialog: ${e.name}: ${e.message}`);
-        if (e.name === 'AbortError') return;
+  // ---------- 3b. Copy by hand ----------
+  // While this panel shows, the page watches for the base to come back on MIDI, so the user
+  // doesn't have to say they've copied the file ("I've copied it" is there for when that fails).
+  function showCopy(intro) {
+    $('copyIntro').textContent = intro;
+    $('downloadBtn').textContent = 'Download';
+    show('copy');
+    watchForBase();
+  }
+  let watching = 0;                                          // only the latest watch runs
+  async function watchForBase(panel = 'copy') {
+    if (!access) return;                                     // no MIDI: only "I've copied it" confirms
+    const me = ++watching;
+    while (current === panel && me === watching) {
+      if (await openBase()) {
+        if (current !== panel || me !== watching) return;
+        log('The base is back');
+        show('installing');
+        return verify();
       }
+      await sleep(1000);
     }
-    download();
   }
   async function download() {
     const fw = await firmware;
@@ -774,34 +789,67 @@
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 60000);
     log('Firmware downloaded');
-    show('manual');
+    $('downloadBtn').textContent = 'Download again';
   }
   $('downloadBtn').onclick = download;
+  document.querySelectorAll('.js-copy').forEach(b => b.onclick = () => showCopy(''));
   $('copiedBtn').onclick = () => { show('installing'); verify(); };
-  $('againBtn').onclick = () => { $('installMsg').textContent = ''; show('install'); };
+  const installAgain = () => { $('installMsg').textContent = ''; show('install'); };
+  $('againBtn').onclick = $('againBtn2').onclick = installAgain;
 
   // ---------- 4. Confirm the base came back with the new firmware ----------
-  async function verify() {
+  // `handle` is the file the save window wrote, if it did. Saved on RPI-RP2, the file is gone within a few
+  // seconds: the base takes it, restarts and the drive disappears. Still readable after that means it was
+  // saved somewhere else (Downloads, say), so say so instead of waiting for a base that won't restart.
+  async function savedElsewhere(handle, size) {
+    try { return (await handle.getFile()).size === size; } catch { return false; }
+  }
+  // `watch`: the base isn't back yet, so keep looking for it (moved the file by hand, or just slow)
+  function notBack(title, text, { tips = true, watch = true } = {}) {
+    $('notbackTitle').textContent = title;
+    $('notbackText').textContent = text;
+    $('notbackTips').hidden = !tips;
+    show('notback');
+    if (watch) watchForBase('notback');
+  }
+  const wrongPlace = () => notBack("The file isn't on the drive",
+    'It was saved on your computer, not on RPI-RP2. Click Install again and choose the RPI-RP2 drive, or move the file onto it yourself.',
+    { tips: false });
+
+  let verifying = 0;                                         // only the latest check runs
+  async function verify(handle) {
+    const me = ++verifying;
+    const stale = () => me !== verifying || current !== 'installing';
     const fw = await firmware;
-    if (!access) { await sleep(5000); return show('unverified'); }
-    const deadline = Date.now() + 45000;
-    await sleep(2000);
-    while (Date.now() < deadline) {
+    const start = Date.now();
+    if (!access) {
+      await sleep(5000);
+      if (stale()) return;
+      if (handle && await savedElsewhere(handle, fw.blob.size)) return wrongPlace();
+      return show('unverified');
+    }
+    // A base answers about 2 s after taking the file; 8 s is plenty. A slower one is still picked up:
+    // the next screen keeps watching for it.
+    let placeChecked = !handle;
+    await sleep(1500);
+    while (Date.now() - start < 8000) {
+      if (stale()) return;
+      if (!placeChecked && Date.now() - start > 5000) {
+        placeChecked = true;
+        if (await savedElsewhere(handle, fw.blob.size)) { log('The saved file is still there: not on RPI-RP2'); return wrongPlace(); }
+      }
       const base = await openBase();
       const v = base && await askVersion(base);
+      if (stale()) return;
       if (v) {
         haveVersion = v;
         fillVersions(v, fw.version);
         if (!isOlder(v, fw.version)) return show('done');
-        $('notbackTitle').textContent = 'The update didn\'t take';
-        $('notbackText').textContent = `Your base restarted but still has firmware ${pretty(v)}.`;
-        return show('notback');
+        return notBack('The update didn\'t take', `Your base restarted but still has firmware ${pretty(v)}.`, { watch: false });
       }
       await sleep(1000);
     }
-    $('notbackTitle').textContent = 'The base didn\'t come back';
-    $('notbackText').textContent = 'Your base didn\'t restart with the new firmware.';
-    show('notback');
+    notBack('The base didn\'t come back', 'Your base didn\'t restart with the new firmware.');
   }
 
   // ---------- Start ----------
@@ -814,6 +862,9 @@
   log('Browser: ' + ua);
   const ios = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   const mobile = ios || /Android|Mobi/i.test(ua);
+  // Steps name the sidebar entry of this computer's save window only (Linux and others: neither)
+  if (/Windows/.test(ua)) document.documentElement.classList.add('on-windows');
+  else if (/Mac OS X|Macintosh/.test(ua) && !ios) document.documentElement.classList.add('on-mac');
   const chromium = 'serial' in navigator || 'usb' in navigator;
   if (mobile) {
     $('unsTitle').textContent = 'Open this page on a computer';
